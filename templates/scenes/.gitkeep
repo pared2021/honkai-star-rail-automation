@@ -1,0 +1,11 @@
+# 场景模板目录
+
+此目录用于存放游戏场景识别模板：
+
+- main_menu.png - 主菜单场景
+- world_map.png - 世界地图场景  
+- battle.png - 战斗界面场景
+- inventory.png - 背包界面场景
+- character.png - 角色界面场景
+- mission.png - 任务界面场景
+- shop.png - 商店界面场景

@@ -1,0 +1,100 @@
+/* 应用程序主样式 */
+.app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* 标题栏样式 */
+.title-bar {
+  height: 32px;
+  background: #1f1f1f;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: #fff;
+  font-size: 12px;
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+.title-bar .title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-bar .controls {
+  display: flex;
+  gap: 8px;
+  -webkit-app-region: no-drag;
+}
+
+.title-bar .controls button {
+  background: none;
+  border: none;
+  color: #fff;
+  padding: 4px 8px;
+  cursor: pointer;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}
+
+.title-bar .controls button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* 主布局样式 */
+.main-layout {
+  flex: 1;
+  overflow: hidden;
+}
+
+.main-layout .ant-layout-sider {
+  background: #001529;
+}
+
+.main-layout .ant-layout-content {
+  background: #f0f2f5;
+  padding: 24px;
+  overflow-y: auto;
+}
+
+/* 菜单样式 */
+.ant-menu-dark {
+  background: #001529;
+}
+
+.ant-menu-dark .ant-menu-item {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.ant-menu-dark .ant-menu-item:hover {
+  color: #fff;
+  background: #1890ff;
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background: #1890ff;
+  color: #fff;
+}
+
+/* 页面内容样式 */
+.page-content {
+  background: #fff;
+  padding: 24px;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .main-layout .ant-layout-content {
+    padding: 16px;
+  }
+  
+  .page-content {
+    padding: 16px;
+  }
+}
