@@ -1,5 +1,130 @@
 // 核心类型定义
 
+// 任务优先级枚举
+export enum TaskPriority {
+  LOW = 1,
+  NORMAL = 2,
+  HIGH = 3,
+  URGENT = 4
+}
+
+// 任务执行统计
+export interface TaskExecutionStats {
+  totalTasks: number;
+  completedTasks: number;
+  failedTasks: number;
+  totalExecutionTime: number;
+  averageExecutionTime: number;
+  total: number;
+  running: number;
+  completed: number;
+  failed: number;
+}
+
+// 任务统计信息（TaskExecutor使用的简化版本）
+export interface TaskStats {
+  totalTasks: number;
+  completedTasks: number;
+  failedTasks: number;
+  totalExecutionTime: number;
+  averageExecutionTime: number;
+  total: number;
+  running: number;
+  completed: number;
+  failed: number;
+}
+
+// 任务执行步骤
+export interface TaskStep {
+  id: string;
+  name: string;
+  description?: string;
+  action: 'click' | 'wait' | 'verify' | 'navigate' | 'interact' | 'input' | 'screenshot';
+  template?: string; // 图像模板路径
+  coordinates?: { x: number; y: number }; // 点击坐标
+  timeout?: number; // 步骤超时时间（毫秒）
+  retries?: number; // 步骤重试次数
+  verificationTemplate?: string; // 验证模板
+  isOptional?: boolean; // 是否为可选步骤
+  onSuccess?: string; // 成功后的下一步ID
+  onFailure?: string; // 失败后的下一步ID
+  data?: Record<string, any>; // 步骤相关数据
+}
+
+// 任务执行结果
+export interface TaskExecutionResult {
+  success: boolean;
+  message?: string;
+  data?: Record<string, any>;
+  executionTime?: number; // 执行时间（毫秒）
+  steps?: string[]; // 执行的步骤记录
+  rewards?: TaskReward[]; // 获得的奖励
+  experience?: number; // 获得的经验
+  errors?: string[]; // 错误信息列表
+}
+
+// 任务失败原因
+export interface TaskFailureReason {
+  code: string;
+  message: string;
+  type: 'timeout' | 'verification_failed' | 'game_not_running' | 'interface_error' | 'system_error' | 'user_cancelled';
+  step?: string; // 失败的步骤
+  retryable: boolean; // 是否可重试
+  timestamp: Date;
+  context?: Record<string, any>; // 失败上下文信息
+}
+
+// 错误恢复策略类型
+export interface ErrorRecoveryStrategy {
+  type: 'retry' | 'restart' | 'skip' | 'manual';
+  maxAttempts: number;
+  delayMs: number;
+  backoffMultiplier?: number;
+  conditions?: string[];
+}
+
+// 任务失败详情
+export interface TaskFailureDetails {
+  errorMessage: string;
+  errorCode?: string;
+  stackTrace?: string;
+  failureTime: Date;
+  recoveryAttempts: number;
+  context?: Record<string, any>;
+}
+
+// 扩展任务接口
+export interface ExtendedTask extends Task {
+  priority: TaskPriority;
+  retryCount: number;
+  maxRetries: number;
+  timeout: number;
+  dependencies?: string[];
+  errorRecoveryStrategy?: ErrorRecoveryStrategy;
+  failureDetails?: TaskFailureDetails;
+  executionSteps?: string[];
+  lastError?: string;
+  executionHistory?: TaskExecutionRecord[];
+  estimatedDuration?: number;
+  actualDuration?: number;
+  createdAt: Date;
+  updatedAt?: Date;
+  startTime?: Date;
+  endTime?: Date;
+  name?: string; // 任务名称
+  description?: string; // 任务描述
+  steps?: TaskStep[]; // 任务执行步骤
+}
+
+// 任务执行记录
+export interface TaskExecutionRecord {
+  timestamp: Date;
+  status: TaskStatus;
+  duration?: number;
+  error?: string;
+  details?: Record<string, any>;
+}
+
 // 游戏状态相关类型
 export interface GameStatus {
   isRunning: boolean;
@@ -2125,6 +2250,182 @@ export interface AutoLaunchConditions {
 }
 
 // ===== Stage 1: 新增类型定义 =====
+
+// 每日委托相关类型定义
+export interface DailyCommissionConfig {
+  id: string;
+  accountId: string;
+  enabled: boolean;
+  autoAcceptAll: boolean; // 是否自动接取所有委托
+  autoClaimRewards: boolean; // 是否自动领取奖励
+  maxRetries: number; // 最大重试次数
+  retryDelay: number; // 重试延迟（毫秒）
+  interfaceTimeout: number; // 界面操作超时时间（毫秒）
+  verificationTimeout: number; // 验证超时时间（毫秒）
+  enableStepLogging: boolean; // 是否启用步骤日志
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 每日任务配置（DailyCommissionConfig的别名，保持向后兼容）
+export type DailyQuestConfig = DailyCommissionConfig;
+
+// 每日委托执行结果
+export interface DailyCommissionResult {
+  success: boolean;
+  executionTime: number; // 执行时间（毫秒）
+  steps: string[]; // 执行步骤记录
+  commissionsAccepted: number; // 接取的委托数量
+  commissionsCompleted: number; // 完成的委托数量
+  rewardsClaimed: boolean; // 是否成功领取奖励
+  error?: string; // 错误信息
+  data?: {
+    commissionsCompleted: boolean;
+    rewardsClaimed: boolean;
+    [key: string]: unknown;
+  };
+}
+
+// 每日委托状态
+export interface DailyCommissionStatus {
+  isInterfaceOpen: boolean; // 委托界面是否打开
+  commissionsAccepted: boolean; // 委托是否已接取
+  rewardsClaimed: boolean; // 奖励是否已领取
+  lastExecutionTime?: Date; // 上次执行时间
+  nextExecutionTime?: Date; // 下次执行时间
+  executionCount: number; // 今日执行次数
+  successCount: number; // 今日成功次数
+  failureCount: number; // 今日失败次数
+}
+
+// 每日委托统计信息
+export interface DailyCommissionStats {
+  id: string;
+  accountId: string;
+  date: string; // YYYY-MM-DD
+  totalExecutions: number; // 总执行次数
+  successfulExecutions: number; // 成功执行次数
+  failedExecutions: number; // 失败执行次数
+  averageExecutionTime: number; // 平均执行时间（毫秒）
+  totalCommissionsAccepted: number; // 总接取委托数
+  totalCommissionsCompleted: number; // 总完成委托数
+  totalRewardsClaimed: number; // 总领取奖励次数
+  errorTypes: {
+    type: string;
+    count: number;
+    lastOccurrence: Date;
+  }[];
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// 委托界面验证结果
+export interface CommissionInterfaceVerification {
+  isOpen: boolean; // 界面是否打开
+  hasAcceptButton: boolean; // 是否有接取按钮
+  hasClaimButton: boolean; // 是否有领取按钮
+  commissionsAvailable: number; // 可用委托数量
+  commissionsAccepted: number; // 已接取委托数量
+  rewardsAvailable: boolean; // 是否有可领取奖励
+  verificationTime: Date; // 验证时间
+}
+
+// 委托执行步骤
+export interface CommissionExecutionStep {
+  id: string;
+  name: string;
+  action: 'click' | 'wait' | 'verify' | 'navigate' | 'interact';
+  template?: string; // 图像模板路径
+  coordinates?: { x: number; y: number }; // 点击坐标
+  timeout?: number; // 步骤超时时间
+  retries?: number; // 步骤重试次数
+  verificationTemplate?: string; // 验证模板
+  description?: string; // 步骤描述
+  isOptional?: boolean; // 是否为可选步骤
+  onSuccess?: string; // 成功后的下一步
+  onFailure?: string; // 失败后的下一步
+}
+
+// 扩展任务类型（TaskExecutor内部使用）
+export interface ExtendedTask extends Task {
+  priority: TaskPriority;
+  addedAt: Date;
+  retryCount?: number;
+  maxRetries?: number;
+  retryDelay?: number;
+  lastError?: string;
+  executionHistory?: {
+    attempt: number;
+    startTime: Date;
+    endTime?: Date;
+    success: boolean;
+    error?: string;
+    duration?: number;
+  }[];
+}
+
+// 每日委托错误类型
+export interface DailyCommissionError {
+  code: string;
+  message: string;
+  type: 'interface' | 'verification' | 'execution' | 'timeout' | 'system';
+  step?: string; // 出错的步骤
+  retryable: boolean; // 是否可重试
+  timestamp: Date;
+  context?: {
+    taskId?: string;
+    accountId?: string;
+    currentStep?: string;
+    attemptNumber?: number;
+    [key: string]: unknown;
+  };
+}
+
+// 委托执行上下文
+export interface CommissionExecutionContext {
+  taskId: string;
+  accountId: string;
+  config: DailyCommissionConfig;
+  startTime: Date;
+  currentStep?: string;
+  stepHistory: string[];
+  retryCount: number;
+  lastError?: DailyCommissionError;
+  status: DailyCommissionStatus;
+  metrics: {
+    stepDurations: { [stepName: string]: number };
+    verificationAttempts: { [stepName: string]: number };
+    totalClicks: number;
+    totalWaitTime: number;
+  };
+}
+
+// 委托模板匹配结果
+export interface CommissionTemplateMatch {
+  found: boolean;
+  confidence: number; // 0-1，匹配置信度
+  location?: {
+    x: number;
+    y: number;
+    width?: number;
+    height?: number;
+  };
+  template: string; // 模板文件路径
+  timestamp: Date;
+  processingTime: number; // 处理时间（毫秒）
+}
+
+// 委托界面元素
+export interface CommissionInterfaceElement {
+  type: 'button' | 'text' | 'icon' | 'panel' | 'list';
+  name: string;
+  template: string;
+  isRequired: boolean;
+  timeout: number;
+  retries: number;
+  description?: string;
+  alternatives?: string[]; // 备选模板
+}
 
 // 任务信息收集配置类型
 export interface TaskInfoCollectionSettings {
