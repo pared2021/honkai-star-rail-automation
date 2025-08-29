@@ -326,30 +326,407 @@ export class TaskExecutor extends EventEmitter {
    * 执行默认的日常委托流程
    */
   private async executeDefaultDailyQuest(taskId: string, steps: string[]): Promise<void> {
-    // 1. 寻找并点击委托按钮
-    steps.push('寻找委托入口');
-    this.logTask(taskId, 'info', '寻找委托入口...');
+    const maxRetries = 3;
+    let currentRetry = 0;
     
-    // 尝试寻找委托按钮（这里需要实际的模板图片）
-    const commissionButton = await this.imageRecognition.findImage('templates/commission_button.png');
-    if (commissionButton.found && commissionButton.location) {
-      await this.inputController.click(commissionButton.location.x, commissionButton.location.y);
-      await this.delay(2000);
-    } else {
-      // 如果找不到委托按钮，尝试使用快捷键
-      this.logTask(taskId, 'info', '使用快捷键打开委托界面...');
-      await this.inputController.pressKey('f4'); // 假设F4是委托快捷键
-      await this.delay(2000);
+    try {
+      // 1. 打开委托界面
+      await this.openCommissionInterface(taskId, steps, maxRetries);
+      
+      // 2. 接取所有可用委托
+      await this.acceptAllCommissions(taskId, steps, maxRetries);
+      
+      // 3. 执行委托任务
+      await this.executeCommissions(taskId, steps, maxRetries);
+      
+      // 4. 领取奖励
+      await this.claimCommissionRewards(taskId, steps, maxRetries);
+      
+      // 5. 关闭委托界面
+      await this.closeCommissionInterface(taskId, steps);
+      
+    } catch (error) {
+      this.logTask(taskId, 'error', `每日委托执行失败: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+  }
+  
+  /**
+   * 打开委托界面
+   */
+  private async openCommissionInterface(taskId: string, steps: string[], maxRetries: number): Promise<void> {
+    steps.push('打开委托界面');
+    this.logTask(taskId, 'info', '正在打开委托界面...');
+    
+    for (let retry = 0; retry < maxRetries; retry++) {
+      try {
+        // 方法1: 寻找委托按钮
+        const commissionButton = await this.imageRecognition.findImage('templates/daily/commission_button.png', {
+          threshold: 0.8,
+          timeout: 3000
+        });
+        
+        if (commissionButton.found && commissionButton.location) {
+          this.logTask(taskId, 'info', '找到委托按钮，点击打开...');
+          await this.inputController.click(commissionButton.location.x, commissionButton.location.y);
+          await this.delay(2000);
+          
+          // 验证界面是否打开
+          const interfaceOpened = await this.verifyCommissionInterfaceOpen();
+          if (interfaceOpened) {
+            this.logTask(taskId, 'info', '委托界面已成功打开');
+            return;
+          }
+        }
+        
+        // 方法2: 使用快捷键
+        this.logTask(taskId, 'info', `尝试使用快捷键打开委托界面 (重试 ${retry + 1}/${maxRetries})`);
+        await this.inputController.pressKey('f4');
+        await this.delay(2000);
+        
+        // 验证界面是否打开
+        const interfaceOpened = await this.verifyCommissionInterfaceOpen();
+        if (interfaceOpened) {
+          this.logTask(taskId, 'info', '委托界面已成功打开');
+          return;
+        }
+        
+        if (retry < maxRetries - 1) {
+          this.logTask(taskId, 'warn', `委托界面打开失败，${1000 * (retry + 1)}ms后重试...`);
+          await this.delay(1000 * (retry + 1));
+        }
+        
+      } catch (error) {
+        this.logTask(taskId, 'error', `打开委托界面时出错: ${error instanceof Error ? error.message : String(error)}`);
+        if (retry === maxRetries - 1) {
+          throw new Error('无法打开委托界面');
+        }
+      }
     }
     
-    // 2. 接取所有可用委托
+    throw new Error('委托界面打开失败，已达到最大重试次数');
+  }
+  
+  /**
+   * 验证委托界面是否已打开
+   */
+  private async verifyCommissionInterfaceOpen(): Promise<boolean> {
+    try {
+      const interfaceMarker = await this.imageRecognition.findImage('templates/daily/commission_interface_marker.png', {
+        threshold: 0.8,
+        timeout: 2000
+      });
+      return interfaceMarker.found;
+    } catch {
+      return false;
+    }
+  }
+  
+  /**
+   * 接取所有可用委托
+   */
+  private async acceptAllCommissions(taskId: string, steps: string[], maxRetries: number): Promise<void> {
     steps.push('接取委托任务');
-    this.logTask(taskId, 'info', '接取所有可用委托...');
+    this.logTask(taskId, 'info', '正在接取所有可用委托...');
     
-    // 寻找"接取全部"按钮
-    const acceptAllButton = await this.imageRecognition.findImage('templates/accept_all_button.png');
-    if (acceptAllButton.found && acceptAllButton.location) {
-      await this.inputController.click(acceptAllButton.location.x, acceptAllButton.location.y);
+    for (let retry = 0; retry < maxRetries; retry++) {
+      try {
+        // 寻找"接取全部"按钮
+         const acceptAllButton = await this.imageRecognition.findImage('templates/daily/accept_all_button.png', {
+           threshold: 0.8,
+           timeout: 3000
+         });
+         
+         if (acceptAllButton.found && acceptAllButton.location) {
+           this.logTask(taskId, 'info', '找到接取全部按钮，点击接取...');
+           await this.inputController.click(acceptAllButton.location.x, acceptAllButton.location.y);
+           await this.delay(2000);
+           
+           // 验证是否成功接取
+           const acceptSuccess = await this.verifyCommissionsAccepted();
+           if (acceptSuccess) {
+             this.logTask(taskId, 'info', '委托任务接取成功');
+             return;
+           }
+         } else {
+           // 尝试寻找单个委托并逐一接取
+           this.logTask(taskId, 'info', '未找到接取全部按钮，尝试逐一接取委托...');
+           const individualAcceptSuccess = await this.acceptIndividualCommissions(taskId);
+           if (individualAcceptSuccess) {
+             return;
+           }
+         }
+         
+         if (retry < maxRetries - 1) {
+           this.logTask(taskId, 'warn', `委托接取失败，${1000 * (retry + 1)}ms后重试...`);
+           await this.delay(1000 * (retry + 1));
+         }
+         
+       } catch (error) {
+         this.logTask(taskId, 'error', `接取委托时出错: ${error instanceof Error ? error.message : String(error)}`);
+         if (retry === maxRetries - 1) {
+           throw new Error('无法接取委托任务');
+         }
+       }
+     }
+     
+     throw new Error('委托任务接取失败，已达到最大重试次数');
+   }
+   
+   /**
+    * 验证委托是否成功接取
+    */
+   private async verifyCommissionsAccepted(): Promise<boolean> {
+     try {
+       // 检查是否有"开始"或"立即完成"按钮出现
+       const startButton = await this.imageRecognition.findImage('templates/daily/start_commission_button.png', {
+         threshold: 0.8,
+         timeout: 2000
+       });
+       
+       const instantCompleteButton = await this.imageRecognition.findImage('templates/daily/instant_complete_button.png', {
+         threshold: 0.8,
+         timeout: 1000
+       });
+       
+       return startButton.found || instantCompleteButton.found;
+     } catch {
+       return false;
+     }
+   }
+   
+   /**
+    * 逐一接取委托任务
+    */
+   private async acceptIndividualCommissions(taskId: string): Promise<boolean> {
+     try {
+       const commissionSlots = await this.imageRecognition.findMultipleImages('templates/daily/commission_slot.png', {
+         threshold: 0.8,
+         timeout: 3000,
+         maxResults: 4 // 最多4个委托槽位
+       });
+       
+       if (commissionSlots.length === 0) {
+         this.logTask(taskId, 'warn', '未找到可接取的委托任务');
+         return false;
+       }
+       
+       let acceptedCount = 0;
+       for (const slot of commissionSlots) {
+         if (slot.location) {
+           await this.inputController.click(slot.location.x, slot.location.y);
+           await this.delay(1000);
+           
+           // 寻找并点击接取按钮
+           const acceptButton = await this.imageRecognition.findImage('templates/daily/accept_button.png', {
+             threshold: 0.8,
+             timeout: 2000
+           });
+           
+           if (acceptButton.found && acceptButton.location) {
+             await this.inputController.click(acceptButton.location.x, acceptButton.location.y);
+             await this.delay(1000);
+             acceptedCount++;
+           }
+         }
+       }
+       
+       this.logTask(taskId, 'info', `成功接取 ${acceptedCount} 个委托任务`);
+       return acceptedCount > 0;
+       
+     } catch (error) {
+       this.logTask(taskId, 'error', `逐一接取委托时出错: ${error instanceof Error ? error.message : String(error)}`);
+       return false;
+     }
+   }
+   
+   /**
+    * 执行委托任务
+    */
+   private async executeCommissions(taskId: string, steps: string[], maxRetries: number): Promise<void> {
+     steps.push('执行委托任务');
+     this.logTask(taskId, 'info', '正在执行委托任务...');
+     
+     for (let retry = 0; retry < maxRetries; retry++) {
+       try {
+         // 优先尝试立即完成
+         const instantCompleteSuccess = await this.tryInstantComplete(taskId);
+         if (instantCompleteSuccess) {
+           this.logTask(taskId, 'info', '使用立即完成功能完成委托');
+           return;
+         }
+         
+         // 如果没有立即完成，尝试正常执行
+         const normalExecuteSuccess = await this.executeCommissionsNormally(taskId);
+         if (normalExecuteSuccess) {
+           this.logTask(taskId, 'info', '委托任务执行完成');
+           return;
+         }
+         
+         if (retry < maxRetries - 1) {
+           this.logTask(taskId, 'warn', `委托执行失败，${2000 * (retry + 1)}ms后重试...`);
+           await this.delay(2000 * (retry + 1));
+         }
+         
+       } catch (error) {
+         this.logTask(taskId, 'error', `执行委托时出错: ${error instanceof Error ? error.message : String(error)}`);
+         if (retry === maxRetries - 1) {
+           throw new Error('无法执行委托任务');
+         }
+       }
+     }
+     
+     throw new Error('委托任务执行失败，已达到最大重试次数');
+   }
+   
+   /**
+    * 尝试立即完成委托
+    */
+   private async tryInstantComplete(taskId: string): Promise<boolean> {
+     try {
+       const instantCompleteButton = await this.imageRecognition.findImage('templates/daily/instant_complete_button.png', {
+         threshold: 0.8,
+         timeout: 3000
+       });
+       
+       if (instantCompleteButton.found && instantCompleteButton.location) {
+         this.logTask(taskId, 'info', '找到立即完成按钮，使用立即完成功能...');
+         await this.inputController.click(instantCompleteButton.location.x, instantCompleteButton.location.y);
+         await this.delay(2000);
+         
+         // 确认立即完成
+         const confirmButton = await this.imageRecognition.findImage('templates/daily/confirm_button.png', {
+           threshold: 0.8,
+           timeout: 2000
+         });
+         
+         if (confirmButton.found && confirmButton.location) {
+           await this.inputController.click(confirmButton.location.x, confirmButton.location.y);
+           await this.delay(3000);
+           return true;
+         }
+       }
+       
+       return false;
+     } catch {
+       return false;
+     }
+   }
+   
+   /**
+    * 正常执行委托任务
+    */
+   private async executeCommissionsNormally(taskId: string): Promise<boolean> {
+     try {
+       // 寻找开始按钮
+       const startButton = await this.imageRecognition.findImage('templates/daily/start_commission_button.png', {
+         threshold: 0.8,
+         timeout: 3000
+       });
+       
+       if (startButton.found && startButton.location) {
+         this.logTask(taskId, 'info', '找到开始按钮，开始执行委托...');
+         await this.inputController.click(startButton.location.x, startButton.location.y);
+         await this.delay(2000);
+         
+         // 等待任务完成（这里可以添加更复杂的任务执行逻辑）
+         await this.waitForCommissionCompletion(taskId);
+         return true;
+       }
+       
+       return false;
+     } catch {
+       return false;
+     }
+   }
+   
+   /**
+    * 等待委托任务完成
+    */
+   private async waitForCommissionCompletion(taskId: string): Promise<void> {
+     const maxWaitTime = 300000; // 最多等待5分钟
+     const checkInterval = 5000; // 每5秒检查一次
+     let waitedTime = 0;
+     
+     this.logTask(taskId, 'info', '等待委托任务完成...');
+     
+     while (waitedTime < maxWaitTime) {
+       try {
+         // 检查是否有完成标识
+         const completionMarker = await this.imageRecognition.findImage('templates/daily/commission_completed_marker.png', {
+           threshold: 0.8,
+           timeout: 2000
+         });
+         
+         if (completionMarker.found) {
+           this.logTask(taskId, 'info', '委托任务已完成');
+           return;
+         }
+         
+         // 检查是否需要交互（对话等）
+         await this.handleCommissionInteraction(taskId);
+         
+         await this.delay(checkInterval);
+         waitedTime += checkInterval;
+         
+         if (waitedTime % 30000 === 0) { // 每30秒记录一次进度
+           this.logTask(taskId, 'info', `委托执行中... 已等待 ${waitedTime / 1000} 秒`);
+         }
+         
+       } catch (error) {
+         this.logTask(taskId, 'warn', `检查委托完成状态时出错: ${error instanceof Error ? error.message : String(error)}`);
+       }
+     }
+     
+     this.logTask(taskId, 'warn', '委托任务等待超时，可能需要手动处理');
+   }
+   
+   /**
+    * 处理委托执行过程中的交互
+    */
+   private async handleCommissionInteraction(taskId: string): Promise<void> {
+     try {
+       // 检查是否有对话框
+       const dialogBox = await this.imageRecognition.findImage('templates/daily/dialog_box.png', {
+         threshold: 0.8,
+         timeout: 1000
+       });
+       
+       if (dialogBox.found) {
+         this.logTask(taskId, 'info', '检测到对话框，尝试自动对话...');
+         
+         // 寻找对话选项或确认按钮
+         const dialogOption = await this.imageRecognition.findImage('templates/daily/dialog_option.png', {
+           threshold: 0.8,
+           timeout: 2000
+         });
+         
+         if (dialogOption.found && dialogOption.location) {
+           await this.inputController.click(dialogOption.location.x, dialogOption.location.y);
+           await this.delay(1000);
+         } else {
+           // 如果没有找到特定选项，尝试按空格或回车
+           await this.inputController.pressKey('space');
+           await this.delay(500);
+         }
+       }
+       
+       // 检查是否有其他交互元素
+       const interactionButton = await this.imageRecognition.findImage('templates/daily/interaction_button.png', {
+         threshold: 0.8,
+         timeout: 1000
+       });
+       
+       if (interactionButton.found && interactionButton.location) {
+         await this.inputController.click(interactionButton.location.x, interactionButton.location.y);
+         await this.delay(1000);
+       }
+       
+     } catch (error) {
+       // 交互处理失败不应该中断整个流程
+       this.logTask(taskId, 'debug', `处理交互时出错: ${error instanceof Error ? error.message : String(error)}`);
+     }
+   }
       await this.delay(1000);
     }
     
