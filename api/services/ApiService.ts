@@ -19,7 +19,7 @@ export class ApiService {
     };
   }
 
-  async controlTask(request: { taskId: string; action: string }) {
+  async controlTask(_request: { taskId: string; action: string }) {
     // 控制任务
     return true;
   }

@@ -1,8 +1,5 @@
 // 统计数据API路由
-import express, { Request, Response } from 'express';
-import { DatabaseService } from '../../src/services/DatabaseService.js';
-import { ApiService } from '../../src/services/ApiService.js';
-import { AccountStats, Task } from '../../src/types/index.js';
+import express, { Response } from 'express';
 import { ExtendedRequest } from '../types/index.js';
 
 const router = express.Router();

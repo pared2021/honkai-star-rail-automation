@@ -65,7 +65,10 @@ interface PresetStats {
   eventTaskStrategies?: number;
 }
 
-interface StrategyPageProps {}
+// 策略页面组件属性接口
+interface StrategyPageProps {
+  // 暂无属性，保留接口以备后续扩展
+}
 
 const StrategyPage: React.FC<StrategyPageProps> = () => {
   const [strategies, setStrategies] = useState<Strategy[]>([]);

@@ -34,7 +34,10 @@ import { TaskInfo, TaskReward, TaskCollectionInfo } from '../../types';
 const { TabPane } = Tabs;
 const { Option } = Select;
 
-interface TaskInfoPageProps {}
+// 任务信息页面组件属性接口
+interface TaskInfoPageProps {
+  // 暂无属性，保留接口以备后续扩展
+}
 
 const TaskInfoPage: React.FC<TaskInfoPageProps> = () => {
   const [taskInfos, setTaskInfos] = useState<TaskInfo[]>([]);

@@ -59,7 +59,6 @@ export function safeRequire(moduleName: string) {
   }
   
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require(moduleName);
   } catch (error) {
     console.warn(`Failed to load module ${moduleName}:`, error);

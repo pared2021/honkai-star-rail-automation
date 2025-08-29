@@ -4293,7 +4293,7 @@ export class MainController extends EventEmitter {
     if (typeof eventOrChannelId === 'string') {
       const channelId = eventOrChannelId;
       const message = channelOrMessage as string;
-      const eventData = eventData as Record<string, unknown>;
+      const eventDataObj = eventData as Record<string, unknown>;
       
       const channel = this.notificationChannels.get(channelId);
       if (!channel) {
@@ -4303,15 +4303,15 @@ export class MainController extends EventEmitter {
       
       // 将简单事件转换为SystemEvent格式
       const systemEvent: SystemEvent = {
-        id: (eventData.data as Record<string, unknown>)?.id as string || uuidv4(),
-        type: eventData.type as string || 'notification',
-        source: eventData.source as string || 'system',
-        timestamp: eventData.timestamp ? new Date(eventData.timestamp as string) : new Date(),
-        severity: (eventData.severity as 'low' | 'medium' | 'high' | 'critical') || 'low',
+        id: (eventDataObj.data as Record<string, unknown>)?.id as string || uuidv4(),
+        type: eventDataObj.type as string || 'notification',
+        source: eventDataObj.source as string || 'system',
+        timestamp: eventDataObj.timestamp ? new Date(eventDataObj.timestamp as string) : new Date(),
+        severity: (eventDataObj.severity as 'low' | 'medium' | 'high' | 'critical') || 'low',
         category: 'notification',
         tags: [],
         data: message,
-        metadata: eventData.data as Record<string, unknown> || {}
+        metadata: eventDataObj.data as Record<string, unknown> || {}
       };
       
       return this.sendNotificationToChannel(systemEvent, channel);

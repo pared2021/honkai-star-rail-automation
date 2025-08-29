@@ -1,7 +1,6 @@
 // Express API 服务入口文件
 import express from 'express';
 import cors from 'cors';
-import path from 'path';
 import { DatabaseService } from '../src/services/DatabaseService.js';
 import { ApiService } from '../src/services/ApiService.js';
 import { StrategyDataInitializer } from '../src/services/StrategyDataInitializer.js';
@@ -59,7 +58,7 @@ async function initializeServices() {
 }
 
 // 健康检查接口
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (_req, res) => {
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
@@ -68,7 +67,7 @@ app.get('/api/health', (req, res) => {
 });
 
 // 错误处理中间件
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('API错误:', err);
   res.status(500).json({
     success: false,
@@ -78,7 +77,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // 404处理
-app.use('*', (req, res) => {
+app.use('*', (_req, res) => {
   res.status(404).json({
     success: false,
     message: '接口不存在'

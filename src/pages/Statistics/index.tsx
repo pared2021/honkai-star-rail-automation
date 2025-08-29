@@ -25,7 +25,10 @@ import { Account, Task, AccountStats } from '../../types';
 const { Option } = Select;
 const { RangePicker } = DatePicker;
 
-interface StatisticsProps {}
+// 统计页面组件属性接口
+interface StatisticsProps {
+  // 暂无属性，保留接口以备后续扩展
+}
 
 interface TaskStatistics {
   totalTasks: number;

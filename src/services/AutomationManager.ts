@@ -955,7 +955,7 @@ export class AutomationManager {
        case 'fully_automatic':
          return false;
        
-       case 'semi_automatic':
+       case 'semi_automatic': {
          if (!automationMode.semiAutomatic) return true;
          
          const semiConfig = automationMode.semiAutomatic;
@@ -973,6 +973,7 @@ export class AutomationManager {
            default:
              return true;
          }
+       }
        
        case 'manual_confirmation':
          return true;
@@ -1068,21 +1069,26 @@ export class AutomationManager {
    private async executeRecoveryStrategy(strategy: string, errorRecord: any): Promise<boolean> {
      try {
        switch (strategy) {
-         case 'restart_task':
+         case 'restart_task': {
            return await this.restartTask(errorRecord.taskId);
+         }
          
-         case 'reset_environment':
+         case 'reset_environment': {
            return await this.resetEnvironment();
+         }
          
-         case 'switch_strategy':
+         case 'switch_strategy': {
            return await this.switchToAlternativeStrategy(errorRecord.taskId);
+         }
          
-         case 'reduce_complexity':
+         case 'reduce_complexity': {
            return await this.reduceTaskComplexity(errorRecord.taskId);
+         }
          
-         case 'wait_and_retry':
+         case 'wait_and_retry': {
            await new Promise(resolve => setTimeout(resolve, 5000)); // 等待5秒
            return await this.retryTask(errorRecord.taskId);
+         }
          
          default:
            return false;

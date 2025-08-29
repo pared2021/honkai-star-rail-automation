@@ -3,7 +3,6 @@ import { TaskInfoCollector, TaskInfoCollectionResult } from './TaskInfoCollector
 import { ImageRecognition } from './ImageRecognition.js';
 import { DatabaseService } from '../services/DatabaseService';
 import { TaskType, TaskInfoCollectionConfig } from '../types';
-import * as path from 'path';
 
 // Mock dependencies
 jest.mock('./ImageRecognition');

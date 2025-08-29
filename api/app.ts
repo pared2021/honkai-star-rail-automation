@@ -4,14 +4,12 @@
 
 import express, { type Request, type Response, type NextFunction }  from 'express';
 import cors from 'cors';
-import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
 import authRoutes from './routes/auth.js';
 
 // for esm mode
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
 
 // load env
 dotenv.config();
@@ -31,7 +29,7 @@ app.use('/api/auth', authRoutes);
 /**
  * health
  */
-app.use('/api/health', (req: Request, res: Response, next: NextFunction): void => {
+app.use('/api/health', (_req: Request, res: Response): void => {
   res.status(200).json({
     success: true,
     message: 'ok'
@@ -41,7 +39,7 @@ app.use('/api/health', (req: Request, res: Response, next: NextFunction): void =
 /**
  * error handler middleware
  */
-app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
+app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({
     success: false,
     error: 'Server internal error'
@@ -51,7 +49,7 @@ app.use((error: Error, req: Request, res: Response, next: NextFunction) => {
 /**
  * 404 handler
  */
-app.use((req: Request, res: Response) => {
+app.use((_req: Request, res: Response) => {
   res.status(404).json({
     success: false,
     error: 'API not found'

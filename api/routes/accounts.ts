@@ -1,7 +1,7 @@
 // 账号管理API路由
 import express, { Response } from 'express';
 import { DatabaseService } from '../../src/services/DatabaseService.js';
-import { Account, CreateAccountRequest, UpdateAccountRequest, ExtendedRequest } from '../types/index.js';
+import { CreateAccountRequest, UpdateAccountRequest, ExtendedRequest } from '../types/index.js';
 
 const router = express.Router();
 

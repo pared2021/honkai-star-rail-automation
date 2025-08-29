@@ -21,7 +21,7 @@ const execAsync = promisify(exec);
 export class GameMonitor {
   private monitorInterval: NodeJS.Timeout | null = null;
   private filterMonitorInterval: NodeJS.Timeout | null = null;
-  private eventListeners: Map<GameEventType, Function[]> = new Map();
+  private eventListeners: Map<GameEventType, ((event: GameEvent) => void)[]> = new Map();
   private lastStatus: GameMonitorStatus | null = null;
   private settings: GameSettings | null = null;
   private filterDetector: FilterDetector;
@@ -455,7 +455,7 @@ export class GameMonitor {
   /**
    * 添加事件监听器
    */
-  public addEventListener(eventType: GameEventType, callback: Function): void {
+  public addEventListener(eventType: GameEventType, callback: (event: GameEvent) => void): void {
     const listeners = this.eventListeners.get(eventType) || [];
     listeners.push(callback);
     this.eventListeners.set(eventType, listeners);
@@ -464,7 +464,7 @@ export class GameMonitor {
   /**
    * 移除事件监听器
    */
-  public removeEventListener(eventType: GameEventType, callback: Function): void {
+  public removeEventListener(eventType: GameEventType, callback: (event: GameEvent) => void): void {
     const listeners = this.eventListeners.get(eventType) || [];
     const index = listeners.indexOf(callback);
     if (index > -1) {
@@ -481,9 +481,12 @@ export class GameMonitor {
     listeners.forEach(callback => {
       try {
         callback({
+          id: `${eventType}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
           type: eventType,
           data,
-          timestamp: new Date()
+          timestamp: new Date(),
+          severity: this.getEventSeverity(eventType),
+          message: this.getEventMessage(eventType, data)
         });
       } catch (error) {
         console.error(`事件监听器执行失败 [${eventType}]:`, error);
@@ -518,6 +521,48 @@ export class GameMonitor {
       uptime: 0,
       lastError: null
     };
+  }
+
+  /**
+   * 获取事件严重程度
+   */
+  private getEventSeverity(eventType: GameEventType): 'info' | 'warning' | 'error' {
+    switch (eventType) {
+      case 'game_crashed':
+      case 'game_not_responding':
+        return 'error';
+      case 'third_party_detected':
+      case 'interference_detected':
+        return 'warning';
+      default:
+        return 'info';
+    }
+  }
+
+  /**
+   * 获取事件消息
+   */
+  private getEventMessage(eventType: GameEventType, data: any): string {
+    switch (eventType) {
+      case 'game_started':
+        return '游戏已启动';
+      case 'game_stopped':
+        return '游戏已停止';
+      case 'game_crashed':
+        return '游戏崩溃';
+      case 'window_changed':
+        return '游戏窗口发生变化';
+      case 'resolution_changed':
+        return '游戏分辨率发生变化';
+      case 'third_party_detected':
+        return `检测到第三方工具: ${data?.message || '未知工具'}`;
+      case 'interference_detected':
+        return '检测到干扰';
+      case 'game_not_responding':
+        return '游戏无响应';
+      default:
+        return `游戏事件: ${eventType}`;
+    }
   }
 
   /**

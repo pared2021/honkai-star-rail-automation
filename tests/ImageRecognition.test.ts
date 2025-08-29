@@ -1,9 +1,8 @@
-// @ts-nocheck
+// 测试文件，允许使用any类型进行mock
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import { ImageRecognition } from '../src/modules/ImageRecognition';
 import * as fs from 'fs';
-import * as path from 'path';
-import Jimp from 'jimp';
 
 // Mock函数必须在jest.mock之前定义
 const mockJimpRead = jest.fn() as jest.MockedFunction<any>;

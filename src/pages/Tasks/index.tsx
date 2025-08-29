@@ -68,7 +68,9 @@ interface Account {
 const { TabPane } = Tabs;
 const { Option } = Select;
 
-interface TasksProps {}
+interface TasksProps {
+  // 如果需要添加props，在这里定义
+}
 
 const Tasks: React.FC<TasksProps> = () => {
   const [runningTasks, setRunningTasks] = useState<Task[]>([]);

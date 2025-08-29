@@ -424,18 +424,18 @@ export class GameDetector extends EventEmitter {
    */
   private getGameWindowInfo(window: unknown): GameWindowInfo {
     const win = window as Record<string, unknown>;
-    const bounds = (win.getBounds as Function)();
+    const bounds = (win.getBounds as () => { x: number; y: number; width: number; height: number })();
     return {
       id: Number(win.id) || 0,
-      title: String((win.getTitle as Function)() || ''),
+      title: String((win.getTitle as () => string)() || ''),
       bounds: {
         x: bounds.x,
         y: bounds.y,
         width: bounds.width,
         height: bounds.height
       },
-      isVisible: Boolean((win.isVisible as Function)()),
-      isMinimized: !Boolean((win.isVisible as Function)())
+      isVisible: Boolean((win.isVisible as () => boolean)()),
+      isMinimized: !(win.isVisible as () => boolean)()
     };
   }
 

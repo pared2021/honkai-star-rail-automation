@@ -1,20 +1,20 @@
 // fs 浏览器兼容性模块
 
 // 模拟 fs 模块的函数
-const existsSync = (path: string): boolean => {
+const existsSync = (_path: string): boolean => {
   // 在浏览器环境中，总是返回false
   return false;
 };
 
-const readFileSync = (path: string, encoding?: string): string | Buffer => {
+const readFileSync = (_path: string, _encoding?: string): string | Buffer => {
   throw new Error('fs.readFileSync is not available in browser environment');
 };
 
-const writeFileSync = (path: string, data: any, encoding?: string): void => {
+const writeFileSync = (_path: string, _data: any, _encoding?: string): void => {
   throw new Error('fs.writeFileSync is not available in browser environment');
 };
 
-const mkdirSync = (path: string, options?: any): void => {
+const mkdirSync = (_path: string, _options?: any): void => {
   throw new Error('fs.mkdirSync is not available in browser environment');
 };
 
