@@ -41,6 +41,17 @@ export const mockUtil = {
   promisify: (fn: any) => fn
 };
 
+// 模块映射
+const mockModules = {
+  'active-win': mockActiveWin,
+  'ps-list': mockPsList,
+  'robotjs': mockRobotjs,
+  'screenshot-desktop': mockScreenshot,
+  'node-window-manager': mockWindowManager,
+  'child_process': mockChildProcess,
+  'util': mockUtil
+};
+
 // 安全的模块加载器
 export function safeRequire(moduleName: string) {
   if (isBrowser) {
