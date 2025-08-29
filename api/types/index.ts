@@ -1,7 +1,6 @@
 // API类型定义
 import { Request } from 'express';
 import { DatabaseService } from '../../src/services/DatabaseService.js';
-import { ApiService } from '../services/ApiService.js';
 
 // 扩展的Request接口
 export interface ExtendedRequest extends Request {

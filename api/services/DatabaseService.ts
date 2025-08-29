@@ -6,16 +6,24 @@ export class DatabaseService {
 
   async getTasks(accountId?: string) {
     // 获取任务列表
+    // TODO: 实现根据账户ID过滤任务的逻辑
+    if (accountId) {
+      console.log(`Getting tasks for account: ${accountId}`);
+    }
     return [];
   }
 
   async getTaskById(id: string) {
     // 根据ID获取任务
+    // TODO: 实现根据ID查询任务的逻辑
+    console.log(`Getting task by id: ${id}`);
     return null;
   }
 
   async getTaskLogs(taskId: string) {
     // 获取任务日志
+    // TODO: 实现获取指定任务日志的逻辑
+    console.log(`Getting logs for task: ${taskId}`);
     return [];
   }
 
@@ -26,11 +34,15 @@ export class DatabaseService {
 
   async updateTask(id: string, updates: any) {
     // 更新任务
+    // TODO: 实现更新任务的逻辑
+    console.log(`Updating task ${id}:`, updates);
     return true;
   }
 
   async deleteTask(id: string) {
     // 删除任务
+    // TODO: 实现删除任务的逻辑
+    console.log(`Deleting task with id: ${id}`);
     return true;
   }
 
@@ -44,11 +56,15 @@ export class DatabaseService {
 
   async getStrategyFeedbacks(strategyId: string, options?: any) {
     // 获取策略反馈列表
+    // TODO: 实现获取策略反馈的逻辑
+    console.log(`Getting feedbacks for strategy: ${strategyId}`, options);
     return [];
   }
 
   async getFeedbackStatistics(strategyId: string) {
     // 获取反馈统计
+    // TODO: 实现获取反馈统计的逻辑
+    console.log(`Getting feedback statistics for strategy: ${strategyId}`);
     return {
       totalFeedbacks: 0,
       averageRating: 0,

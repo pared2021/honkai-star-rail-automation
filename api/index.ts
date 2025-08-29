@@ -67,7 +67,7 @@ app.get('/api/health', (_req, res) => {
 });
 
 // 错误处理中间件
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response) => {
   console.error('API错误:', err);
   res.status(500).json({
     success: false,

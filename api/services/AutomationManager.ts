@@ -16,6 +16,8 @@ export class AutomationManager {
 
   async stopAutomation(id: string) {
     // 停止自动化
+    // TODO: 实现停止指定ID的自动化任务逻辑，使用 id 参数
+    console.log(`Stopping automation with id: ${id}`);
     return true;
   }
 

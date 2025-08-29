@@ -98,7 +98,7 @@ export class ApiService {
   /**
    * 任务管理API
    */
-  public async startTask(_request: StartTaskRequest): Promise<ApiResponse<string>> {
+  public async startTask(request: StartTaskRequest): Promise<ApiResponse<string>> {
     try {
       // 检查游戏状态
       const gameStatus = { isRunning: false, windowTitle: '', processId: 0 }; // await this.gameDetector.getCurrentStatus();
@@ -114,6 +114,7 @@ export class ApiService {
         // taskType: request.taskType,
         // config: request.config
       // });
+      // TODO: 实现任务启动逻辑，使用 request 参数
 
       return {
         success: true,

@@ -19,8 +19,9 @@ export class ApiService {
     };
   }
 
-  async controlTask(_request: { taskId: string; action: string }) {
+  async controlTask(request: { taskId: string; action: string }) {
     // 控制任务
+    // TODO: 实现任务控制逻辑，使用 request.taskId 和 request.action
     return true;
   }
 }

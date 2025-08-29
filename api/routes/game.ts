@@ -1,6 +1,5 @@
 // 游戏状态API路由
 import express, { Response } from 'express';
-import { ApiService } from '../../src/services/ApiService.js';
 import { GameMonitor } from '../../src/services/GameMonitor.js';
 import { GameLauncher } from '../../src/services/GameLauncher.js';
 import { GameLaunchConfig } from '../../src/types/index.js';
@@ -419,7 +418,7 @@ router.post('/emergency-stop', async (req: ExtendedRequest, res: Response) => {
     
     // 停止所有运行中的任务
     const runningTasks: unknown[] = []; // await apiService.getRunningTasks();
-    const stopPromises = runningTasks.map(task => 
+    const stopPromises = runningTasks.map(_task => 
       // apiService.controlTask({ taskId: task.id, action: 'stop' })
       Promise.resolve({ success: true })
     );

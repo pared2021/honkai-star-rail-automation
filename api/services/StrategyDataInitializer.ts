@@ -15,6 +15,8 @@ export class StrategyDataInitializer {
 
   async resetStrategyData(strategyId: string) {
     // 重置策略数据
+    // TODO: 实现重置指定策略数据的逻辑
+    console.log(`Resetting strategy data for: ${strategyId}`);
     return true;
   }
 
