@@ -1,11 +1,11 @@
 // TaskInfoCollector 模块测试
-import { TaskInfoCollector, TaskInfoCollectionResult } from './TaskInfoCollector.js';
-import { ImageRecognition } from './ImageRecognition.js';
+import { TaskInfoCollector, TaskInfoCollectionResult } from '../modules/TaskInfoCollector';
+import { ImageRecognition } from '../modules/ImageRecognition';
 import { DatabaseService } from '../services/DatabaseService';
 import { TaskType, TaskInfoCollectionConfig } from '../types';
 
 // Mock dependencies
-jest.mock('./ImageRecognition');
+jest.mock('../modules/ImageRecognition');
 jest.mock('../services/DatabaseService');
 
 describe('TaskInfoCollector', () => {

@@ -124,10 +124,11 @@ export class StrategyAnalyzer {
    * 生成主线任务攻略步骤
    */
   private async generateMainQuestSteps(taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+    console.debug('Generating main quest steps with patterns:', _patterns);
     const steps: StrategyStep[] = [
       {
         id: `step_${Date.now()}_1`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 1,
         stepType: 'navigation',
         action: {
@@ -149,7 +150,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_2`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 2,
         stepType: 'interaction',
         action: {
@@ -171,7 +172,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_3`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 3,
         stepType: 'battle',
         action: {
@@ -193,7 +194,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_4`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 4,
         stepType: 'interaction',
         action: {
@@ -222,10 +223,11 @@ export class StrategyAnalyzer {
    * 生成支线任务攻略步骤
    */
   private async generateSideQuestSteps(taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+    console.debug('Generating side quest steps with patterns:', _patterns);
     const steps: StrategyStep[] = [
       {
         id: `step_${Date.now()}_1`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 1,
         stepType: 'navigation',
         action: {
@@ -241,7 +243,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_2`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 2,
         stepType: 'custom',
         action: {
@@ -263,7 +265,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_3`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 3,
         stepType: 'interaction',
         action: {
@@ -285,11 +287,12 @@ export class StrategyAnalyzer {
   /**
    * 生成日常任务攻略步骤
    */
-  private async generateDailyQuestSteps(taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+  private async generateDailyQuestSteps(_taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+    console.debug('Generating daily quest steps for task:', _taskInfo.taskName, 'with patterns:', _patterns);
     const steps: StrategyStep[] = [
       {
         id: `step_${Date.now()}_1`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 1,
         stepType: 'navigation',
         action: {
@@ -305,7 +308,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_2`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 2,
         stepType: 'interaction',
         action: {
@@ -321,7 +324,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_3`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 3,
         stepType: 'battle',
         action: {
@@ -343,7 +346,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_4`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 4,
         stepType: 'interaction',
         action: {
@@ -365,11 +368,12 @@ export class StrategyAnalyzer {
   /**
    * 生成活动任务攻略步骤
    */
-  private async generateEventQuestSteps(taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+  private async generateEventQuestSteps(_taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+    console.debug('Generating event quest steps with patterns:', _patterns);
     const steps: StrategyStep[] = [
       {
         id: `step_${Date.now()}_1`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 1,
         stepType: 'interaction',
         action: {
@@ -385,15 +389,15 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_2`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 2,
         stepType: 'interaction',
         action: {
           type: 'click',
-          target: { text: taskInfo.taskName },
+          target: { text: _taskInfo.taskName },
           parameters: {}
         },
-        description: `选择活动：${taskInfo.taskName}`,
+        description: `选择活动：${_taskInfo.taskName}`,
         timeout: 5,
         retryCount: 3,
         isOptional: false,
@@ -401,7 +405,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_3`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 3,
         stepType: 'interaction',
         action: {
@@ -429,11 +433,12 @@ export class StrategyAnalyzer {
   /**
    * 生成通用攻略步骤
    */
-  private async generateGenericSteps(taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+  private async generateGenericSteps(_taskInfo: TaskInfo, _patterns: AnalysisPatterns): Promise<StrategyStep[]> {
+    console.debug('Generating generic steps with patterns:', _patterns);
     return [
       {
         id: `step_${Date.now()}_1`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 1,
         stepType: 'custom',
         action: {
@@ -449,7 +454,7 @@ export class StrategyAnalyzer {
       },
       {
         id: `step_${Date.now()}_2`,
-        strategyId: '',
+        strategyId: `strategy_${Date.now()}`,
         stepOrder: 2,
         stepType: 'interaction',
         action: {
@@ -458,7 +463,7 @@ export class StrategyAnalyzer {
           parameters: { method: 'auto' }
         },
         description: '执行任务内容',
-        timeout: (taskInfo.estimatedTime || 60) * 60,
+        timeout: (_taskInfo.estimatedTime || 60) * 60,
         retryCount: 3,
         isOptional: false,
         conditions: []
@@ -675,6 +680,7 @@ export class StrategyAnalyzer {
 
   // 辅助方法
   private analyzeExistingPatterns(_strategies: Strategy[]): AnalysisPatterns {
+    console.debug('Analyzing patterns for strategies:', _strategies.length);
     return {
       commonSteps: this.findCommonSteps(_strategies),
       averageTime: this.calculateAverageTime(_strategies),
@@ -684,6 +690,7 @@ export class StrategyAnalyzer {
 
   private findCommonSteps(_strategies: Strategy[]): string[] {
     // 分析常见步骤模式
+    console.debug('Finding common steps in strategies:', _strategies.length);
     return [];
   }
 
@@ -695,6 +702,7 @@ export class StrategyAnalyzer {
 
   private findSuccessPatterns(_strategies: Strategy[]): SuccessPattern[] {
     // 分析成功模式
+    console.debug('Finding success patterns in strategies:', _strategies.length);
     return [];
   }
 

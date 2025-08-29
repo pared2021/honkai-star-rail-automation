@@ -380,6 +380,7 @@ class PerformanceDataCollector extends EventEmitter {
     commonErrors: string[];
     performanceTrends: any[];
   }> {
+    console.debug('Getting execution stats for strategy:', strategyId);
     // TODO: 实现统计数据计算
     return {
       totalExecutions: 0,

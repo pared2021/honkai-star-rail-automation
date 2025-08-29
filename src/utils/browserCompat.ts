@@ -13,12 +13,12 @@ export const mockPsList = () => Promise.resolve([]);
 
 // robotjs 模拟
 export const mockRobotjs = {
-  moveMouse: () => {},
-  mouseClick: () => {},
-  keyTap: () => {},
-  dragMouse: () => {},
-  setMouseDelay: () => {},
-  setKeyboardDelay: () => {}
+  moveMouse: () => { console.debug('mockRobotjs.moveMouse called'); },
+  mouseClick: () => { console.debug('mockRobotjs.mouseClick called'); },
+  keyTap: () => { console.debug('mockRobotjs.keyTap called'); },
+  dragMouse: () => { console.debug('mockRobotjs.dragMouse called'); },
+  setMouseDelay: () => { console.debug('mockRobotjs.setMouseDelay called'); },
+  setKeyboardDelay: () => { console.debug('mockRobotjs.setKeyboardDelay called'); }
 };
 
 // screenshot-desktop 模拟
@@ -33,7 +33,7 @@ export const mockWindowManager = {
 
 // child_process 模拟
 export const mockChildProcess = {
-  exec: () => {}
+  exec: () => { console.debug('mockChildProcess.exec called'); }
 };
 
 // util 模拟

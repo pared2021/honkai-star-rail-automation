@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Progress } from './ui/progress';
 import { Badge } from './ui/badge';
-import { Button } from './ui/button';
+
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts';
-import { Activity, Clock, Cpu, HardDrive, Wifi, AlertTriangle, CheckCircle, XCircle, TrendingUp, TrendingDown } from 'lucide-react';
+import { Activity, Clock, Cpu, HardDrive, Wifi, AlertTriangle, CheckCircle, XCircle } from 'lucide-react';
 import PerformanceDataCollector from '../services/PerformanceDataCollector';
 import ExecutionTracker from '../services/ExecutionTracker';
 import IntelligentEvaluator from '../services/IntelligentEvaluator';

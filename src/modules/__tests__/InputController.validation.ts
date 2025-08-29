@@ -1,4 +1,4 @@
-import InputController from '../InputController.js';
+import InputController from '../InputController';
 
 /**
  * InputController功能验证脚本

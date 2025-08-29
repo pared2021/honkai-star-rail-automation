@@ -690,7 +690,8 @@ class IntelligentEvaluator {
   }
 
   // 数据库操作
-  private async getExecutionHistory(strategyId: string): Promise<StrategyExecutionSession[]> {
+  private async getExecutionHistory(_strategyId: string): Promise<StrategyExecutionSession[]> {
+    console.debug('Getting execution history for strategy:', _strategyId);
     // TODO: 从数据库获取执行历史
     return [];
   }
@@ -710,7 +711,8 @@ class IntelligentEvaluator {
   /**
    * 获取评估历史
    */
-  public async getEvaluationHistory(strategyId: string): Promise<IntelligentEvaluationResult[]> {
+  public async getEvaluationHistory(_strategyId: string): Promise<IntelligentEvaluationResult[]> {
+    console.debug('Getting evaluation history for strategy:', _strategyId);
     // TODO: 从数据库获取评估历史
     return [];
   }

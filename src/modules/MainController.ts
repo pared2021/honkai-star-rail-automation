@@ -1384,7 +1384,8 @@ export class MainController extends EventEmitter {
       const configPath = path.join(process.cwd(), 'config', 'main-controller.json');
       
       this.configWatcher = fs.watch(configPath, { encoding: 'utf8' }) as unknown as import('fs').FSWatcher;
-      this.configWatcher.on('change', async (eventType, _filename) => {
+      this.configWatcher.on('change', async (_eventType, _filename) => {
+        console.debug('Config file change detected:', _eventType, _filename);
         this.logEvent('info', '检测到配置文件变化，重新加载配置');
         try {
           await this.loadConfiguration();

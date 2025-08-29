@@ -30,6 +30,7 @@ app.use('/api/auth', authRoutes);
  * health
  */
 app.use('/api/health', (_req: Request, res: Response): void => {
+  console.debug('Health check request:', _req.method, _req.url);
   res.status(200).json({
     success: true,
     message: 'ok'
@@ -40,6 +41,7 @@ app.use('/api/health', (_req: Request, res: Response): void => {
  * error handler middleware
  */
 app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
+  console.debug('Error request:', _req.method, _req.url, 'Next function available:', typeof _next);
   res.status(500).json({
     success: false,
     error: 'Server internal error'
@@ -50,6 +52,7 @@ app.use((error: Error, _req: Request, res: Response, _next: NextFunction) => {
  * 404 handler
  */
 app.use((_req: Request, res: Response) => {
+  console.debug('404 request:', _req.method, _req.url);
   res.status(404).json({
     success: false,
     error: 'API not found'

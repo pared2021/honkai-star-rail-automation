@@ -12,8 +12,6 @@ import {
   MinusOutlined,
   BorderOutlined,
   CloseOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   MonitorOutlined
 } from '@ant-design/icons';
 import Dashboard from './pages/Dashboard/index';

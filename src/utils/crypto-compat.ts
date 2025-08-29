@@ -1,10 +1,12 @@
 // crypto 浏览器兼容性模块
 
 // 模拟 createHash 函数
-const createHash = (algorithm: string) => {
+const createHash = (_algorithm: string) => {
+  console.debug('createHash called with algorithm:', _algorithm);
   return {
     update: (data: any) => ({
-      digest: (encoding?: string) => {
+      digest: (_encoding?: string) => {
+        console.debug('digest called with encoding:', _encoding);
         // 在浏览器环境中返回一个简单的哈希值
         if (typeof data === 'string') {
           let hash = 0;

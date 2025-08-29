@@ -59,6 +59,7 @@ async function initializeServices() {
 
 // 健康检查接口
 app.get('/api/health', (_req, res) => {
+  console.debug('Health check request received:', _req.method, _req.url);
   res.json({ 
     status: 'ok', 
     timestamp: new Date().toISOString(),
@@ -68,6 +69,7 @@ app.get('/api/health', (_req, res) => {
 
 // 错误处理中间件
 app.use((err: any, _req: express.Request, res: express.Response) => {
+  console.debug('Error request details:', _req.method, _req.url);
   console.error('API错误:', err);
   res.status(500).json({
     success: false,
@@ -78,6 +80,7 @@ app.use((err: any, _req: express.Request, res: express.Response) => {
 
 // 404处理
 app.use('*', (_req, res) => {
+  console.debug('404 request:', _req.method, _req.url);
   res.status(404).json({
     success: false,
     message: '接口不存在'

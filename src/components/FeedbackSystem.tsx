@@ -6,18 +6,15 @@ import { Textarea } from './ui/textarea';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
-import { Alert, AlertDescription } from './ui/alert';
+
 import { Progress } from './ui/progress';
 import { 
   Star, 
   MessageSquare, 
   ThumbsUp, 
-  ThumbsDown, 
+ 
   Send, 
-  CheckCircle, 
-  AlertCircle,
-  TrendingUp,
-  Users,
+
   BarChart3,
   Filter
 } from 'lucide-react';

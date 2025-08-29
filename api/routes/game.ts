@@ -419,7 +419,7 @@ router.post('/emergency-stop', async (req: ExtendedRequest, res: Response) => {
     // 停止所有运行中的任务
     const runningTasks: unknown[] = []; // await apiService.getRunningTasks();
     const stopPromises = runningTasks.map(_task => 
-      // apiService.controlTask({ taskId: task.id, action: 'stop' })
+      // apiService.controlTask({ taskId: _task.id, action: 'stop' })
       Promise.resolve({ success: true })
     );
     
