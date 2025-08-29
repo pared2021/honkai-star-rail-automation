@@ -4,12 +4,12 @@ import { isBrowser } from '../utils/browserCompat.js';
 import nodeWindowManager from 'node-window-manager';
 import activeWin from 'active-win';
 import psList from 'ps-list';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+// import { exec } from 'child_process';
+// import { promisify } from 'util';
 
 // 安全获取模块
 const windowManager = nodeWindowManager?.windowManager;
-const execAsync = promisify(exec);
+// const execAsync = promisify(exec); // 暂时注释掉未使用的变量
 import { EventEmitter } from 'events';
 
 export interface GameDetectorConfig {
@@ -84,7 +84,7 @@ export class GameDetector extends EventEmitter {
   /**
    * 日志记录方法
    */
-  private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: any): void {
+  private log(level: 'debug' | 'info' | 'warn' | 'error', message: string, data?: unknown): void {
     if (!this.config.enableLogging) return;
     
     const levels = { debug: 0, info: 1, warn: 2, error: 3 };
@@ -384,7 +384,7 @@ export class GameDetector extends EventEmitter {
   /**
    * 获取游戏窗口
    */
-  private async getGameWindow(): Promise<any | null> {
+  private async getGameWindow(): Promise<unknown | null> {
     try {
       const windows = windowManager.getWindows();
       
@@ -399,7 +399,7 @@ export class GameDetector extends EventEmitter {
             return title === targetTitle || 
                    title.includes(targetTitle) ||
                    title.replace(/\s+/g, '').includes(targetTitle.replace(/\s+/g, ''));
-          } catch (error) {
+          } catch {
             // 某些窗口可能无法获取标题
             return false;
           }
@@ -422,19 +422,20 @@ export class GameDetector extends EventEmitter {
   /**
    * 获取游戏窗口信息
    */
-  private getGameWindowInfo(window: any): GameWindowInfo {
-    const bounds = window.getBounds();
+  private getGameWindowInfo(window: unknown): GameWindowInfo {
+    const win = window as Record<string, unknown>;
+    const bounds = (win.getBounds as Function)();
     return {
-      id: window.id,
-      title: window.getTitle(),
+      id: Number(win.id) || 0,
+      title: String((win.getTitle as Function)() || ''),
       bounds: {
         x: bounds.x,
         y: bounds.y,
         width: bounds.width,
         height: bounds.height
       },
-      isVisible: window.isVisible(),
-      isMinimized: !window.isVisible()
+      isVisible: Boolean((win.isVisible as Function)()),
+      isMinimized: !Boolean((win.isVisible as Function)())
     };
   }
 
@@ -474,9 +475,11 @@ export class GameDetector extends EventEmitter {
   /**
    * 获取游戏窗口位置信息
    */
-  private getGameWindowRect(window: any): { x: number; y: number; width: number; height: number } {
+  private getGameWindowRect(window: unknown): { x: number; y: number; width: number; height: number } {
     try {
-      const bounds = window.getBounds();
+      const windowObj = window as Record<string, unknown>;
+      const getBounds = windowObj.getBounds as () => { x: number; y: number; width: number; height: number };
+      const bounds = getBounds();
       const rect = {
         x: bounds.x,
         y: bounds.y,

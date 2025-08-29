@@ -1,6 +1,6 @@
 // 任务执行器模块
-import { Task, TaskStatus, TaskType, TaskLog, LogLevel, TaskResult } from '../types/index.js';
-import { v4 as uuidv4 } from 'uuid';
+import { Task, TaskStatus, TaskLog, LogLevel, TaskResult } from '../types/index.js';
+// import { v4 as uuidv4 } from 'uuid';
 import { EventEmitter } from 'events';
 import GameDetector from './GameDetector.js';
 import InputController from './InputController.js';
@@ -194,44 +194,39 @@ export class TaskExecutor extends EventEmitter {
     task.startTime = new Date();
     this.emit('taskStarted', task);
 
-    try {
-      let result: TaskResult;
+    let result: TaskResult;
 
-      // 根据任务类型执行不同的逻辑
-      switch (task.taskType) {
-        case 'daily':
-          result = await this.executeDailyTask(task);
-          break;
-        case 'main':
-          result = await this.executeMainTask(task);
-          break;
-        case 'side':
-          result = await this.executeSideTask(task);
-          break;
-        case 'custom':
-          result = await this.executeCustomTask(task);
-          break;
-        case 'event':
-          result = await this.executeEventTask(task);
-          break;
-        default:
-          throw new Error(`不支持的任务类型: ${task.taskType}`);
-      }
-
-      // 任务执行成功
-      task.status = 'completed';
-      task.endTime = new Date();
-      task.result = result;
-      
-      this.stats.completedTasks++;
-      this.updateAverageExecutionTime();
-      
-      this.logTask(task.id, 'info', '任务执行完成');
-      this.emit('taskCompleted', task, result);
-
-    } catch (error) {
-      throw error; // 重新抛出错误，由 executeTaskWithTimeout 处理
+    // 根据任务类型执行不同的逻辑
+    switch (task.taskType) {
+      case 'daily':
+        result = await this.executeDailyTask(task);
+        break;
+      case 'main':
+        result = await this.executeMainTask(task);
+        break;
+      case 'side':
+        result = await this.executeSideTask(task);
+        break;
+      case 'custom':
+        result = await this.executeCustomTask(task);
+        break;
+      case 'event':
+        result = await this.executeEventTask(task);
+        break;
+      default:
+        throw new Error(`不支持的任务类型: ${task.taskType}`);
     }
+
+    // 任务执行成功
+    task.status = 'completed';
+    task.endTime = new Date();
+    task.result = result;
+    
+    this.stats.completedTasks++;
+    this.updateAverageExecutionTime();
+    
+    this.logTask(task.id, 'info', '任务执行完成');
+    this.emit('taskCompleted', task, result);
   }
 
   /**
@@ -389,50 +384,52 @@ export class TaskExecutor extends EventEmitter {
   /**
    * 执行任务步骤
    */
-  private async executeTaskStep(taskId: string, step: any, steps: string[]): Promise<void> {
-    steps.push(`执行步骤: ${step.name}`);
-    this.logTask(taskId, 'info', `执行步骤: ${step.name}`);
+  private async executeTaskStep(taskId: string, step: unknown, steps: string[]): Promise<void> {
+    const taskStep = step as Record<string, unknown>;
+    steps.push(`执行步骤: ${String(taskStep.name || 'unknown')}`);
+    this.logTask(taskId, 'info', `执行步骤: ${String(taskStep.name || 'unknown')}`);
     
-    switch (step.action) {
+    switch (taskStep.action) {
       case 'click':
-        if (step.template) {
+        if (taskStep.template) {
           // 基于图像识别的点击
-          const result = await this.imageRecognition.findImage(step.template);
+          const result = await this.imageRecognition.findImage(String(taskStep.template));
           if (result.found && result.location) {
             await this.inputController.click(result.location.x, result.location.y);
           } else {
-            throw new Error(`找不到模板图像: ${step.template}`);
+            throw new Error(`找不到模板图像: ${String(taskStep.template)}`);
           }
-        } else if (step.coordinates) {
+        } else if (taskStep.coordinates && typeof taskStep.coordinates === 'object' && taskStep.coordinates !== null) {
           // 基于坐标的点击
-          await this.inputController.click(step.coordinates.x, step.coordinates.y);
+          const coords = taskStep.coordinates as Record<string, unknown>;
+          await this.inputController.click(Number(coords.x) || 0, Number(coords.y) || 0);
         }
         break;
         
       case 'key':
-        if (step.key) {
-          await this.inputController.pressKey(step.key);
+        if (taskStep.key) {
+          await this.inputController.pressKey(String(taskStep.key));
         }
         break;
         
       case 'wait':
-        await this.delay(step.duration || 1000);
+        await this.delay(Number(taskStep.duration) || 1000);
         break;
         
       case 'waitForImage':
-        if (step.template) {
-          await this.imageRecognition.waitForImage(step.template, step.timeout || 10000);
+        if (taskStep.template) {
+          await this.imageRecognition.waitForImage(String(taskStep.template), Number(taskStep.timeout) || 10000);
         }
         break;
         
       default:
-        this.logTask(taskId, 'warn', `未知的步骤类型: ${step.action}`);
-        await this.delay(step.duration || 1000);
+        this.logTask(taskId, 'warn', `未知的步骤类型: ${String(taskStep.action)}`);
+        await this.delay(Number(taskStep.duration) || 1000);
     }
     
     // 步骤间延迟
-    if (step.delay) {
-      await this.delay(step.delay);
+    if (taskStep.delay) {
+      await this.delay(Number(taskStep.delay));
     }
   }
 
@@ -639,14 +636,14 @@ export class TaskExecutor extends EventEmitter {
   /**
    * 记录任务日志
    */
-  private logTask(taskId: string, level: LogLevel, message: string, data?: any): void {
+  private logTask(taskId: string, level: LogLevel, message: string, data?: unknown): void {
     const log: TaskLog = {
       id: `log_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
       taskId,
       level,
       message,
       timestamp: new Date(),
-      metadata: data ? { ...data } : undefined
+      metadata: data && typeof data === 'object' && data !== null ? { ...data as Record<string, unknown> } : undefined
     };
 
     if (!this.taskLogs.has(taskId)) {

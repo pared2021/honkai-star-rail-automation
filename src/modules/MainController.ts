@@ -4,7 +4,7 @@ import TaskExecutor, { TaskPriority } from './TaskExecutor.js';
 import ImageRecognition from './ImageRecognition.js';
 import InputController from './InputController.js';
 import DatabaseService from '../services/DatabaseService';
-import { Task, Account, TaskType, TaskStatus, ApiResponse, TaskLog, LogLevel } from '../types';
+import { Task, TaskType, TaskStatus, ApiResponse, TaskLog, LogLevel } from '../types';
 import { EventEmitter } from 'events';
 import { promises as fs } from 'fs';
 import path from 'path';
@@ -78,7 +78,7 @@ interface GameStatus {
   isActive: boolean;
   windowRect?: { x: number; y: number; width: number; height: number };
   processId?: number;
-  windowInfo?: any;
+  windowInfo?: unknown;
 }
 
 // 异常处理相关接口
@@ -87,7 +87,7 @@ interface ExceptionInfo {
   type: 'task_error' | 'system_error' | 'game_error' | 'network_error' | 'resource_error';
   severity: 'low' | 'medium' | 'high' | 'critical';
   message: string;
-  details?: any;
+  details?: unknown;
   timestamp: Date;
   source: string;
   stackTrace?: string;
@@ -317,7 +317,7 @@ interface EventFilter {
   severity?: 'low' | 'medium' | 'high' | 'critical';
   category?: string;
   tags?: string[];
-  condition?: (event: any) => boolean; // 添加condition属性
+  condition?: (event: unknown) => boolean; // 添加condition属性
 }
 
 interface SystemEvent {
@@ -325,11 +325,11 @@ interface SystemEvent {
   type: string;
   source: string;
   timestamp: Date;
-  data: any;
+  data: unknown;
   severity: 'low' | 'medium' | 'high' | 'critical';
   category: string;
   tags: string[];
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface EventHistory {
@@ -394,7 +394,7 @@ interface EventSystemState {
   isEnabled: boolean;
   totalEvents: number;
   totalSubscriptions: number;
-  listeners: any[]; // 添加listeners属性
+  listeners: unknown[]; // 添加listeners属性
 }
 
 export interface PerformanceMetrics {
@@ -458,7 +458,7 @@ export class MainController extends EventEmitter {
   private configurationBackups: ConfigurationBackup[];
   private persistenceOptions: PersistenceOptions;
   private autoSaveInterval?: NodeJS.Timeout;
-  private configWatcher?: any; // fs.FSWatcher type
+  private configWatcher?: import('fs').FSWatcher; // fs.FSWatcher type
   private gameDetectionInterval?: NodeJS.Timeout; // 游戏检测定时器
   private gameStatusInterval?: NodeJS.Timeout;
   
@@ -733,7 +733,7 @@ export class MainController extends EventEmitter {
   /**
    * 处理任务失败
    */
-  private async handleTaskFailure(task: Task, error: string): Promise<void> {
+  private async handleTaskFailure(task: Task, _error: string): Promise<void> {
     this.errorCount++;
     this.lastErrorTime = new Date();
     
@@ -770,15 +770,15 @@ export class MainController extends EventEmitter {
       );
       
       this.log('info', `任务恢复成功，新任务ID: ${newTaskId}`);
-    } catch (error) {
-      this.log('error', `任务恢复失败: ${error}`);
+    } catch {
+      this.log('error', '任务恢复失败');
     }
   }
   
   /**
    * 记录事件日志
    */
-  private logEvent(level: LogLevel, message: string, metadata?: Record<string, any>): void {
+  private logEvent(level: LogLevel, message: string, metadata?: Record<string, unknown>): void {
     if (!this.config.eventLogging) return;
     
     const eventLog: TaskLog = {
@@ -828,7 +828,7 @@ export class MainController extends EventEmitter {
       const persistedConfig = JSON.parse(configData);
       this.config = { ...this.config, ...persistedConfig };
       this.log('info', '已加载持久化配置');
-    } catch (error) {
+    } catch {
       this.log('debug', '未找到持久化配置文件，使用默认配置');
     }
   }
@@ -1032,7 +1032,7 @@ export class MainController extends EventEmitter {
   /**
    * 验证配置
    */
-  private validateConfiguration(config: any): { isValid: boolean; errors: string[] } {
+  private validateConfiguration(config: unknown): { isValid: boolean; errors: string[] } {
     const errors: string[] = [];
     
     try {
@@ -1042,52 +1042,58 @@ export class MainController extends EventEmitter {
         return { isValid: false, errors };
       }
       
+      const configObj = config as Record<string, unknown>;
+      
       // 验证版本信息
-      if (!config.version || typeof config.version !== 'string') {
+      if (!configObj.version || typeof configObj.version !== 'string') {
         errors.push('配置版本信息缺失或无效');
-      } else if (!this.isValidVersion(config.version)) {
+      } else if (!this.isValidVersion(configObj.version)) {
         errors.push('配置版本格式无效，应为 x.y.z 格式');
       }
       
       // 验证游戏检测配置
-      if (config.gameDetection) {
-        if (config.gameDetection.interval && config.gameDetection.interval < 100) {
+      if (configObj.gameDetection) {
+        const gameDetection = configObj.gameDetection as Record<string, unknown>;
+        if (gameDetection.interval && Number(gameDetection.interval) < 100) {
           errors.push('游戏检测间隔不能小于100ms');
         }
-        if (config.gameDetection.timeout && config.gameDetection.timeout < 1000) {
+        if (gameDetection.timeout && Number(gameDetection.timeout) < 1000) {
           errors.push('游戏检测超时不能小于1000ms');
         }
       }
       
       // 验证任务执行配置
-      if (config.taskExecution) {
-        if (config.taskExecution.maxConcurrentTasks && config.taskExecution.maxConcurrentTasks < 1) {
+      if (configObj.taskExecution) {
+        const taskExecution = configObj.taskExecution as Record<string, unknown>;
+        if (taskExecution.maxConcurrentTasks && Number(taskExecution.maxConcurrentTasks) < 1) {
           errors.push('最大并发任务数不能小于1');
         }
-        if (config.taskExecution.defaultTimeout && config.taskExecution.defaultTimeout < 1000) {
+        if (taskExecution.defaultTimeout && Number(taskExecution.defaultTimeout) < 1000) {
           errors.push('默认任务超时不能小于1000ms');
         }
       }
       
       // 验证性能监控配置
-      if (config.performanceMonitoring) {
-        if (config.performanceMonitoring.interval && config.performanceMonitoring.interval < 1000) {
+      if (configObj.performanceMonitoring) {
+        const performanceMonitoring = configObj.performanceMonitoring as Record<string, unknown>;
+        if (performanceMonitoring.interval && Number(performanceMonitoring.interval) < 1000) {
           errors.push('性能监控间隔不能小于1000ms');
         }
       }
       
       // 验证安全配置
-      if (config.security) {
-        if (config.security.maxRetryAttempts && config.security.maxRetryAttempts < 1) {
+      if (configObj.security) {
+        const security = configObj.security as Record<string, unknown>;
+        if (security.maxRetryAttempts && Number(security.maxRetryAttempts) < 1) {
           errors.push('最大重试次数不能小于1');
         }
-        if (config.security.lockoutDuration && config.security.lockoutDuration < 1000) {
+        if (security.lockoutDuration && Number(security.lockoutDuration) < 1000) {
           errors.push('锁定持续时间不能小于1000ms');
         }
       }
       
     } catch (error) {
-      errors.push(`配置验证过程中发生错误: ${error.toString()}`);
+      errors.push(`配置验证过程中发生错误: ${String(error)}`);
     }
     
     return { isValid: errors.length === 0, errors };
@@ -1143,7 +1149,7 @@ export class MainController extends EventEmitter {
       }
       
       // 应用升级后的配置
-      this.config = upgradedConfig;
+      this.config = upgradedConfig as unknown as MainControllerConfig;
       this.configurationSchema.version = targetVersion;
       this.configurationSchema.lastModified = new Date();
       this.configurationState.isDirty = true;
@@ -1159,7 +1165,7 @@ export class MainController extends EventEmitter {
     } catch (error) {
       this.logEvent('error', '配置版本升级失败', {
         targetVersion,
-        error: error.toString()
+        error: String(error)
       });
       throw error;
     }
@@ -1168,18 +1174,18 @@ export class MainController extends EventEmitter {
   /**
    * 执行配置升级
    */
-  private async performConfigurationUpgrade(fromVersion: string, toVersion: string): Promise<any> {
+  private async performConfigurationUpgrade(fromVersion: string, toVersion: string): Promise<unknown> {
     let config = { ...this.config };
     
     // 根据版本执行相应的升级逻辑
     if (this.compareVersions(fromVersion, '1.1.0') < 0 && this.compareVersions(toVersion, '1.1.0') >= 0) {
       // 升级到 1.1.0
-      config = this.upgradeToV1_1_0(config);
+      config = this.upgradeToV1_1_0(config) as MainControllerConfig;
     }
     
     if (this.compareVersions(fromVersion, '1.2.0') < 0 && this.compareVersions(toVersion, '1.2.0') >= 0) {
       // 升级到 1.2.0
-      config = this.upgradeToV1_2_0(config);
+      config = this.upgradeToV1_2_0(config) as MainControllerConfig;
     }
     
     return config;
@@ -1188,10 +1194,11 @@ export class MainController extends EventEmitter {
   /**
    * 升级到版本 1.1.0
    */
-  private upgradeToV1_1_0(config: any): any {
+  private upgradeToV1_1_0(config: unknown): unknown {
+    const configObj = config as Record<string, unknown>;
     // 添加新的性能监控配置
-    if (!config.performanceMonitoring) {
-      config.performanceMonitoring = {
+    if (!configObj.performanceMonitoring) {
+      configObj.performanceMonitoring = {
         enabled: true,
         interval: 5000,
         memoryThreshold: 80,
@@ -1200,24 +1207,25 @@ export class MainController extends EventEmitter {
     }
     
     // 添加新的安全配置
-    if (!config.security) {
-      config.security = {
+    if (!configObj.security) {
+      configObj.security = {
         enableSafetyChecks: true,
         maxRetryAttempts: 3,
         lockoutDuration: 300000
       };
     }
     
-    return config;
+    return configObj;
   }
   
   /**
    * 升级到版本 1.2.0
    */
-  private upgradeToV1_2_0(config: any): any {
+  private upgradeToV1_2_0(config: unknown): unknown {
+    const configObj = config as Record<string, unknown>;
     // 添加事件系统配置
-    if (!config.eventSystem) {
-      config.eventSystem = {
+    if (!configObj.eventSystem) {
+      configObj.eventSystem = {
         enabled: true,
         maxEventHistory: 1000,
         retentionDays: 7
@@ -1225,15 +1233,15 @@ export class MainController extends EventEmitter {
     }
     
     // 添加通知配置
-    if (!config.notifications) {
-      config.notifications = {
+    if (!configObj.notifications) {
+      configObj.notifications = {
         enabled: true,
         channels: ['console', 'file'],
         logLevel: 'info'
       };
     }
     
-    return config;
+    return configObj;
   }
   
   /**
@@ -1261,7 +1269,7 @@ export class MainController extends EventEmitter {
     } catch (error) {
       this.logEvent('error', '配置版本回滚失败', {
         targetVersion,
-        error: error.toString()
+        error: String(error)
       });
       throw error;
     }
@@ -1276,7 +1284,7 @@ export class MainController extends EventEmitter {
         id: `backup_${Date.now()}`,
         timestamp: new Date(),
         version: '1.0.0',
-        config: this.config as any,
+        config: this.config as unknown as ConfigurationSchema,
         description: '自动备份'
       };
       
@@ -1295,7 +1303,7 @@ export class MainController extends EventEmitter {
       this.logEvent('debug', '配置备份创建成功', { backupId: backup.id });
       
     } catch (error) {
-      this.logEvent('error', '配置备份创建失败', { error: error.toString() });
+      this.logEvent('error', '配置备份创建失败', { error: String(error) });
     }
   }
   
@@ -1321,7 +1329,7 @@ export class MainController extends EventEmitter {
       // 恢复配置
       // 注意：这里需要将ConfigurationSchema转换为MainControllerConfig
       // 暂时跳过类型检查，实际使用时需要进行适当的类型转换
-      this.config = backup.config as any;
+      this.config = backup.config as unknown as MainControllerConfig;
       this.configurationState.isDirty = true;
       
       this.logEvent('info', '配置备份恢复成功', { backupId });
@@ -1331,7 +1339,7 @@ export class MainController extends EventEmitter {
       await this.saveConfiguration();
       
     } catch (error) {
-      this.logEvent('error', '配置备份恢复失败', { backupId, error: error.toString() });
+      this.logEvent('error', '配置备份恢复失败', { backupId, error: String(error) });
       throw error;
     }
   }
@@ -1349,7 +1357,7 @@ export class MainController extends EventEmitter {
         try {
           await this.saveConfiguration();
         } catch (error) {
-          this.logEvent('error', '自动保存配置失败', { error: error.toString() });
+          this.logEvent('error', '自动保存配置失败', { error: String(error) });
         }
       }
     }, this.configurationState.autoSaveInterval);
@@ -1375,21 +1383,21 @@ export class MainController extends EventEmitter {
     try {
       const configPath = path.join(process.cwd(), 'config', 'main-controller.json');
       
-      this.configWatcher = fs.watch(configPath, { encoding: 'utf8' });
-      this.configWatcher.on('change', async (eventType, filename) => {
+      this.configWatcher = fs.watch(configPath, { encoding: 'utf8' }) as unknown as import('fs').FSWatcher;
+      this.configWatcher.on('change', async (eventType, _filename) => {
         this.logEvent('info', '检测到配置文件变化，重新加载配置');
         try {
           await this.loadConfiguration();
           this.emit('configurationReloaded');
         } catch (error) {
-          this.logEvent('error', '配置文件重新加载失败', { error: error.toString() });
+          this.logEvent('error', '配置文件重新加载失败', { error: String(error) });
         }
       });
       
       this.logEvent('debug', '配置文件监听已启动');
       
     } catch (error) {
-      this.logEvent('error', '配置文件监听启动失败', { error: error.toString() });
+      this.logEvent('error', '配置文件监听启动失败', { error: String(error) });
     }
   }
   
@@ -1505,7 +1513,7 @@ export class MainController extends EventEmitter {
         issues.push('游戏未运行');
         recommendations.push('启动游戏客户端');
       }
-    } catch (error) {
+    } catch (_error) {
       issues.push('无法检测游戏状态');
       recommendations.push('检查游戏检测器配置');
     }
@@ -1524,7 +1532,7 @@ export class MainController extends EventEmitter {
   /**
    * 启动任务
    */
-  public async startTask(taskType: TaskType, accountId: string, config: Record<string, any>): Promise<ApiResponse<{ taskId: string }>> {
+  public async startTask(taskType: TaskType, accountId: string, config: Record<string, unknown>): Promise<ApiResponse<{ taskId: string }>> {
     try {
       if (!this.isInitialized) {
         throw new Error('主控制器未初始化');
@@ -1654,7 +1662,7 @@ export class MainController extends EventEmitter {
       this.lastErrorTime = new Date();
       this.logEvent('error', '停止任务失败', { 
         taskId, 
-        error: error.toString() 
+        error: String(error) 
       });
       
       return {
@@ -1918,7 +1926,7 @@ export class MainController extends EventEmitter {
       if (!gameStatus.isActive) {
         return { reason: '游戏窗口不活跃' };
       }
-    } catch (error) {
+    } catch (_error) {
       return { reason: '无法检测游戏状态' };
     }
     
@@ -2004,9 +2012,6 @@ export class MainController extends EventEmitter {
         break;
       case 'event':
         priority = TaskPriority.HIGH;
-        break;
-      case 'side':
-        priority = TaskPriority.LOW;
         break;
       default:
         priority = TaskPriority.NORMAL;
@@ -2521,7 +2526,7 @@ export class MainController extends EventEmitter {
     severity: ExceptionInfo['severity'],
     message: string,
     source: string,
-    details?: any,
+    details?: unknown,
     error?: Error
   ): string {
     const exceptionId = uuidv4();
@@ -2816,7 +2821,7 @@ export class MainController extends EventEmitter {
       this.logEvent('info', '执行任务重启策略', { exceptionId: exception.id });
       
       // 从异常详情中获取任务ID
-      const taskId = exception.details?.taskId;
+      const taskId = (exception.details as Record<string, unknown>)?.taskId as string;
       if (!taskId) {
         this.logEvent('warn', '无法获取任务ID，跳过任务重启', { exceptionId: exception.id });
         return false;
@@ -3034,8 +3039,8 @@ export class MainController extends EventEmitter {
       }
       
       // 强制垃圾回收（如果可用）
-      if (global.gc) {
-        global.gc();
+      if ((global as unknown as { gc?: () => void }).gc) {
+        (global as unknown as { gc: () => void }).gc();
       }
       
       this.logEvent('info', '资源清理完成', {
@@ -3160,8 +3165,8 @@ export class MainController extends EventEmitter {
           });
           
           // 强制垃圾回收（如果可用）
-          if (global.gc) {
-            global.gc();
+          if ((global as unknown as { gc?: () => void }).gc) {
+            (global as unknown as { gc: () => void }).gc();
           }
           
           return true;
@@ -3557,7 +3562,7 @@ export class MainController extends EventEmitter {
     
     // 创建新告警
     const alert: PerformanceAlert = {
-      id: `perf_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: `perf_${Date.now()}_${Math.random().toString(36).substring(2, 11)}`,
       type,
       metric,
       message,
@@ -3748,11 +3753,11 @@ export class MainController extends EventEmitter {
     } catch (error) {
       this.errorCount++;
       this.lastErrorTime = new Date();
-      this.logEvent('error', '紧急停止失败', { error: error.toString() });
+      this.logEvent('error', '紧急停止失败', { error: String(error) });
       
       return {
         success: false,
-        message: `紧急停止失败: ${error}`,
+        message: `紧急停止失败: ${String(error)}`,
         data: null
       };
     }
@@ -3779,7 +3784,7 @@ export class MainController extends EventEmitter {
           }
         }
       } catch (error) {
-        this.log('error', `游戏状态监听失败: ${error}`);
+        this.log('error', `游戏状态监听失败: ${String(error)}`);
       }
     }, this.config.gameDetection.interval);
   }
@@ -3805,7 +3810,7 @@ export class MainController extends EventEmitter {
       
       return { safe: true };
     } catch (error) {
-      return { safe: false, reason: `安全检查异常: ${error}` };
+      return { safe: false, reason: `安全检查异常: ${String(error)}` };
     }
   }
 
@@ -3893,7 +3898,7 @@ export class MainController extends EventEmitter {
       // 清理事件日志
       this.eventLogs = [];
     } catch (error) {
-      this.logEvent('error', '销毁主控制器失败', { error: error.toString() });
+      this.logEvent('error', '销毁主控制器失败', { error: String(error) });
       throw error;
     }
   }
@@ -4025,12 +4030,12 @@ export class MainController extends EventEmitter {
   /**
    * 发布系统事件
    */
-  public publishEvent(type: string, data: any, options: {
+  public publishEvent(type: string, data: unknown, options: {
     source?: string;
     severity?: 'low' | 'medium' | 'high' | 'critical';
     category?: string;
     tags?: string[];
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
   } = {}): string {
     const event: SystemEvent = {
       id: uuidv4(),
@@ -4102,7 +4107,7 @@ export class MainController extends EventEmitter {
    * 取消事件订阅
    */
   public unsubscribeFromEvent(subscriptionId: string): boolean {
-    for (const [eventType, subscriptions] of this.eventSubscriptions.entries()) {
+    for (const [, subscriptions] of this.eventSubscriptions.entries()) {
       const index = subscriptions.findIndex(sub => sub.id === subscriptionId);
       if (index !== -1) {
         subscriptions.splice(index, 1);
@@ -4142,10 +4147,11 @@ export class MainController extends EventEmitter {
       await this.sendNotifications(event);
       
     } catch (error) {
+      const eventObj = event as unknown as Record<string, unknown>;
       this.logEvent('error', '处理事件失败', {
-        eventId: event.id,
-        eventType: event.type,
-        error: error.toString()
+        eventId: eventObj.id,
+        eventType: eventObj.type,
+        error: String(error)
       });
     }
   }
@@ -4154,7 +4160,8 @@ export class MainController extends EventEmitter {
    * 触发事件订阅者
    */
   private async triggerEventSubscriptions(event: SystemEvent): Promise<void> {
-    const subscriptions = this.eventSubscriptions.get(event.type) || [];
+    const eventObj = event as unknown as Record<string, unknown>;
+    const subscriptions = this.eventSubscriptions.get(eventObj.type as string) || [];
     const toRemove: string[] = [];
     
     for (const subscription of subscriptions) {
@@ -4175,8 +4182,8 @@ export class MainController extends EventEmitter {
       } catch (error) {
         this.logEvent('error', '事件监听器执行失败', {
           subscriptionId: subscription.id,
-          eventType: event.type,
-          error: error.toString()
+          eventType: eventObj.type,
+          error: String(error)
         });
       }
     }
@@ -4191,20 +4198,22 @@ export class MainController extends EventEmitter {
    * 检查事件是否匹配过滤器
    */
   private matchesFilter(event: SystemEvent, filter: EventFilter): boolean {
-    if (filter.source && event.source !== filter.source) {
+    const eventObj = event as unknown as Record<string, unknown>;
+    if (filter.source && eventObj.source !== filter.source) {
       return false;
     }
     
-    if (filter.severity && event.severity !== filter.severity) {
+    if (filter.severity && eventObj.severity !== filter.severity) {
       return false;
     }
     
-    if (filter.category && event.category !== filter.category) {
+    if (filter.category && eventObj.category !== filter.category) {
       return false;
     }
     
     if (filter.tags && filter.tags.length > 0) {
-      const hasMatchingTag = filter.tags.some(tag => event.tags.includes(tag));
+      const eventTags = eventObj.tags as string[] || [];
+      const hasMatchingTag = filter.tags.some(tag => eventTags.includes(tag));
       if (!hasMatchingTag) {
         return false;
       }
@@ -4241,10 +4250,11 @@ export class MainController extends EventEmitter {
         this.eventSystemState.notificationState.lastNotification = new Date();
       } catch (error) {
         this.eventSystemState.notificationState.totalFailed++;
+        const eventObj = event as unknown as Record<string, unknown>;
         this.logEvent('error', '发送通知失败', {
           channelId: channel.id,
-          eventId: event.id,
-          error: error.toString()
+          eventId: eventObj.id,
+          error: String(error)
         });
       }
     }
@@ -4277,13 +4287,13 @@ export class MainController extends EventEmitter {
    * 向指定通道发送通知
    */
   private async sendNotificationToChannel(event: SystemEvent, channel: NotificationChannel): Promise<void>;
-  private async sendNotificationToChannel(channelId: string, message: string, event: any): Promise<void>;
-  private async sendNotificationToChannel(eventOrChannelId: SystemEvent | string, channelOrMessage: NotificationChannel | string, eventData?: any): Promise<void> {
+  private async sendNotificationToChannel(channelId: string, message: string, event: unknown): Promise<void>;
+  private async sendNotificationToChannel(eventOrChannelId: SystemEvent | string, channelOrMessage: NotificationChannel | string, eventData?: unknown): Promise<void> {
     // 处理重载：如果第一个参数是字符串，则使用新的签名
     if (typeof eventOrChannelId === 'string') {
       const channelId = eventOrChannelId;
       const message = channelOrMessage as string;
-      const event = eventData;
+      const eventData = eventData as Record<string, unknown>;
       
       const channel = this.notificationChannels.get(channelId);
       if (!channel) {
@@ -4293,15 +4303,15 @@ export class MainController extends EventEmitter {
       
       // 将简单事件转换为SystemEvent格式
       const systemEvent: SystemEvent = {
-        id: event.data?.id || uuidv4(),
-        type: event.type || 'notification',
-        source: event.source || 'system',
-        timestamp: new Date(event.timestamp) || new Date(),
-        severity: event.severity || 'info',
+        id: (eventData.data as Record<string, unknown>)?.id as string || uuidv4(),
+        type: eventData.type as string || 'notification',
+        source: eventData.source as string || 'system',
+        timestamp: eventData.timestamp ? new Date(eventData.timestamp as string) : new Date(),
+        severity: (eventData.severity as 'low' | 'medium' | 'high' | 'critical') || 'low',
         category: 'notification',
         tags: [],
         data: message,
-        metadata: event.data || {}
+        metadata: eventData.data as Record<string, unknown> || {}
       };
       
       return this.sendNotificationToChannel(systemEvent, channel);
@@ -4312,13 +4322,14 @@ export class MainController extends EventEmitter {
     const channel = channelOrMessage as NotificationChannel;
     const message = this.formatNotificationMessage(event, channel);
     
+    const eventObj = event as unknown as Record<string, unknown>;
     switch (channel.type) {
       case 'console':
-        console.log(`[${event.severity.toUpperCase()}] ${message}`);
+        console.log(`[${String(eventObj.severity).toUpperCase()}] ${message}`);
         break;
         
       case 'log':
-        this.log(channel.config.logLevel as any || 'info', message);
+        this.log((channel.config.logLevel as 'error' | 'info' | 'warn' | 'debug') || 'info', message);
         break;
         
       case 'file':
@@ -4341,11 +4352,12 @@ export class MainController extends EventEmitter {
   /**
    * 格式化通知消息
    */
-  private formatNotificationMessage(event: SystemEvent, channel: NotificationChannel): string {
-    const timestamp = event.timestamp.toISOString();
-    const data = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
+  private formatNotificationMessage(event: SystemEvent, _channel: NotificationChannel): string {
+    const eventObj = event as unknown as Record<string, unknown>;
+    const timestamp = new Date(eventObj.timestamp as string).toISOString();
+    const data = typeof eventObj.data === 'string' ? eventObj.data : JSON.stringify(eventObj.data);
     
-    return `[${timestamp}] [${event.source}] [${event.type}] ${data}`;
+    return `[${timestamp}] [${eventObj.source}] [${eventObj.type}] ${data}`;
   }
 
   /**
@@ -4359,11 +4371,12 @@ export class MainController extends EventEmitter {
     const dir = path.dirname(filePath);
     await fs.mkdir(dir, { recursive: true });
     
+    const eventObj = event as unknown as Record<string, unknown>;
     let content: string;
     if (format === 'json') {
       content = JSON.stringify(event) + '\n';
     } else if (format === 'csv') {
-      content = `"${event.timestamp.toISOString()}","${event.source}","${event.type}","${event.severity}","${JSON.stringify(event.data).replace(/"/g, '""')}"\n`;
+      content = `"${new Date(eventObj.timestamp as string).toISOString()}","${eventObj.source}","${eventObj.type}","${eventObj.severity}","${JSON.stringify(eventObj.data).replace(/"/g, '""')}"\n`;
     } else {
       content = message + '\n';
     }
@@ -4383,20 +4396,21 @@ export class MainController extends EventEmitter {
 
       // 这里使用简单的邮件发送逻辑
       // 在实际项目中，应该集成 nodemailer 等邮件库
+      const eventObj = event as unknown as Record<string, unknown>;
       const emailData = {
         from: config.smtpUser || 'system@example.com',
         to: config.recipients.join(','),
-        subject: `系统通知 - ${event.type} [${event.severity.toUpperCase()}]`,
+        subject: `系统通知 - ${eventObj.type} [${String(eventObj.severity).toUpperCase()}]`,
         text: message,
         html: `
           <div style="font-family: Arial, sans-serif;">
             <h3>系统事件通知</h3>
-            <p><strong>事件类型:</strong> ${event.type}</p>
-            <p><strong>严重程度:</strong> ${event.severity}</p>
-            <p><strong>来源:</strong> ${event.source}</p>
-            <p><strong>时间:</strong> ${event.timestamp.toLocaleString()}</p>
+            <p><strong>事件类型:</strong> ${eventObj.type}</p>
+            <p><strong>严重程度:</strong> ${eventObj.severity}</p>
+            <p><strong>来源:</strong> ${eventObj.source}</p>
+            <p><strong>时间:</strong> ${new Date(eventObj.timestamp as string).toLocaleString()}</p>
             <p><strong>详情:</strong></p>
-            <pre>${JSON.stringify(event.data, null, 2)}</pre>
+            <pre>${JSON.stringify(eventObj.data, null, 2)}</pre>
           </div>
         `
       };
@@ -4411,7 +4425,7 @@ export class MainController extends EventEmitter {
     } catch (error) {
       this.logEvent('error', '发送邮件通知失败', {
         channelId: channel.id,
-        error: error.toString()
+        error: String(error)
       });
       throw error;
     }
@@ -4427,17 +4441,18 @@ export class MainController extends EventEmitter {
         throw new Error('Webhook URL未配置');
       }
 
+      const eventObj = event as unknown as Record<string, unknown>;
       const payload = {
         event: {
-          id: event.id,
-          type: event.type,
-          source: event.source,
-          timestamp: event.timestamp.toISOString(),
-          severity: event.severity,
-          category: event.category,
-          tags: event.tags,
-          data: event.data,
-          metadata: event.metadata
+          id: eventObj.id,
+          type: eventObj.type,
+          source: eventObj.source,
+          timestamp: new Date(eventObj.timestamp as string).toISOString(),
+          severity: eventObj.severity,
+          category: eventObj.category,
+          tags: eventObj.tags,
+          data: eventObj.data,
+          metadata: eventObj.metadata
         },
         message: message
       };
@@ -4469,7 +4484,7 @@ export class MainController extends EventEmitter {
     } catch (error) {
       this.logEvent('error', '发送Webhook通知失败', {
         channelId: channel.id,
-        error: error.toString()
+        error: String(error)
       });
       throw error;
     }
@@ -4483,7 +4498,8 @@ export class MainController extends EventEmitter {
     const retentionMs = this.eventHistory.retentionDays * 24 * 60 * 60 * 1000;
     
     this.eventHistory.events = this.eventHistory.events.filter(event => {
-      return now.getTime() - event.timestamp.getTime() < retentionMs;
+      const eventObj = event as unknown as Record<string, unknown>;
+      return now.getTime() - new Date(eventObj.timestamp as string).getTime() < retentionMs;
     });
   }
 
@@ -4531,19 +4547,34 @@ export class MainController extends EventEmitter {
     
     if (filter) {
       if (filter.eventType) {
-        events = events.filter(e => e.type === filter.eventType);
+        events = events.filter(e => {
+          const eventObj = e as unknown as Record<string, unknown>;
+          return eventObj.type === filter.eventType;
+        });
       }
       if (filter.source) {
-        events = events.filter(e => e.source === filter.source);
+        events = events.filter(e => {
+          const eventObj = e as unknown as Record<string, unknown>;
+          return eventObj.source === filter.source;
+        });
       }
       if (filter.severity) {
-        events = events.filter(e => e.severity === filter.severity);
+        events = events.filter(e => {
+          const eventObj = e as unknown as Record<string, unknown>;
+          return eventObj.severity === filter.severity;
+        });
       }
       if (filter.startTime) {
-        events = events.filter(e => e.timestamp >= filter.startTime!);
+        events = events.filter(e => {
+          const eventObj = e as unknown as Record<string, unknown>;
+          return new Date(eventObj.timestamp as string) >= filter.startTime!;
+        });
       }
       if (filter.endTime) {
-        events = events.filter(e => e.timestamp <= filter.endTime!);
+        events = events.filter(e => {
+          const eventObj = e as unknown as Record<string, unknown>;
+          return new Date(eventObj.timestamp as string) <= filter.endTime!;
+        });
       }
       if (filter.limit) {
         events = events.slice(-filter.limit);
@@ -4558,15 +4589,19 @@ export class MainController extends EventEmitter {
    */
   public async replayEvents(eventIds: string[]): Promise<void> {
     for (const eventId of eventIds) {
-      const event = this.eventHistory.events.find(e => e.id === eventId);
+      const event = this.eventHistory.events.find(e => {
+        const eventObj = e as unknown as Record<string, unknown>;
+        return eventObj.id === eventId;
+      });
       if (event) {
+        const eventObj = event as unknown as Record<string, unknown>;
         // 创建新的事件ID和时间戳
         const replayEvent: SystemEvent = {
           ...event,
           id: uuidv4(),
           timestamp: new Date(),
           metadata: {
-            ...event.metadata,
+            ...(eventObj.metadata as Record<string, unknown>),
             isReplay: true,
             originalEventId: eventId
           }
@@ -4606,7 +4641,7 @@ export class MainController extends EventEmitter {
       
     } catch (error) {
       this.logEvent('error', '事件历史持久化失败', {
-        error: error.toString()
+        error: String(error)
       });
       throw error;
     }
@@ -4630,9 +4665,9 @@ export class MainController extends EventEmitter {
       const persistData = JSON.parse(fileContent);
       
       // 恢复事件历史
-      this.eventHistory.events = persistData.events.map((event: any) => ({
+      this.eventHistory.events = persistData.events.map((event: Record<string, unknown>) => ({
         ...event,
-        timestamp: new Date(event.timestamp)
+        timestamp: new Date(event.timestamp as string)
       }));
       
       this.eventHistory.totalEvents = persistData.totalEvents || this.eventHistory.events.length;
@@ -4649,7 +4684,7 @@ export class MainController extends EventEmitter {
       
     } catch (error) {
       this.logEvent('error', '事件历史加载失败', {
-        error: error.toString()
+        error: String(error)
       });
       // 不抛出错误，使用默认配置继续运行
     }
@@ -4691,7 +4726,7 @@ export class MainController extends EventEmitter {
     } catch (error) {
       this.logEvent('error', '事件历史导出失败', {
         filePath,
-        error: error.toString()
+        error: String(error)
       });
       throw error;
     }
@@ -4716,9 +4751,9 @@ export class MainController extends EventEmitter {
       }
       
       // 转换时间戳
-      const importedEvents = importData.events.map((event: any) => ({
+      const importedEvents = importData.events.map((event: Record<string, unknown>) => ({
         ...event,
-        timestamp: new Date(event.timestamp)
+        timestamp: new Date(event.timestamp as string)
       }));
       
       // 根据合并模式处理事件
@@ -4748,7 +4783,7 @@ export class MainController extends EventEmitter {
     } catch (error) {
       this.logEvent('error', '事件历史导入失败', {
         filePath,
-        error: error.toString()
+        error: String(error)
       });
       throw error;
     }
@@ -4835,7 +4870,7 @@ export class MainController extends EventEmitter {
     };
     
     // 检查是否已存在相同ID的监听器
-    const existingIndex = this.eventSystemState.listeners.findIndex(l => l.id === id);
+    const existingIndex = this.eventSystemState.listeners.findIndex(l => (l as Record<string, unknown>).id === id);
     if (existingIndex !== -1) {
       this.eventSystemState.listeners[existingIndex] = listener;
       this.logEvent('info', '事件监听器已更新', { listenerId: id, eventType });
@@ -4845,21 +4880,21 @@ export class MainController extends EventEmitter {
     }
     
     // 按优先级排序
-    this.eventSystemState.listeners.sort((a, b) => b.priority - a.priority);
+    this.eventSystemState.listeners.sort((a, b) => Number((b as Record<string, unknown>).priority || 0) - Number((a as Record<string, unknown>).priority || 0));
   }
   
   /**
    * 移除事件监听器
    */
   public removeEventListener(listenerId: string): boolean {
-    const index = this.eventSystemState.listeners.findIndex(l => l.id === listenerId);
+    const index = this.eventSystemState.listeners.findIndex(l => (l as Record<string, unknown>).id === listenerId);
     if (index !== -1) {
       const listener = this.eventSystemState.listeners[index];
       this.eventSystemState.listeners.splice(index, 1);
       
       this.logEvent('info', '事件监听器已移除', {
         listenerId,
-        eventType: listener.eventType
+        eventType: String((listener as Record<string, unknown>).eventType || '')
       });
       
       return true;
@@ -4873,13 +4908,13 @@ export class MainController extends EventEmitter {
    * 启用/禁用事件监听器
    */
   public toggleEventListener(listenerId: string, isActive: boolean): boolean {
-    const listener = this.eventSystemState.listeners.find(l => l.id === listenerId);
+    const listener = this.eventSystemState.listeners.find(l => (l as Record<string, unknown>).id === listenerId);
     if (listener) {
-      listener.isActive = isActive;
+      (listener as Record<string, unknown>).isActive = isActive;
       
       this.logEvent('info', `事件监听器已${isActive ? '启用' : '禁用'}`, {
         listenerId,
-        eventType: listener.eventType
+        eventType: String((listener as Record<string, unknown>).eventType || '')
       });
       
       return true;
@@ -4901,20 +4936,21 @@ export class MainController extends EventEmitter {
     
     if (filter) {
       listeners = listeners.filter(listener => {
-        if (filter.eventType && listener.eventType !== filter.eventType) {
+        const listenerObj = listener as Record<string, unknown>;
+        if (filter.eventType && String(listenerObj.eventType || '') !== filter.eventType) {
           return false;
         }
-        if (filter.isActive !== undefined && listener.isActive !== filter.isActive) {
+        if (filter.isActive !== undefined && Boolean(listenerObj.isActive) !== filter.isActive) {
           return false;
         }
-        if (filter.priority !== undefined && listener.priority !== filter.priority) {
+        if (filter.priority !== undefined && Number(listenerObj.priority || 0) !== filter.priority) {
           return false;
         }
         return true;
       });
     }
     
-    return listeners;
+    return listeners as EventListener[];
   }
   
   /**
@@ -4926,7 +4962,8 @@ export class MainController extends EventEmitter {
     // 移除已标记为一次性且已执行的监听器
     this.eventSystemState.listeners = this.eventSystemState.listeners.filter(listener => {
       // 这里可以添加更多清理逻辑
-      return listener.isActive;
+      const listenerObj = listener as Record<string, unknown>;
+      return Boolean(listenerObj.isActive);
     });
     
     const afterCount = this.eventSystemState.listeners.length;
@@ -4985,7 +5022,7 @@ export class MainController extends EventEmitter {
             }
             break;
             
-          case 'toggle':
+          case 'toggle': {
             const isActive = operation.options?.isActive ?? true;
             if (this.toggleEventListener(operation.listenerId, isActive)) {
               success++;
@@ -4993,13 +5030,14 @@ export class MainController extends EventEmitter {
               throw new Error('监听器不存在');
             }
             break;
+          }
             
           default:
             throw new Error(`未知操作类型: ${operation.action}`);
         }
       } catch (error) {
         failed++;
-        errors.push(`${operation.action} ${operation.listenerId}: ${error.toString()}`);
+        errors.push(`${operation.action} ${operation.listenerId}: ${String(error)}`);
       }
     }
     
@@ -5018,8 +5056,8 @@ export class MainController extends EventEmitter {
    * 事件路由规则
    */
   private eventRoutes: Map<string, {
-    condition: (event: any) => boolean;
-    handlers: ((event: any) => Promise<void>)[];
+    condition: (event: unknown) => boolean;
+    handlers: ((event: unknown) => Promise<void>)[];
     priority: number;
     enabled: boolean;
   }> = new Map();
@@ -5032,7 +5070,7 @@ export class MainController extends EventEmitter {
     severities?: ('debug' | 'info' | 'warn' | 'error')[];
     sources?: string[];
     timeRange?: { start: Date; end: Date };
-    customConditions?: ((event: any) => boolean)[];
+    customConditions?: ((event: unknown) => boolean)[];
     rateLimit?: { maxEvents: number; timeWindow: number };
   }): EventFilter {
     const rateLimitState = config.rateLimit ? {
@@ -5042,26 +5080,27 @@ export class MainController extends EventEmitter {
 
     return {
       id: `advanced_filter_${Date.now()}`,
-      condition: (event: any) => {
+      condition: (event: unknown) => {
         try {
           // 检查事件类型
-          if (config.types && !config.types.includes(event.type)) {
+          const eventObj = event as unknown as Record<string, unknown>;
+          if (config.types && !config.types.includes(String(eventObj.type || ''))) {
             return false;
           }
 
           // 检查严重程度
-          if (config.severities && !config.severities.includes(event.severity)) {
+          if (config.severities && !config.severities.includes(String(eventObj.severity || '') as any)) {
             return false;
           }
 
           // 检查事件源
-          if (config.sources && !config.sources.includes(event.source)) {
+          if (config.sources && !config.sources.includes(String(eventObj.source || ''))) {
             return false;
           }
 
           // 检查时间范围
           if (config.timeRange) {
-            const eventTime = new Date(event.timestamp);
+            const eventTime = new Date(Number(eventObj.timestamp) || Date.now());
             if (eventTime < config.timeRange.start || eventTime > config.timeRange.end) {
               return false;
             }
@@ -5098,7 +5137,7 @@ export class MainController extends EventEmitter {
         } catch (error) {
           this.logEvent('error', '事件过滤器执行失败', {
             filterId: 'advanced_filter',
-            error: error.toString()
+            error: String(error)
           });
           return false;
         }
@@ -5110,8 +5149,8 @@ export class MainController extends EventEmitter {
    * 添加事件路由
    */
   public addEventRoute(routeId: string, config: {
-    condition: (event: any) => boolean;
-    handlers: ((event: any) => Promise<void>)[];
+    condition: (event: unknown) => boolean;
+    handlers: ((event: unknown) => Promise<void>)[];
     priority?: number;
     enabled?: boolean;
   }): void {
@@ -5156,32 +5195,34 @@ export class MainController extends EventEmitter {
   /**
    * 处理事件路由
    */
-  private async processEventRouting(event: any): Promise<void> {
+  private async processEventRouting(event: unknown): Promise<void> {
     try {
       // 获取匹配的路由并按优先级排序
       const matchingRoutes = Array.from(this.eventRoutes.entries())
-        .filter(([_, route]) => route.enabled && route.condition(event))
-        .sort(([_, a], [__, b]) => b.priority - a.priority);
+        .filter(([, route]) => route.enabled && route.condition(event))
+        .sort(([, a], [, b]) => b.priority - a.priority);
 
       // 执行匹配的路由处理器
       for (const [routeId, route] of matchingRoutes) {
         try {
           await Promise.all(route.handlers.map(handler => handler(event)));
+          const eventObj = event as unknown as Record<string, unknown>;
           this.logEvent('debug', '事件路由处理完成', {
             routeId,
-            eventType: event.type
+            eventType: String(eventObj.type || '')
           });
         } catch (error) {
+          const eventObj = event as unknown as Record<string, unknown>;
           this.logEvent('error', '事件路由处理失败', {
             routeId,
-            eventType: event.type,
-            error: error.toString()
+            eventType: String(eventObj.type || ''),
+            error: String(error)
           });
         }
       }
     } catch (error) {
       this.logEvent('error', '事件路由处理过程失败', {
-        error: error.toString()
+        error: String(error)
       });
     }
   }
@@ -5195,26 +5236,27 @@ export class MainController extends EventEmitter {
       eventType?: string | string[];
       severity?: ('debug' | 'info' | 'warn' | 'error') | ('debug' | 'info' | 'warn' | 'error')[];
       source?: string | string[];
-      customCondition?: (event: any) => boolean;
+      customCondition?: (event: unknown) => boolean;
     };
     actions: {
       notify?: { channels: string[]; template?: string };
       log?: { level: 'debug' | 'info' | 'warn' | 'error'; message?: string };
-      execute?: (event: any) => Promise<void>;
-      forward?: { target: string; transform?: (event: any) => any };
+      execute?: (event: unknown) => Promise<void>;
+      forward?: { target: string; transform?: (event: unknown) => unknown };
     };
     priority?: number;
   }): string {
     const routeId = `conditional_route_${config.name}_${Date.now()}`;
 
     // 构建条件函数
-    const condition = (event: any): boolean => {
+    const condition = (event: unknown): boolean => {
       // 检查事件类型
       if (config.conditions.eventType) {
         const types = Array.isArray(config.conditions.eventType) 
           ? config.conditions.eventType 
           : [config.conditions.eventType];
-        if (!types.includes(event.type)) {
+        const eventObj = event as unknown as Record<string, unknown>;
+        if (!types.includes(String(eventObj.type || ''))) {
           return false;
         }
       }
@@ -5224,7 +5266,8 @@ export class MainController extends EventEmitter {
         const severities = Array.isArray(config.conditions.severity)
           ? config.conditions.severity
           : [config.conditions.severity];
-        if (!severities.includes(event.severity)) {
+        const eventObj = event as unknown as Record<string, unknown>;
+        if (!severities.includes(String(eventObj.severity || '') as any)) {
           return false;
         }
       }
@@ -5234,7 +5277,8 @@ export class MainController extends EventEmitter {
         const sources = Array.isArray(config.conditions.source)
           ? config.conditions.source
           : [config.conditions.source];
-        if (!sources.includes(event.source)) {
+        const eventObj = event as unknown as Record<string, unknown>;
+        if (!sources.includes(String(eventObj.source || ''))) {
           return false;
         }
       }
@@ -5250,14 +5294,14 @@ export class MainController extends EventEmitter {
     };
 
     // 构建处理器
-    const handlers: ((event: any) => Promise<void>)[] = [];
+    const handlers: ((event: unknown) => Promise<void>)[] = [];
 
     // 通知处理器
     if (config.actions.notify) {
-      handlers.push(async (event: any) => {
+      handlers.push(async (event: unknown) => {
         const message = config.actions.notify!.template 
           ? this.formatNotificationTemplate(config.actions.notify!.template, event)
-          : `事件通知: ${event.type} - ${event.message}`;
+          : `事件通知: ${String((event as unknown as Record<string, unknown>).type || '')} - ${String((event as unknown as Record<string, unknown>).message || '')}`;
         
         for (const channelId of config.actions.notify!.channels) {
           await this.sendNotificationToChannel(channelId, message, event);
@@ -5267,9 +5311,10 @@ export class MainController extends EventEmitter {
 
     // 日志处理器
     if (config.actions.log) {
-      handlers.push(async (event: any) => {
-        const message = config.actions.log!.message || `路由日志: ${event.type}`;
-        this.logEvent(config.actions.log!.level, message, event);
+      handlers.push(async (event: unknown) => {
+        const eventObj = event as unknown as Record<string, unknown>;
+        const message = config.actions.log!.message || `路由日志: ${String(eventObj.type || '')}`;
+        this.logEvent(config.actions.log!.level, message, event as unknown as Record<string, unknown>);
       });
     }
 
@@ -5280,7 +5325,7 @@ export class MainController extends EventEmitter {
 
     // 转发处理器
     if (config.actions.forward) {
-      handlers.push(async (event: any) => {
+      handlers.push(async (event: unknown) => {
         const transformedEvent = config.actions.forward!.transform 
           ? config.actions.forward!.transform(event)
           : event;
@@ -5288,7 +5333,7 @@ export class MainController extends EventEmitter {
         // 这里可以实现转发到其他系统的逻辑
         this.logEvent('debug', '事件已转发', {
           target: config.actions.forward!.target,
-          originalEvent: event.type,
+          originalEvent: String((event as unknown as Record<string, unknown>).type || ''),
           transformedEvent
         });
       });
@@ -5313,14 +5358,15 @@ export class MainController extends EventEmitter {
   /**
    * 格式化通知模板
    */
-  private formatNotificationTemplate(template: string, event: any): string {
+  private formatNotificationTemplate(template: string, event: unknown): string {
+    const eventObj = event as Record<string, unknown>;
     return template
-      .replace(/\{\{type\}\}/g, event.type || '')
-      .replace(/\{\{severity\}\}/g, event.severity || '')
-      .replace(/\{\{source\}\}/g, event.source || '')
-      .replace(/\{\{message\}\}/g, event.message || '')
-      .replace(/\{\{timestamp\}\}/g, event.timestamp ? new Date(event.timestamp).toLocaleString() : '')
-      .replace(/\{\{data\}\}/g, event.data ? JSON.stringify(event.data) : '');
+      .replace(/\{\{type\}\}/g, String(eventObj.type || ''))
+      .replace(/\{\{severity\}\}/g, String(eventObj.severity || ''))
+      .replace(/\{\{source\}\}/g, String(eventObj.source || ''))
+      .replace(/\{\{message\}\}/g, String(eventObj.message || ''))
+      .replace(/\{\{timestamp\}\}/g, eventObj.timestamp ? new Date(Number(eventObj.timestamp)).toLocaleString() : '')
+      .replace(/\{\{data\}\}/g, eventObj.data ? JSON.stringify(eventObj.data) : '');
   }
 
   /**

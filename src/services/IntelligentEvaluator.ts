@@ -613,7 +613,7 @@ class IntelligentEvaluator {
   }
 
   private predictSuccessRate(stats: ExecutionStatistics, risks: RiskFactor[]): number {
-    let baseSuccessRate = stats.totalExecutions > 0 ? 
+    const baseSuccessRate = stats.totalExecutions > 0 ? 
       stats.successfulExecutions / stats.totalExecutions : 0.5;
     
     // 根据风险因子调整预测

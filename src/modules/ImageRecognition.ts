@@ -1,5 +1,5 @@
 // 图像识别模块
-import { GameStatus } from '../types';
+// import { GameStatus } from '../types';
 import { isBrowser } from '../utils/browserCompat.js';
 import screenshot from 'screenshot-desktop';
 import { Jimp, intToRGBA } from 'jimp';
@@ -48,7 +48,7 @@ export class ImageRecognition {
   private gameWindowBounds: { x: number; y: number; width: number; height: number } | null = null;
   private logger: {
     info: (msg: string) => void;
-    error: (msg: string, error?: any) => void;
+    error: (msg: string, error?: unknown) => void;
     debug: (msg: string) => void;
   };
 
@@ -64,7 +64,7 @@ export class ImageRecognition {
     
     this.logger = {
       info: (msg: string) => console.log(`[ImageRecognition] ${msg}`),
-      error: (msg: string, error?: any) => console.error(`[ImageRecognition] ${msg}`, error),
+      error: (msg: string, error?: unknown) => console.error(`[ImageRecognition] ${msg}`, error),
       debug: (msg: string) => console.debug(`[ImageRecognition] ${msg}`)
     };
   }

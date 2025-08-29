@@ -38,7 +38,7 @@ export const mockChildProcess = {
 
 // util 模拟
 export const mockUtil = {
-  promisify: (fn: any) => fn
+  promisify: <T extends (...args: unknown[]) => unknown>(fn: T) => fn
 };
 
 // 模块映射
@@ -59,6 +59,7 @@ export function safeRequire(moduleName: string) {
   }
   
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     return require(moduleName);
   } catch (error) {
     console.warn(`Failed to load module ${moduleName}:`, error);

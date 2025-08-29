@@ -63,7 +63,7 @@ class RealGameIntegrationTest {
       this.eventLogs.push(`[${new Date().toISOString()}] 窗口变化事件: ${JSON.stringify(status)}`);
     });
 
-    this.detector.on('error', (error: any) => {
+    this.detector.on('error', (error: Error | string) => {
       this.eventLogs.push(`[${new Date().toISOString()}] 错误事件: ${error}`);
     });
   }
