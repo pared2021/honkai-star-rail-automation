@@ -1,15 +1,11 @@
 // 游戏检测模块
 import { GameStatus } from '../types';
-import { isBrowser } from '../utils/browserCompat.js';
+import { isBrowser } from '../utils/browserCompat';
 import nodeWindowManager from 'node-window-manager';
 import activeWin from 'active-win';
 import psList from 'ps-list';
-// import { exec } from 'child_process';
-// import { promisify } from 'util';
-
 // 安全获取模块
 const windowManager = nodeWindowManager?.windowManager;
-// const execAsync = promisify(exec); // 暂时注释掉未使用的变量
 import { EventEmitter } from 'events';
 
 export interface GameDetectorConfig {
@@ -53,6 +49,18 @@ export class GameDetector extends EventEmitter {
   private currentWindowInfo: GameWindowInfo | null = null;
   private lastDetectionTime: Date = new Date();
   private detectionErrors: string[] = [];
+
+
+  // 实时监控相关属性
+  private realTimeMonitoringEnabled = false;
+  private monitoringInterval: NodeJS.Timeout | null = null;
+  private lastGameState = {
+    isRunning: false,
+    isActive: false,
+    windowPosition: null as any,
+    processInfo: null as any
+  };
+  private stateChangeCallbacks: Array<(state: any) => void> = [];
 
   constructor(config?: Partial<GameDetectorConfig>) {
     super();
@@ -348,16 +356,31 @@ export class GameDetector extends EventEmitter {
     try {
       const processes = await psList();
       
+      // 优化：按优先级排序进程名，常见的放在前面
+      const prioritizedProcessNames = [...this.config.gameProcessNames].sort((a, b) => {
+        const priority = ['StarRail.exe', 'HonkaiStarRail.exe', '崩坏星穹铁道.exe'];
+        const aIndex = priority.indexOf(a);
+        const bIndex = priority.indexOf(b);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        return 0;
+      });
+      
       // 查找匹配的游戏进程
-      for (const processName of this.config.gameProcessNames) {
+      for (const processName of prioritizedProcessNames) {
         const gameProcess = processes.find(p => {
+          if (!p.name) return false;
+          
           const name = p.name.toLowerCase();
           const targetName = processName.toLowerCase();
           
-          // 精确匹配或包含匹配
+          // 多种匹配策略
           return name === targetName || 
                  name.includes(targetName) ||
-                 name.replace('.exe', '') === targetName.replace('.exe', '');
+                 name.replace('.exe', '') === targetName.replace('.exe', '') ||
+                 name.replace(/[\s\-_]/g, '') === targetName.replace(/[\s\-_]/g, '') ||
+                 this.fuzzyMatchProcessName(name, targetName);
         });
         
         if (gameProcess) {
@@ -365,8 +388,8 @@ export class GameDetector extends EventEmitter {
           const processInfo: GameProcessInfo = {
             pid: gameProcess.pid,
             name: gameProcess.name,
-            cpu: gameProcess.cpu,
-            memory: gameProcess.memory,
+            cpu: gameProcess.cpu || 0,
+            memory: gameProcess.memory || 0,
             ppid: gameProcess.ppid
           };
           return processInfo;
@@ -377,8 +400,23 @@ export class GameDetector extends EventEmitter {
       return null;
     } catch (error) {
       this.log('error', '检测游戏进程失败', error);
-      throw error; // 重新抛出错误以便上层捕获
+      throw error;
     }
+  }
+
+  /**
+   * 模糊匹配进程名
+   */
+  private fuzzyMatchProcessName(processName: string, targetName: string): boolean {
+    // 移除常见的后缀和前缀
+    const cleanProcess = processName.replace(/\.(exe|app|bin)$/i, '').toLowerCase();
+    const cleanTarget = targetName.replace(/\.(exe|app|bin)$/i, '').toLowerCase();
+    
+    // 检查是否包含关键词
+    const keywords = ['starrail', 'honkai', '崩坏', '星穹', '铁道'];
+    return keywords.some(keyword => 
+      cleanProcess.includes(keyword) && cleanTarget.includes(keyword)
+    );
   }
 
   /**
@@ -386,28 +424,59 @@ export class GameDetector extends EventEmitter {
    */
   private async getGameWindow(): Promise<unknown | null> {
     try {
+      if (!windowManager) {
+        this.log('warn', 'windowManager 未初始化');
+        return null;
+      }
+      
       const windows = windowManager.getWindows();
+      if (!windows || windows.length === 0) {
+        this.log('debug', '未检测到任何窗口');
+        return null;
+      }
+      
+      // 优化：按优先级排序窗口标题
+      const prioritizedTitles = [...this.config.gameWindowTitles].sort((a, b) => {
+        const priority = ['崩坏：星穹铁道', 'Honkai: Star Rail', 'StarRail'];
+        const aIndex = priority.indexOf(a);
+        const bIndex = priority.indexOf(b);
+        if (aIndex !== -1 && bIndex !== -1) return aIndex - bIndex;
+        if (aIndex !== -1) return -1;
+        if (bIndex !== -1) return 1;
+        return 0;
+      });
       
       // 查找匹配的游戏窗口
-      for (const windowTitle of this.config.gameWindowTitles) {
+      for (const windowTitle of prioritizedTitles) {
         const gameWindow = windows.find(w => {
           try {
-            const title = w.getTitle().toLowerCase();
-            const targetTitle = windowTitle.toLowerCase();
+            if (!w || typeof w.getTitle !== 'function') return false;
             
-            // 精确匹配或包含匹配
-            return title === targetTitle || 
-                   title.includes(targetTitle) ||
-                   title.replace(/\s+/g, '').includes(targetTitle.replace(/\s+/g, ''));
-          } catch {
+            const title = w.getTitle();
+            if (!title) return false;
+            
+            return this.isGameWindowTitle(title, windowTitle);
+          } catch (error) {
             // 某些窗口可能无法获取标题
+            this.log('debug', '获取窗口标题失败', error);
             return false;
           }
         });
         
-        if (gameWindow && gameWindow.isVisible()) {
-          this.log('debug', `找到游戏窗口: ${gameWindow.getTitle()} (ID: ${gameWindow.id})`);
-          return gameWindow;
+        if (gameWindow) {
+          try {
+            // 检查窗口是否可见
+            if (typeof gameWindow.isVisible === 'function' && gameWindow.isVisible()) {
+              const title = gameWindow.getTitle ? gameWindow.getTitle() : 'Unknown';
+              const id = gameWindow.id || 'Unknown';
+              this.log('debug', `找到游戏窗口: ${title} (ID: ${id})`);
+              return gameWindow;
+            } else {
+              this.log('debug', '找到游戏窗口但不可见，继续搜索');
+            }
+          } catch (error) {
+            this.log('debug', '检查窗口可见性失败', error);
+          }
         }
       }
       
@@ -420,23 +489,92 @@ export class GameDetector extends EventEmitter {
   }
 
   /**
+   * 检查窗口标题是否匹配游戏窗口
+   */
+  private isGameWindowTitle(windowTitle: string, targetTitle: string): boolean {
+    if (!windowTitle || !targetTitle) return false;
+    
+    const title = windowTitle.toLowerCase().trim();
+    const target = targetTitle.toLowerCase().trim();
+    
+    // 精确匹配
+    if (title === target) return true;
+    
+    // 包含匹配
+    if (title.includes(target) || target.includes(title)) return true;
+    
+    // 忽略空格和特殊字符的匹配
+    const cleanTitle = title.replace(/[\s\-_：:]/g, '');
+    const cleanTarget = target.replace(/[\s\-_：:]/g, '');
+    if (cleanTitle.includes(cleanTarget) || cleanTarget.includes(cleanTitle)) return true;
+    
+    // 关键词匹配
+    const keywords = ['starrail', 'honkai', '崩坏', '星穹', '铁道'];
+    const titleHasKeyword = keywords.some(keyword => title.includes(keyword));
+    const targetHasKeyword = keywords.some(keyword => target.includes(keyword));
+    
+    return titleHasKeyword && targetHasKeyword;
+  }
+
+  /**
    * 获取游戏窗口信息
    */
   private getGameWindowInfo(window: unknown): GameWindowInfo {
     const win = window as Record<string, unknown>;
-    const bounds = (win.getBounds as () => { x: number; y: number; width: number; height: number })();
-    return {
-      id: Number(win.id) || 0,
-      title: String((win.getTitle as () => string)() || ''),
-      bounds: {
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height
-      },
-      isVisible: Boolean((win.isVisible as () => boolean)()),
-      isMinimized: !(win.isVisible as () => boolean)()
-    };
+    
+    try {
+      // 安全获取窗口边界
+      let bounds = { x: 0, y: 0, width: 0, height: 0 };
+      if (typeof win.getBounds === 'function') {
+        try {
+          bounds = win.getBounds();
+        } catch (error) {
+          this.log('warn', '获取窗口边界失败', error);
+        }
+      }
+      
+      // 安全获取窗口标题
+      let title = '';
+      if (typeof win.getTitle === 'function') {
+        try {
+          title = win.getTitle() || '';
+        } catch (error) {
+          this.log('warn', '获取窗口标题失败', error);
+        }
+      }
+      
+      // 安全获取可见性状态
+      let isVisible = false;
+      if (typeof win.isVisible === 'function') {
+        try {
+          isVisible = win.isVisible();
+        } catch (error) {
+          this.log('warn', '获取窗口可见性失败', error);
+        }
+      }
+      
+      return {
+        id: Number(win.id) || 0,
+        title: String(title),
+        bounds: {
+          x: Number(bounds.x) || 0,
+          y: Number(bounds.y) || 0,
+          width: Number(bounds.width) || 0,
+          height: Number(bounds.height) || 0
+        },
+        isVisible: Boolean(isVisible),
+        isMinimized: !Boolean(isVisible)
+      };
+    } catch (error) {
+      this.log('error', '获取游戏窗口信息失败', error);
+      return {
+        id: 0,
+        title: '',
+        bounds: { x: 0, y: 0, width: 0, height: 0 },
+        isVisible: false,
+        isMinimized: true
+      };
+    }
   }
 
   /**
@@ -444,24 +582,36 @@ export class GameDetector extends EventEmitter {
    */
   private async isGameWindowActive(): Promise<boolean> {
     try {
+      if (!activeWin) {
+        this.log('warn', 'activeWin 模块未可用');
+        return false;
+      }
+      
       const activeWindow = await activeWin();
       
-      if (!activeWindow) {
-        this.log('debug', '未检测到活动窗口');
+      if (!activeWindow || !activeWindow.title) {
+        this.log('debug', '未检测到活动窗口或窗口无标题');
         return false;
       }
       
       // 检查活动窗口是否为游戏窗口
       const isGameActive = this.config.gameWindowTitles.some(title => {
-        const activeTitle = activeWindow.title.toLowerCase();
-        const gameTitle = title.toLowerCase();
-        return activeTitle === gameTitle || 
-               activeTitle.includes(gameTitle) ||
-               activeTitle.replace(/\s+/g, '').includes(gameTitle.replace(/\s+/g, ''));
+        return this.isGameWindowTitle(activeWindow.title, title);
       });
       
       if (isGameActive) {
-        this.log('debug', `游戏窗口处于活动状态: ${activeWindow.title}`);
+        this.log('debug', `游戏窗口处于活动状态: ${activeWindow.title} (PID: ${activeWindow.owner?.processId || 'Unknown'})`);
+        
+        // 额外验证：检查进程ID是否匹配
+        if (this.currentProcessInfo && activeWindow.owner?.processId) {
+          const pidMatch = activeWindow.owner.processId === this.currentProcessInfo.pid;
+          if (!pidMatch) {
+            this.log('debug', `窗口标题匹配但进程ID不匹配: 活动窗口PID=${activeWindow.owner.processId}, 游戏进程PID=${this.currentProcessInfo.pid}`);
+          }
+          return pidMatch;
+        }
+      } else {
+        this.log('debug', `当前活动窗口不是游戏窗口: ${activeWindow.title}`);
       }
       
       return isGameActive;
@@ -478,14 +628,36 @@ export class GameDetector extends EventEmitter {
   private getGameWindowRect(window: unknown): { x: number; y: number; width: number; height: number } {
     try {
       const windowObj = window as Record<string, unknown>;
-      const getBounds = windowObj.getBounds as () => { x: number; y: number; width: number; height: number };
-      const bounds = getBounds();
+      
+      if (!windowObj || typeof windowObj.getBounds !== 'function') {
+        this.log('warn', '窗口对象无效或不支持getBounds方法');
+        return { x: 0, y: 0, width: 0, height: 0 };
+      }
+      
+      const bounds = windowObj.getBounds();
+      
+      if (!bounds || typeof bounds !== 'object') {
+        this.log('warn', '获取到的窗口边界信息无效');
+        return { x: 0, y: 0, width: 0, height: 0 };
+      }
+      
+      // 验证和规范化边界值
       const rect = {
-        x: bounds.x,
-        y: bounds.y,
-        width: bounds.width,
-        height: bounds.height
+        x: Number(bounds.x) || 0,
+        y: Number(bounds.y) || 0,
+        width: Math.max(Number(bounds.width) || 0, 0),
+        height: Math.max(Number(bounds.height) || 0, 0)
       };
+      
+      // 检查边界值的合理性
+      if (rect.width > 10000 || rect.height > 10000) {
+        this.log('warn', '窗口尺寸异常大，可能存在问题', rect);
+      }
+      
+      if (rect.x < -10000 || rect.x > 10000 || rect.y < -10000 || rect.y > 10000) {
+        this.log('warn', '窗口位置异常，可能存在问题', rect);
+      }
+      
       this.log('debug', '获取窗口位置信息', rect);
       return rect;
     } catch (error) {
@@ -541,6 +713,100 @@ export class GameDetector extends EventEmitter {
     const elapsed = Date.now() - startTime;
     this.log('warn', `等待游戏启动超时，总等待时间: ${elapsed}ms`);
     return false;
+  }
+
+  /**
+   * 获取游戏窗口句柄
+   */
+  public async getGameWindowHandle(): Promise<string | null> {
+    try {
+      const window = await this.getGameWindow();
+      if (!window) {
+        this.log('debug', '未找到游戏窗口，无法获取句柄');
+        return null;
+      }
+
+      const windowObj = window as Record<string, unknown>;
+      
+      // 尝试获取窗口句柄（不同平台可能有不同的属性名）
+      const handle = windowObj.handle || windowObj.id || windowObj.hwnd || windowObj.windowId;
+      
+      if (handle) {
+        const handleStr = String(handle);
+        this.log('debug', `获取到游戏窗口句柄: ${handleStr}`);
+        return handleStr;
+      } else {
+        this.log('warn', '无法从窗口对象获取句柄');
+        return null;
+      }
+    } catch (error) {
+      this.log('error', '获取游戏窗口句柄失败', error);
+      return null;
+    }
+  }
+
+  /**
+   * 获取游戏窗口详细位置信息
+   */
+  public async getGameWindowPosition(): Promise<{
+    handle: string | null;
+    bounds: { x: number; y: number; width: number; height: number };
+    isVisible: boolean;
+    isActive: boolean;
+  } | null> {
+    try {
+      const window = await this.getGameWindow();
+      if (!window) {
+        this.log('debug', '未找到游戏窗口，无法获取位置信息');
+        return null;
+      }
+
+      const handle = await this.getGameWindowHandle();
+      const bounds = this.getGameWindowRect(window);
+      const windowInfo = this.getGameWindowInfo(window);
+      const isActive = await this.isGameWindowActive();
+
+      const position = {
+        handle,
+        bounds,
+        isVisible: windowInfo.isVisible,
+        isActive
+      };
+
+      this.log('debug', '获取游戏窗口位置信息', position);
+      return position;
+    } catch (error) {
+      this.log('error', '获取游戏窗口位置信息失败', error);
+      return null;
+    }
+  }
+
+  /**
+   * 检查游戏窗口是否在指定区域内
+   */
+  public async isGameWindowInRegion(region: { x: number; y: number; width: number; height: number }): Promise<boolean> {
+    try {
+      const position = await this.getGameWindowPosition();
+      if (!position) {
+        return false;
+      }
+
+      const { bounds } = position;
+      
+      // 检查窗口是否与指定区域有重叠
+      const overlap = (
+        bounds.x < region.x + region.width &&
+        bounds.x + bounds.width > region.x &&
+        bounds.y < region.y + region.height &&
+        bounds.y + bounds.height > region.y
+      );
+
+      this.log('debug', `游戏窗口区域检查: 窗口(${bounds.x},${bounds.y},${bounds.width},${bounds.height}) 区域(${region.x},${region.y},${region.width},${region.height}) 重叠:${overlap}`);
+      return overlap;
+    } catch (error) {
+      this.log('error', '检查游戏窗口区域失败', error);
+      return false;
+    }
   }
 
   /**
@@ -789,6 +1055,176 @@ export class GameDetector extends EventEmitter {
     
     this.log('warn', '等待游戏窗口激活超时');
     return false;
+  }
+
+  /**
+   * 启用实时监控
+   */
+  public enableRealTimeMonitoring(interval: number = 2000): void {
+    if (this.realTimeMonitoringEnabled) {
+      this.log('warn', '实时监控已经启用');
+      return;
+    }
+
+    this.realTimeMonitoringEnabled = true;
+    this.monitoringInterval = setInterval(async () => {
+      await this.performRealTimeCheck();
+    }, interval);
+
+    this.log('info', `实时监控已启用，检查间隔: ${interval}ms`);
+  }
+
+  /**
+   * 禁用实时监控
+   */
+  public disableRealTimeMonitoring(): void {
+    if (!this.realTimeMonitoringEnabled) {
+      this.log('warn', '实时监控未启用');
+      return;
+    }
+
+    this.realTimeMonitoringEnabled = false;
+    if (this.monitoringInterval) {
+      clearInterval(this.monitoringInterval);
+      this.monitoringInterval = null;
+    }
+
+    this.log('info', '实时监控已禁用');
+  }
+
+  /**
+   * 执行实时检查
+   */
+  private async performRealTimeCheck(): Promise<void> {
+    try {
+      const currentState = {
+        isRunning: false,
+        isActive: false,
+        windowPosition: null as any,
+        processInfo: null as any
+      };
+
+      // 检查游戏进程
+      const processInfo = await this.detectGameProcess();
+      currentState.processInfo = processInfo;
+      currentState.isRunning = !!processInfo;
+
+      // 检查游戏窗口状态
+      if (processInfo) {
+        currentState.isActive = await this.isGameWindowActive();
+        currentState.windowPosition = await this.getGameWindowPosition();
+      }
+
+      // 检查状态变化
+      this.checkStateChanges(currentState);
+
+      // 更新最后状态
+      this.lastGameState = currentState;
+
+    } catch (error) {
+      this.log('error', '实时监控检查失败', error);
+    }
+  }
+
+  /**
+   * 检查状态变化并触发事件
+   */
+  private checkStateChanges(currentState: any): void {
+    // 游戏启动检测
+    if (!this.lastGameState.isRunning && currentState.isRunning) {
+      this.log('info', '检测到游戏启动');
+      this.emit('gameStarted', currentState.processInfo);
+      this.notifyStateChange('gameStarted', currentState);
+    }
+
+    // 游戏关闭检测
+    if (this.lastGameState.isRunning && !currentState.isRunning) {
+      this.log('info', '检测到游戏关闭');
+      this.emit('gameStopped');
+      this.notifyStateChange('gameStopped', currentState);
+    }
+
+    // 游戏激活状态变化
+    if (this.lastGameState.isActive !== currentState.isActive) {
+      if (currentState.isActive) {
+        this.log('info', '游戏窗口变为活动状态');
+        this.emit('gameActivated');
+        this.notifyStateChange('gameActivated', currentState);
+      } else {
+        this.log('info', '游戏窗口失去活动状态');
+        this.emit('gameDeactivated');
+        this.notifyStateChange('gameDeactivated', currentState);
+      }
+    }
+
+    // 窗口位置变化检测
+    if (this.hasWindowPositionChanged(this.lastGameState.windowPosition, currentState.windowPosition)) {
+      this.log('debug', '游戏窗口位置发生变化');
+      this.emit('windowPositionChanged', currentState.windowPosition);
+      this.notifyStateChange('windowPositionChanged', currentState);
+    }
+  }
+
+  /**
+   * 检查窗口位置是否发生变化
+   */
+  private hasWindowPositionChanged(oldPos: any, newPos: any): boolean {
+    if (!oldPos && !newPos) return false;
+    if (!oldPos || !newPos) return true;
+
+    const oldBounds = oldPos.bounds;
+    const newBounds = newPos.bounds;
+
+    return (
+      oldBounds.x !== newBounds.x ||
+      oldBounds.y !== newBounds.y ||
+      oldBounds.width !== newBounds.width ||
+      oldBounds.height !== newBounds.height
+    );
+  }
+
+  /**
+   * 添加状态变化回调
+   */
+  public onStateChange(callback: (state: any) => void): void {
+    this.stateChangeCallbacks.push(callback);
+  }
+
+  /**
+   * 移除状态变化回调
+   */
+  public removeStateChangeCallback(callback: (state: any) => void): void {
+    const index = this.stateChangeCallbacks.indexOf(callback);
+    if (index > -1) {
+      this.stateChangeCallbacks.splice(index, 1);
+    }
+  }
+
+  /**
+   * 通知状态变化
+   */
+  private notifyStateChange(eventType: string, state: any): void {
+    this.stateChangeCallbacks.forEach(callback => {
+      try {
+        callback({ eventType, state, timestamp: new Date() });
+      } catch (error) {
+        this.log('error', '状态变化回调执行失败', error);
+      }
+    });
+  }
+
+  /**
+   * 获取当前游戏状态
+   */
+  public getCurrentGameState(): any {
+    return { ...this.lastGameState };
+  }
+
+  /**
+   * 检查实时监控是否启用
+   */
+  public isRealTimeMonitoringEnabled(): boolean {
+    return this.realTimeMonitoringEnabled;
   }
 }
 

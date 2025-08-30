@@ -2,13 +2,19 @@
 export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
+  extensionsToTreatAsEsm: ['.ts'],
   roots: ['<rootDir>/src'],
   testMatch: [
     '**/__tests__/**/*.+(ts|tsx|js)',
     '**/*.(test|spec).+(ts|tsx|js)'
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest'
+    '^.+\\.(ts|tsx)$': ['ts-jest', {
+      useESM: true
+    }]
+  },
+  moduleNameMapper: {
+    '^(\\.\\.?\\/.+)\\.js$': '$1'
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
@@ -37,14 +43,11 @@ export default {
     '/dist-api/',
     '/release/'
   ],
-  // 模拟模块
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1'
-  },
   // 全局设置
   globals: {
     'ts-jest': {
-      tsconfig: 'tsconfig.json'
+      tsconfig: 'tsconfig.json',
+      useESM: true
     }
   }
 }
