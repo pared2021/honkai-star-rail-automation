@@ -8,7 +8,7 @@ type JimpInstance = Awaited<ReturnType<typeof Jimp.read>>;
 import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
-import * as pixelmatch from 'pixelmatch';
+import pixelmatch from 'pixelmatch';
 // import Logger from '../utils/Logger';
 
 export interface ImageRecognitionConfig {
@@ -749,7 +749,7 @@ export class ImageRecognition {
 
       // 计算像素差异
       const diff = new Uint8ClampedArray(currentImage.width * currentImage.height * 4);
-      const diffPixels = pixelmatch.default(
+      const diffPixels = pixelmatch(
         new Uint8ClampedArray(currentImage.bitmap.data),
         new Uint8ClampedArray(template.bitmap.data),
         diff,

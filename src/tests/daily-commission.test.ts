@@ -48,9 +48,9 @@ describe('每日委托自动化测试', () => {
       expect(taskId).toBeDefined();
       expect(typeof taskId).toBe('string');
 
-      const task = taskExecutor.getTaskById(taskId);
-      expect(task).toBeDefined();
-      expect(task?.status).toBe('pending');
+      const retrievedTask = taskExecutor.getTaskById(taskId);
+      expect(retrievedTask).toBeDefined();
+      expect(retrievedTask?.status).toBe('pending');
     });
 
     test('应该能够获取任务状态', () => {
@@ -85,8 +85,8 @@ describe('每日委托自动化测试', () => {
       const cancelled = taskExecutor.cancelTask(taskId);
       expect(cancelled).toBe(true);
 
-      const task = taskExecutor.getTask(taskId);
-      expect(task?.status).toBe('cancelled');
+      const cancelledTask = taskExecutor.getTask(taskId);
+      expect(cancelledTask?.status).toBe('cancelled');
     });
   });
 
@@ -125,8 +125,8 @@ describe('每日委托自动化测试', () => {
         });
       });
 
-      const task = taskExecutor.getTask(taskId);
-      expect(task?.status).toBe('failed');
+      const failedTask = taskExecutor.getTask(taskId);
+      expect(failedTask?.status).toBe('failed');
     });
 
     test('应该能够处理图像识别失败', async () => {
@@ -172,9 +172,9 @@ describe('每日委托自动化测试', () => {
         });
       });
 
-      const task = taskExecutor.getTask(taskId);
-      expect(task?.status).toBe('failed');
-      expect(task?.retryCount).toBeGreaterThan(0);
+      const failedTask2 = taskExecutor.getTask(taskId);
+      expect(failedTask2?.status).toBe('failed');
+      expect(failedTask2?.retryCount).toBeGreaterThan(0);
     });
   });
 

@@ -10,11 +10,20 @@ export default {
   ],
   transform: {
     '^.+\\.(ts|tsx)$': ['ts-jest', {
-      useESM: true
+      useESM: true,
+      tsconfig: {
+        module: 'esnext'
+      }
     }]
   },
+  globals: {
+    'ts-jest': {
+      useESM: true
+    }
+  },
   moduleNameMapper: {
-    '^(\\.\\.?\\/.+)\\.js$': '$1'
+    '^(\\.\\.?\\/.+)\\.js$': '$1',
+    '^pixelmatch$': '<rootDir>/src/tests/__mocks__/pixelmatch.js'
   },
   collectCoverageFrom: [
     'src/**/*.{ts,tsx}',
