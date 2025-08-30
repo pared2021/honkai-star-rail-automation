@@ -51,6 +51,14 @@ class TaskConfig:
             self.custom_params = {}
         if self.schedule_days is None:
             self.schedule_days = []
+        
+        # 验证参数
+        if not self.task_name or not self.task_name.strip():
+            raise ValueError("任务名称不能为空")
+        if self.max_retry_count < 0:
+            raise ValueError("重试次数不能为负数")
+        if self.timeout_seconds < 0:
+            raise ValueError("超时时间不能为负数")
 
 
 # Task类已从models.task_model导入
@@ -91,7 +99,7 @@ class TaskManager:
             task_id=task_id,
             user_id=user_id,
             config=config,
-            status=TaskStatus.CREATED,
+            status=TaskStatus.PENDING,
             created_at=datetime.now(),
             updated_at=datetime.now()
         )
@@ -103,7 +111,7 @@ class TaskManager:
             # 插入任务基本信息
             cursor.execute(
                 "INSERT INTO tasks (task_id, user_id, task_name, task_type, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                (task_id, user_id, config.task_name, config.task_type.value, TaskStatus.CREATED.value, 
+                (task_id, user_id, config.task_name, config.task_type.value, TaskStatus.PENDING.value, 
                  task.created_at.isoformat(), task.updated_at.isoformat())
             )
             
