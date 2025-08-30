@@ -30,9 +30,7 @@ export default {
     'html'
   ],
   setupFilesAfterEnv: ['<rootDir>/src/tests/setup.ts'],
-  moduleNameMapping: {
-    '^@/(.*)$': '<rootDir>/src/$1'
-  },
+
   testTimeout: 30000, // 30秒超时
   verbose: true,
   // 忽略集成测试，除非明确指定
@@ -43,11 +41,8 @@ export default {
     '/dist-api/',
     '/release/'
   ],
-  // 全局设置
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-      useESM: true
-    }
-  }
+  transformIgnorePatterns: [
+    'node_modules/(?!(pixelmatch|jimp)/)',
+  ],
+
 }
