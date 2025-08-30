@@ -39,19 +39,19 @@ export class DailyCommissionTask extends TaskExecutor {
     const taskConditions: TaskCondition[] = [
       {
         type: ConditionType.GAME_STATE,
-        gameRunning: true,
-        description: '游戏必须正在运行'
+        gameRunning: true
       },
       {
         type: ConditionType.TIME,
-        allowedHours: [6, 7, 8, 9, 10, 11, 18, 19, 20, 21, 22, 23], // 早上6-11点，晚上6-11点
-        description: '只在适合游戏的时间段执行'
+        startTime: '06:00',
+        endTime: '23:59',
+        daysOfWeek: [1, 2, 3, 4, 5, 6, 0], // 每天都可以执行
+        cooldownMinutes: 60 // 1小时冷却
       },
       {
         type: ConditionType.RESOURCE,
-        minCpuAvailable: 30,
-        maxNetworkLatency: 200,
-        description: '系统资源充足'
+        minCpuAvailable: 20,
+        minMemoryAvailable: 30
       }
     ];
 
@@ -113,10 +113,17 @@ export class DailyCommissionTask extends TaskExecutor {
   }
 
   /**
+   * 获取当前时间戳（可被测试mock）
+   */
+  public getCurrentTime(): number {
+    return Date.now();
+  }
+
+  /**
    * 执行每日委托任务
    */
   protected async executeTask(): Promise<TaskResult> {
-    const startTime = Date.now();
+    const startTime = this.getCurrentTime();
     const steps: string[] = [];
     const errors: string[] = [];
 
@@ -156,7 +163,7 @@ export class DailyCommissionTask extends TaskExecutor {
       await this.returnToMainMenu();
       this.log('已返回主界面');
 
-      const executionTime = Date.now() - startTime;
+      const executionTime = this.getCurrentTime() - startTime;
       return {
         success: true,
         message: '每日委托任务执行完成',
@@ -175,7 +182,7 @@ export class DailyCommissionTask extends TaskExecutor {
       return {
         success: false,
         message: `每日委托任务执行失败: ${errorMessage}`,
-        executionTime: Date.now() - startTime,
+        executionTime: this.getCurrentTime() - startTime,
         errors,
         data: {
           steps,

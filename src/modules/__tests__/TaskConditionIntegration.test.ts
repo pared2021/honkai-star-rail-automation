@@ -23,6 +23,8 @@ describe('TaskConditionManager Integration with DailyCommissionTask', () => {
   let mockLogger: jest.Mocked<Logger>;
 
   beforeEach(() => {
+    // Mock getCurrentTime method for DailyCommissionTask
+    jest.spyOn(DailyCommissionTask.prototype, 'getCurrentTime').mockReturnValue(1672531200000);
     // Setup mocks
     mockLogger = {
       info: jest.fn(),
@@ -96,17 +98,66 @@ describe('TaskConditionManager Integration with DailyCommissionTask', () => {
       mockGameDetector.isGameRunning.mockReturnValue(true);
       mockGameDetector.isGameActive.mockReturnValue(true);
       
-      const mockDate = new Date('2024-01-01T03:00:00');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+      // Clear the existing getCurrentTime mock from beforeEach and set new one
+      jest.restoreAllMocks();
+      const mockTime3AM = new Date('2024-01-15T03:00:00.000Z').getTime(); // 1705287600000
+      const getCurrentTimeSpy = jest.spyOn(DailyCommissionTask.prototype, 'getCurrentTime')
+        .mockReturnValue(mockTime3AM);
       
-      // Should fail during execution due to time condition
+      // Mock good system resources directly
+      const originalGetSystemResources = conditionManager['getSystemResources'];
+      conditionManager['getSystemResources'] = jest.fn().mockResolvedValue({
+        cpuAvailable: 80, // Above required 20%
+        memoryAvailable: 70, // Above required 30%
+        networkLatency: 50,
+        diskSpace: 5000
+      });
+      
+      // Setup mocks for task execution (in case condition check passes unexpectedly)
+      mockSceneDetector.detectCurrentScene.mockResolvedValue({
+        scene: 'MAIN_MENU' as any,
+        confidence: 0.9,
+        timestamp: 1672531200000,
+        matchedTemplates: [],
+        detectionTime: 100
+      });
+      mockSceneDetector.waitForScene.mockResolvedValue(true);
+      mockImageRecognition.findImage.mockResolvedValue({
+        found: true,
+        location: { x: 200, y: 200 },
+        confidence: 0.9
+      });
+      
       try {
-        await dailyCommissionTask.execute();
-        fail('Expected task to fail due to time condition');
-      } catch (error) {
-        expect(error.message).toContain('任务条件不满足');
-      }
-    });
+        // canExecute only checks game state, not time conditions
+        const canExecute = await dailyCommissionTask.canExecute();
+        expect(canExecute).toBe(true); // Game state check passes
+        
+        // Test if getCurrentTime mock is working
+        expect(dailyCommissionTask.getCurrentTime()).toBe(mockTime3AM);
+        
+        // Directly test checkConditions to see what it returns
+        // Access conditions from the task's config
+        const taskConditions = (dailyCommissionTask as any).config.conditions;
+        const conditionResult = await conditionManager.checkConditions('DailyCommission', taskConditions);
+        
+        // Log the actual result for debugging
+        console.log('Condition result:', JSON.stringify(conditionResult, null, 2));
+        
+        // The time condition should fail at 3:00 AM (outside 06:00-23:59)
+        expect(conditionResult.satisfied).toBe(false);
+        expect(conditionResult.message).toContain('时间');
+        
+        // Now test the full execute flow
+        const result = await dailyCommissionTask.execute();
+        expect(result.success).toBe(false);
+        expect(result.message).toContain('任务条件不满足');
+      } finally {
+         // Cleanup
+         getCurrentTimeSpy.mockRestore();
+         conditionManager['getSystemResources'] = originalGetSystemResources;
+       }
+     });
 
     it('should fail when system resources are insufficient', async () => {
       // Setup: Game is running, good time, but poor resources
@@ -114,16 +165,49 @@ describe('TaskConditionManager Integration with DailyCommissionTask', () => {
       mockGameDetector.isGameActive.mockReturnValue(true);
       
       const mockDate = new Date('2024-01-01T10:00:00');
-      jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
+      const dateSpy = jest.spyOn(global, 'Date').mockImplementation(() => mockDate as any);
       
-      // Mock poor system resources
-      jest.spyOn(Math, 'random').mockReturnValue(0.1); // Low CPU available
+      // Mock poor system resources - need very high random values to get below thresholds
+      // cpuAvailable = 100 - random * 50, need < 20, so random > 1.6 (impossible)
+      // memoryAvailable = 100 - random * 40, need < 30, so random > 1.75 (impossible)
+      // Let's mock the getSystemResources method directly instead
+      const originalGetSystemResources = conditionManager['getSystemResources'];
+      conditionManager['getSystemResources'] = jest.fn().mockResolvedValue({
+        cpuAvailable: 15, // Below required 20%
+        memoryAvailable: 25, // Below required 30%
+        networkLatency: 50,
+        diskSpace: 5000
+      });
+      
+      // Setup mocks for task execution (in case condition check passes unexpectedly)
+      mockSceneDetector.detectCurrentScene.mockResolvedValue({
+        scene: 'MAIN_MENU' as any,
+        confidence: 0.9,
+        timestamp: 1672531200000,
+        matchedTemplates: [],
+        detectionTime: 100
+      });
+      mockSceneDetector.waitForScene.mockResolvedValue(true);
+      mockImageRecognition.findImage.mockResolvedValue({
+        found: true,
+        location: { x: 200, y: 200 },
+        confidence: 0.9
+      });
       
       try {
-        await dailyCommissionTask.execute();
-        fail('Expected task to fail due to resource condition');
-      } catch (error) {
-        expect(error.message).toContain('任务条件不满足');
+        // canExecute only checks game state, not resource conditions
+        const canExecute = await dailyCommissionTask.canExecute();
+        expect(canExecute).toBe(true); // Game state check passes
+        
+        // But execute should fail due to resource condition check in TaskExecutor
+        const result = await dailyCommissionTask.execute();
+        expect(result.success).toBe(false);
+        expect(result.message).toContain('任务条件不满足:');
+        expect(result.message).toContain('CPU可用率不足');
+      } finally {
+        // Restore mocks
+        dateSpy.mockRestore();
+        conditionManager['getSystemResources'] = originalGetSystemResources;
       }
     });
   });
@@ -142,7 +226,9 @@ describe('TaskConditionManager Integration with DailyCommissionTask', () => {
       mockSceneDetector.detectCurrentScene.mockResolvedValue({
         scene: 'MAIN_MENU' as any,
         confidence: 0.9,
-        location: { x: 100, y: 100 }
+        timestamp: 1672531200000,
+        matchedTemplates: [],
+        detectionTime: 100
       });
       mockSceneDetector.waitForScene.mockResolvedValue(true);
       mockImageRecognition.findImage.mockResolvedValue({
@@ -190,6 +276,10 @@ describe('TaskConditionManager Integration with DailyCommissionTask', () => {
   });
 
   afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  afterAll(() => {
     jest.restoreAllMocks();
   });
 });

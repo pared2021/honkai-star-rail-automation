@@ -242,6 +242,16 @@ export class TaskConditionManager {
     const now = new Date();
     const currentTime = now.getHours() * 60 + now.getMinutes();
     const currentDay = now.getDay();
+    
+    console.log('checkTimeCondition called:', {
+      now: now.toISOString(),
+      hours: now.getHours(),
+      minutes: now.getMinutes(),
+      currentTime,
+      currentDay,
+      startTime: condition.startTime,
+      endTime: condition.endTime
+    });
 
     // 检查星期几
     if (condition.daysOfWeek && !condition.daysOfWeek.includes(currentDay)) {

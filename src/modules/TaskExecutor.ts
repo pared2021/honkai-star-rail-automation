@@ -75,7 +75,7 @@ export abstract class TaskExecutor extends EventEmitter {
     }
 
     this.status = TaskStatus.RUNNING;
-    this.startTime = Date.now();
+    this.startTime = this.getCurrentTime();
     this.retryCount = 0;
     this.cancelled = false;
 
@@ -91,21 +91,32 @@ export abstract class TaskExecutor extends EventEmitter {
 
       // 检查高级条件（如果配置了条件管理器和条件）
       if (this.conditionManager && this.config.conditions) {
+        console.log('TaskExecutor: Checking conditions', {
+          taskName: this.taskName,
+          conditionsCount: Array.isArray(this.config.conditions) ? this.config.conditions.length : 'ConditionGroup',
+          hasConditionManager: !!this.conditionManager
+        });
         const conditionResult = await this.conditionManager.checkConditions(
           this.taskName,
           this.config.conditions
         );
+        console.log('TaskExecutor: Condition check result', conditionResult);
         if (!conditionResult.satisfied) {
           throw new Error(`任务条件不满足: ${conditionResult.message}`);
         }
         this.log(`条件检查通过: ${conditionResult.message}`);
+      } else {
+        console.log('TaskExecutor: Skipping condition check', {
+          hasConditionManager: !!this.conditionManager,
+          hasConditions: !!this.config.conditions
+        });
       }
 
       // 执行任务主逻辑
       const result = await this.executeWithRetry();
       
       this.status = TaskStatus.COMPLETED;
-      this.endTime = Date.now();
+      this.endTime = this.getCurrentTime();
       
       this.emit('completed', { taskName: this.taskName, result });
       this.log(`任务执行完成，耗时: ${this.getExecutionTime()}ms`);
@@ -113,7 +124,7 @@ export abstract class TaskExecutor extends EventEmitter {
       return result;
     } catch (error) {
       this.status = this.cancelled ? TaskStatus.CANCELLED : TaskStatus.FAILED;
-      this.endTime = Date.now();
+      this.endTime = this.getCurrentTime();
       
       const errorMessage = error instanceof Error ? error.message : String(error);
       const result: TaskResult = {
@@ -148,11 +159,18 @@ export abstract class TaskExecutor extends EventEmitter {
   }
 
   /**
+   * 获取当前时间戳
+   */
+  public getCurrentTime(): number {
+    return Date.now();
+  }
+
+  /**
    * 获取执行时间
    */
   getExecutionTime(): number {
     if (this.startTime === 0) return 0;
-    const endTime = this.endTime || Date.now();
+    const endTime = this.endTime || this.getCurrentTime();
     return endTime - this.startTime;
   }
 
