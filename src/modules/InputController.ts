@@ -1197,10 +1197,10 @@ export class InputController {
           success = await this.click(action.params.x, action.params.y, action.params.options);
           break;
         case 'move':
-          success = await this.move(action.params.x, action.params.y);
+          success = await this.moveMouse(action.params.x, action.params.y);
           break;
         case 'key':
-          success = await this.key(action.params.key, action.params.options);
+          success = await this.pressKey(action.params.key, action.params.options);
           break;
         case 'type':
           await this.typeText(action.params.text, action.params.delay);
@@ -1434,10 +1434,10 @@ export class InputController {
           await this.click(action.params.x, action.params.y, action.params.options);
           break;
         case 'move':
-          await this.move(action.params.x, action.params.y);
+          await this.moveMouse(action.params.x, action.params.y);
           break;
         case 'key':
-          await this.key(action.params.key, action.params.options);
+          await this.pressKey(action.params.key, action.params.options);
           break;
         case 'typeText':
           await this.typeText(action.params.text, action.params.delay);
