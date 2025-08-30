@@ -360,10 +360,13 @@ describe('DailyCommissionTask', () => {
         return Promise.resolve(false);
       });
       
+      // Mock delayMs to avoid actual delays
+      jest.spyOn(task as any, 'delayMs').mockResolvedValue(undefined);
+      
       const result = await task.execute();
       
       expect(result.success).toBe(false);
-      expect(result.errors).toEqual(expect.arrayContaining([expect.stringContaining('无法加载委托界面')]));
+      expect(result.errors).toEqual(expect.arrayContaining([expect.stringContaining('委托界面加载失败')]));
     }, 5000);
   });
 
