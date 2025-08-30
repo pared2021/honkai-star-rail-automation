@@ -129,7 +129,8 @@ describe('InputController', () => {
     });
 
     test('应该拒绝无效的按键', async () => {
-      await expect(inputController.pressKey('invalid_key')).rejects.toThrow('无效的按键');
+      const result = await inputController.pressKey('invalid_key');
+      expect(result).toBe(false);
     });
 
     test('应该拒绝过长的文本', async () => {
@@ -257,8 +258,9 @@ describe('InputController', () => {
         throw new Error('Robot error');
       });
       
-      // InputController会重新抛出错误
-      await expect(inputController.click(100, 200)).rejects.toThrow('Robot error');
+      // InputController会捕获错误并返回false
+      const result = await inputController.click(100, 200);
+      expect(result).toBe(false);
       
       const logs = inputController.getInputLogs();
       expect(logs[0].success).toBe(false);

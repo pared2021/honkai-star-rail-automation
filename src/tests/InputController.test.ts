@@ -1,5 +1,4 @@
-import { InputController } from '../modules/InputController';
-import { GameWindow, SmoothMoveOptions, QueuedAction, RecordedAction } from '../modules/InputController';
+import InputController, { GameWindow, SmoothMoveOptions, QueuedAction, RecordedAction } from '../modules/InputController';
 
 // Mock robotjs
 jest.mock('robotjs', () => ({
@@ -10,7 +9,9 @@ jest.mock('robotjs', () => ({
   dragMouse: jest.fn(),
   scrollMouse: jest.fn(),
   getMousePos: jest.fn(() => ({ x: 100, y: 100 })),
-  keyToggle: jest.fn()
+  keyToggle: jest.fn(),
+  setMouseDelay: jest.fn(),
+  setKeyboardDelay: jest.fn()
 }));
 
 describe('InputController', () => {
@@ -69,7 +70,7 @@ describe('InputController', () => {
       expect(config).toHaveProperty('isEnabled');
       expect(config).toHaveProperty('defaultDelay');
       expect(config).toHaveProperty('gameWindow');
-      expect(config).toHaveProperty('safetyChecksEnabled');
+      expect(config).toHaveProperty('safetyChecks');
     });
   });
 
@@ -153,7 +154,8 @@ describe('InputController', () => {
       };
 
       const result = inputController.addToQueue(action);
-      expect(result).toBe(true);
+      expect(typeof result).toBe('string');
+      expect(result).toMatch(/^action_\d+_[a-z0-9]+$/);
       
       const status = inputController.getQueueStatus();
       expect(status.size).toBe(1);
@@ -220,10 +222,10 @@ describe('InputController', () => {
         timestamp: Date.now()
       };
 
-      inputController.addToQueue(action);
+      const actionId = inputController.addToQueue(action);
       expect(inputController.getQueueStatus().size).toBe(1);
       
-      const removed = inputController.removeFromQueue('removable');
+      const removed = inputController.removeFromQueue(actionId);
       expect(removed).toBe(true);
       expect(inputController.getQueueStatus().size).toBe(0);
     });
@@ -412,7 +414,9 @@ describe('InputController', () => {
       expect(stats).toHaveProperty('totalActions');
       expect(stats).toHaveProperty('successfulActions');
       expect(stats).toHaveProperty('failedActions');
-      expect(stats).toHaveProperty('successRate');
+      // InputStats接口不包含successRate，使用getStats()方法获取包含successRate的统计信息
+      const detailedStats = inputController.getStats();
+      expect(detailedStats).toHaveProperty('successRate');
     });
 
     test('应该能够获取输入日志', () => {
