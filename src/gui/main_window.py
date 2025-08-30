@@ -19,6 +19,9 @@ from PyQt6.QtGui import QIcon, QFont, QPixmap, QAction
 from loguru import logger
 from ..core.config_manager import ConfigManager
 from ..database.db_manager import DatabaseManager
+from ..automation.automation_controller import TaskStatus
+from ..automation.task_monitor import TaskMonitor
+from ..automation.automation_controller import AutomationController
 
 
 class MainWindow(QMainWindow):
@@ -49,6 +52,18 @@ class MainWindow(QMainWindow):
         
         self.config_manager = config_manager
         self.db_manager = db_manager
+        
+        # 创建自动化控制器
+        self.automation_controller = AutomationController(
+            config_manager=self.config_manager,
+            db_manager=self.db_manager
+        )
+        
+        # 创建任务监控器
+        self.task_monitor = TaskMonitor(
+            db_manager=self.db_manager,
+            automation_controller=self.automation_controller
+        )
         
         # 窗口状态
         self.current_task_id: Optional[str] = None
@@ -233,19 +248,37 @@ class MainWindow(QMainWindow):
     
     def _create_task_tab(self) -> QWidget:
         """创建任务管理标签页"""
+        from .task_creation_widget import TaskCreationWidget
+        from .task_list_widget import TaskListWidget
+        from ..core.task_manager import TaskManager
+        
         widget = QWidget()
         layout = QVBoxLayout(widget)
+        layout.setContentsMargins(10, 10, 10, 10)
+        layout.setSpacing(10)
         
-        # 占位符内容
-        label = QLabel("任务管理功能")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setFont(QFont("Microsoft YaHei", 16))
-        layout.addWidget(label)
+        # 创建任务管理器实例
+        self.task_manager = TaskManager(self.db_manager)
         
-        placeholder = QLabel("此处将显示任务列表、创建新任务、编辑任务等功能")
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setStyleSheet("color: #666; font-size: 12px;")
-        layout.addWidget(placeholder)
+        # 创建水平分割器
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        layout.addWidget(splitter)
+        
+        # 左侧：任务列表
+        self.task_list_widget = TaskListWidget(self.task_manager)
+        splitter.addWidget(self.task_list_widget)
+        
+        # 右侧：任务创建/编辑
+        self.task_creation_widget = TaskCreationWidget(self.task_manager)
+        splitter.addWidget(self.task_creation_widget)
+        
+        # 设置分割器比例
+        splitter.setSizes([700, 400])
+        splitter.setStretchFactor(0, 1)
+        splitter.setStretchFactor(1, 0)
+        
+        # 连接信号
+        self._connect_task_signals()
         
         return widget
     
@@ -396,6 +429,94 @@ class MainWindow(QMainWindow):
         self.task_started.connect(self._on_task_started)
         self.task_stopped.connect(self._on_task_stopped)
         self.status_changed.connect(self._on_status_changed)
+        
+        # 连接任务监控器信号
+        self.task_monitor.task_status_changed.connect(self._on_monitor_task_status_changed)
+        self.task_monitor.task_progress_updated.connect(self._on_monitor_task_progress_updated)
+        self.task_monitor.task_message_updated.connect(self._on_monitor_task_message_updated)
+        self.task_monitor.task_completed.connect(self._on_monitor_task_completed)
+    
+    def _connect_task_signals(self):
+        """连接任务管理相关信号"""
+        if hasattr(self, 'task_list_widget') and hasattr(self, 'task_creation_widget'):
+            # 任务列表信号
+            self.task_list_widget.task_edit_requested.connect(self._on_task_edit_requested)
+            self.task_list_widget.task_delete_requested.connect(self._on_task_delete_requested)
+            self.task_list_widget.task_start_requested.connect(self._on_task_start_requested)
+            self.task_list_widget.task_stop_requested.connect(self._on_task_stop_requested)
+            
+            # 任务创建信号
+            self.task_creation_widget.task_created.connect(self._on_task_created)
+            self.task_creation_widget.task_creation_failed.connect(self._on_task_creation_failed)
+    
+    def _on_task_edit_requested(self, task_id: str):
+        """处理任务编辑请求"""
+        try:
+            task = self.task_manager.get_task(task_id)
+            if task:
+                # 在任务创建组件中加载任务配置进行编辑
+                self.task_creation_widget.load_task_for_edit(task)
+                logger.info(f"开始编辑任务: {task_id}")
+            else:
+                QMessageBox.warning(self, "错误", "未找到指定的任务")
+        except Exception as e:
+            logger.error(f"加载任务编辑失败: {e}")
+            QMessageBox.critical(self, "编辑失败", f"加载任务编辑失败：{str(e)}")
+    
+    def _on_task_delete_requested(self, task_id: str):
+        """处理任务删除请求"""
+        try:
+            success = self.task_manager.delete_task(task_id)
+            if success:
+                QMessageBox.information(self, "删除成功", "任务已成功删除")
+                # 刷新任务列表
+                self.task_list_widget.refresh_task_list()
+                logger.info(f"任务删除成功: {task_id}")
+            else:
+                QMessageBox.warning(self, "删除失败", "任务删除失败")
+        except Exception as e:
+            logger.error(f"任务删除失败: {e}")
+            QMessageBox.critical(self, "删除失败", f"任务删除失败：{str(e)}")
+    
+    def _on_task_start_requested(self, task_id: str):
+        """处理任务启动请求"""
+        try:
+            # 这里应该调用自动化控制器来启动任务
+            # 暂时只更新状态
+            self.task_manager.update_task(task_id, status=TaskStatus.RUNNING)
+            self.task_list_widget.refresh_task_list()
+            self.status_label.setText(f"任务 {task_id} 已启动")
+            logger.info(f"任务启动: {task_id}")
+        except Exception as e:
+            logger.error(f"任务启动失败: {e}")
+            QMessageBox.critical(self, "启动失败", f"任务启动失败：{str(e)}")
+    
+    def _on_task_stop_requested(self, task_id: str):
+        """处理任务停止请求"""
+        try:
+            # 这里应该调用自动化控制器来停止任务
+            # 暂时只更新状态
+            self.task_manager.update_task(task_id, status=TaskStatus.STOPPED)
+            self.task_list_widget.refresh_task_list()
+            self.status_label.setText(f"任务 {task_id} 已停止")
+            logger.info(f"任务停止: {task_id}")
+        except Exception as e:
+            logger.error(f"任务停止失败: {e}")
+            QMessageBox.critical(self, "停止失败", f"任务停止失败：{str(e)}")
+    
+    def _on_task_created(self, task_id: str):
+        """处理任务创建成功"""
+        QMessageBox.information(self, "创建成功", f"任务创建成功！\n任务ID: {task_id}")
+        # 刷新任务列表
+        self.task_list_widget.refresh_task_list()
+        # 选择新创建的任务
+        self.task_list_widget.select_task(task_id)
+        logger.info(f"任务创建成功: {task_id}")
+    
+    def _on_task_creation_failed(self, error_message: str):
+        """处理任务创建失败"""
+        QMessageBox.critical(self, "创建失败", f"任务创建失败：{error_message}")
+        logger.error(f"任务创建失败: {error_message}")
     
     def _update_status(self):
         """更新状态信息"""
@@ -430,6 +551,9 @@ class MainWindow(QMainWindow):
         self.current_task_id = task_id
         self.is_automation_running = True
         
+        # 启动任务监控器
+        self.task_monitor.start_monitoring()
+        
         # 更新UI状态
         self.start_btn.setEnabled(False)
         self.stop_btn.setEnabled(True)
@@ -443,6 +567,9 @@ class MainWindow(QMainWindow):
         """停止自动化"""
         if not self.is_automation_running:
             return
+        
+        # 停止任务监控器
+        self.task_monitor.stop_monitoring()
         
         if self.current_task_id:
             # 更新任务状态
@@ -477,6 +604,51 @@ class MainWindow(QMainWindow):
         from datetime import datetime
         timestamp = datetime.now().strftime("%H:%M:%S")
         self.status_text.append(f"[{timestamp}] {message}")
+    
+    def _on_monitor_task_status_changed(self, task_id: str, status: str):
+        """处理任务监控器的状态变化信号"""
+        self.status_changed.emit(f"任务 {task_id[:8]}... 状态变更为: {status}")
+        # 更新任务列表中的状态显示
+        if hasattr(self, 'task_list_widget'):
+            from ..automation.automation_controller import TaskStatus
+            try:
+                task_status = TaskStatus(status)
+                self.task_list_widget.update_task_status(task_id, task_status)
+            except ValueError:
+                logger.warning(f"未知的任务状态: {status}")
+                # 刷新整个任务列表作为备选方案
+                self.task_list_widget.refresh_task_list()
+    
+    def _on_monitor_task_progress_updated(self, task_id: str, progress: int, message: str):
+        """处理任务进度更新信号"""
+        logger.debug(f"任务进度更新: {task_id} - {progress}% - {message}")
+        self.status_changed.emit(f"任务 {task_id[:8]}... 进度: {progress}%")
+        
+        # 更新任务列表中的进度显示
+        if hasattr(self, 'task_list_widget'):
+            self.task_list_widget.update_task_progress(task_id, progress, message)
+    
+    def _on_monitor_task_message_updated(self, task_id: str, message: str):
+        """处理任务监控器的消息更新信号"""
+        self.status_changed.emit(f"任务 {task_id[:8]}...: {message}")
+    
+    def _on_monitor_task_completed(self, task_id: str, success: bool, message: str):
+        """处理任务监控器的任务完成信号"""
+        status_msg = "成功" if success else "失败"
+        self.status_changed.emit(f"任务 {task_id[:8]}... 执行{status_msg}: {message}")
+        
+        # 如果是当前运行的任务，更新UI状态
+        if task_id == self.current_task_id:
+            self.is_automation_running = False
+            self.current_task_id = None
+            self.start_btn.setEnabled(True)
+            self.stop_btn.setEnabled(False)
+            self.status_label.setText("就绪")
+            self.task_label.setText("无活动任务")
+        
+        # 刷新任务列表
+        if hasattr(self, 'task_list_widget'):
+            self.task_list_widget.refresh_task_list()
     
     def _import_config(self):
         """导入配置"""
@@ -520,7 +692,11 @@ class MainWindow(QMainWindow):
                 event.accept()
             else:
                 event.ignore()
-        else:
-            event.accept()
+                return
         
+        # 确保任务监控器被停止
+        if hasattr(self, 'task_monitor'):
+            self.task_monitor.stop_monitoring()
+        
+        event.accept()
         logger.info("主窗口关闭")

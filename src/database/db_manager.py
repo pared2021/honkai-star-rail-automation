@@ -75,8 +75,19 @@ class DatabaseManager:
                     task_id TEXT PRIMARY KEY,
                     user_id TEXT NOT NULL,
                     task_name TEXT NOT NULL,
+                    description TEXT,
                     task_type TEXT NOT NULL,
-                    status TEXT DEFAULT 'created' CHECK (status IN ('created', 'running', 'completed', 'failed', 'stopped')),
+                    priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
+                    status TEXT DEFAULT 'created' CHECK (status IN ('created', 'running', 'completed', 'failed', 'stopped', 'paused')),
+                    max_duration INTEGER DEFAULT 300,
+                    retry_count INTEGER DEFAULT 3,
+                    retry_interval REAL DEFAULT 1.0,
+                    safe_mode BOOLEAN DEFAULT 1,
+                    scheduled_time TIMESTAMP,
+                    repeat_interval INTEGER,
+                    last_execution TIMESTAMP,
+                    execution_count INTEGER DEFAULT 0,
+                    progress REAL DEFAULT 0.0,
                     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                     FOREIGN KEY (user_id) REFERENCES users(user_id)
@@ -187,13 +198,25 @@ class DatabaseManager:
         logger.info(f"创建用户: {username} (ID: {user_id})")
         return user_id
     
-    def create_task(self, user_id: str, task_name: str, task_type: str) -> str:
+    def create_task(self, user_id: str, task_name: str, task_type: str, 
+                   description: str = None, priority: str = 'medium',
+                   max_duration: int = 300, retry_count: int = 3,
+                   retry_interval: float = 1.0, safe_mode: bool = True,
+                   scheduled_time: str = None, repeat_interval: int = None) -> str:
         """创建新任务
         
         Args:
             user_id: 用户ID
             task_name: 任务名称
             task_type: 任务类型
+            description: 任务描述
+            priority: 优先级
+            max_duration: 最大执行时间（秒）
+            retry_count: 重试次数
+            retry_interval: 重试间隔（秒）
+            safe_mode: 安全模式
+            scheduled_time: 计划执行时间
+            repeat_interval: 重复间隔（秒）
             
         Returns:
             str: 任务ID
@@ -203,8 +226,13 @@ class DatabaseManager:
         with self.get_connection() as conn:
             cursor = conn.cursor()
             cursor.execute(
-                "INSERT INTO tasks (task_id, user_id, task_name, task_type) VALUES (?, ?, ?, ?)",
-                (task_id, user_id, task_name, task_type)
+                """INSERT INTO tasks (task_id, user_id, task_name, description, task_type, 
+                   priority, max_duration, retry_count, retry_interval, safe_mode, 
+                   scheduled_time, repeat_interval) 
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (task_id, user_id, task_name, description, task_type, priority,
+                 max_duration, retry_count, retry_interval, safe_mode,
+                 scheduled_time, repeat_interval)
             )
             conn.commit()
             
@@ -227,6 +255,82 @@ class DatabaseManager:
             conn.commit()
             
         logger.info(f"更新任务状态: {task_id} -> {status}")
+    
+    def update_task(self, task_id: str, **kwargs):
+        """更新任务信息
+        
+        Args:
+            task_id: 任务ID
+            **kwargs: 要更新的字段
+        """
+        if not kwargs:
+            return
+            
+        # 构建更新语句
+        set_clauses = []
+        values = []
+        
+        for key, value in kwargs.items():
+            if key in ['task_name', 'description', 'task_type', 'priority', 'status',
+                      'max_duration', 'retry_count', 'retry_interval', 'safe_mode',
+                      'scheduled_time', 'repeat_interval', 'last_execution', 
+                      'execution_count', 'progress']:
+                set_clauses.append(f"{key} = ?")
+                values.append(value)
+        
+        if not set_clauses:
+            return
+            
+        set_clauses.append("updated_at = CURRENT_TIMESTAMP")
+        values.append(task_id)
+        
+        sql = f"UPDATE tasks SET {', '.join(set_clauses)} WHERE task_id = ?"
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(sql, values)
+            conn.commit()
+            
+        logger.info(f"更新任务: {task_id}")
+    
+    def get_task_by_id(self, task_id: str) -> Optional[Dict[str, Any]]:
+        """根据ID获取任务
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            Optional[Dict]: 任务信息
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM tasks WHERE task_id = ?",
+                (task_id,)
+            )
+            
+            row = cursor.fetchone()
+            return dict(row) if row else None
+    
+    def delete_task(self, task_id: str):
+        """删除任务
+        
+        Args:
+            task_id: 任务ID
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            # 删除相关的配置和日志
+            cursor.execute("DELETE FROM task_configs WHERE task_id = ?", (task_id,))
+            cursor.execute("DELETE FROM execution_logs WHERE task_id = ?", (task_id,))
+            
+            # 删除任务
+            cursor.execute("DELETE FROM tasks WHERE task_id = ?", (task_id,))
+            
+            conn.commit()
+            
+        logger.info(f"删除任务: {task_id}")
     
     def add_execution_log(self, task_id: str, level: str, message: str, details: str = None):
         """添加执行日志
