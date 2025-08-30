@@ -87,7 +87,8 @@ async function testModuleIntegration() {
       taskType: TaskType.DAILY,
       config: {
         useDefaultFlow: true
-      }
+      },
+      logs: []
     };
     
     try {

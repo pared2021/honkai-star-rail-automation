@@ -1,6 +1,7 @@
 // 主进程控制器 - 整合所有核心模块
 import GameDetector from './GameDetector.js';
-import TaskExecutor, { TaskPriority } from './TaskExecutor.js';
+import { TaskExecutor } from './TaskExecutor.js';
+import { TaskPriority } from '../types';
 import ImageRecognition from './ImageRecognition.js';
 import InputController from './InputController.js';
 import DatabaseService from '../services/DatabaseService';
@@ -627,7 +628,7 @@ export class MainController extends EventEmitter {
 
     // 初始化各个模块
     this.gameDetector = new GameDetector();
-    this.taskExecutor = new TaskExecutor(this.config.maxConcurrentTasks);
+    this.taskExecutor = new TaskExecutor();
     this.imageRecognition = new ImageRecognition();
     this.inputController = new InputController();
     this.databaseService = new DatabaseService();
@@ -757,16 +758,13 @@ export class MainController extends EventEmitter {
       }
       
       // 重新添加任务到队列
-      const newTaskId = this.taskExecutor.addTask(
+      const newTaskId = await this.taskExecutor.addTask(
         {
-          id: uuidv4(),
           accountId: task.accountId,
           taskType: task.taskType,
           config: task.config,
-          status: 'pending',
-          createdAt: new Date()
-        },
-        TaskPriority.HIGH
+          status: 'pending'
+        }
       );
       
       this.log('info', `任务恢复成功，新任务ID: ${newTaskId}`);
@@ -1590,7 +1588,7 @@ export class MainController extends EventEmitter {
         status: 'pending' as TaskStatus,
         createdAt: new Date()
       };
-      const taskId = this.taskExecutor.addTask(taskWithDefaults);
+      const taskId = await this.taskExecutor.addTask(taskWithDefaults);
       
       // 保存任务到数据库
       const fullTask: Task = {
@@ -2332,13 +2330,10 @@ export class MainController extends EventEmitter {
       
       // 重新添加任务
       await this.taskExecutor.addTask({
-        id: uuidv4(),
         taskType: task.taskType,
         accountId: task.accountId,
-        // 任务优先级通过TaskExecutor管理
         config: task.config,
-        status: 'pending' as TaskStatus,
-        createdAt: new Date()
+        status: 'pending' as TaskStatus
       });
       
       this.logEvent('info', '任务重启成功', { taskId: task.id });
@@ -2843,12 +2838,10 @@ export class MainController extends EventEmitter {
       
       // 重新添加任务到队列
       const newTaskId = await this.taskExecutor.addTask({
-        ...task,
-        id: uuidv4(), // 生成新的任务ID
-        status: 'pending',
-        startTime: undefined,
-        endTime: undefined
-        // error属性不存在于Task类型中，已移除
+        taskType: task.taskType,
+        accountId: task.accountId,
+        config: task.config,
+        status: 'pending'
       });
       
       this.logEvent('info', '任务重启成功', {
@@ -3012,7 +3005,7 @@ export class MainController extends EventEmitter {
       this.logEvent('info', '执行资源清理策略', { exceptionId: exception.id });
       
       // 清理已完成的任务
-      this.taskExecutor.clearCompletedTasks();
+      this.taskExecutor.cleanupCompletedTasks();
       
       // 清理事件日志（保留最近1000条）
       if (this.eventLogs.length > 1000) {

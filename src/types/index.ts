@@ -114,6 +114,11 @@ export interface ExtendedTask extends Task {
   name?: string; // 任务名称
   description?: string; // 任务描述
   steps?: TaskStep[]; // 任务执行步骤
+  logs: Array<{
+    timestamp: Date;
+    level: string;
+    message: string;
+  }>; // 任务日志
 }
 
 // 任务执行记录
@@ -2347,22 +2352,7 @@ export interface CommissionExecutionStep {
 }
 
 // 扩展任务类型（TaskExecutor内部使用）
-export interface ExtendedTask extends Task {
-  priority: TaskPriority;
-  addedAt: Date;
-  retryCount?: number;
-  maxRetries?: number;
-  retryDelay?: number;
-  lastError?: string;
-  executionHistory?: {
-    attempt: number;
-    startTime: Date;
-    endTime?: Date;
-    success: boolean;
-    error?: string;
-    duration?: number;
-  }[];
-}
+// 注意：ExtendedTask接口已在前面定义，这里移除重复定义
 
 // 每日委托错误类型
 export interface DailyCommissionError {
