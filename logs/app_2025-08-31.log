@@ -1,0 +1,9 @@
+2025-08-31 01:39:38 | INFO     | src.core.logger:setup_logger:128 - 日志系统初始化完成
+2025-08-31 01:39:38 | INFO     | __main__:main:71 - 应用程序启动
+2025-08-31 01:39:38 | INFO     | src.database.db_manager:_ensure_database_exists:38 - 创建数据库文件: E:\UGit\xingtie\data\app.db
+2025-08-31 01:39:38 | INFO     | src.database.db_manager:initialize_database:166 - 数据库初始化完成
+2025-08-31 01:39:38 | INFO     | src.database.db_manager:initialize_database:166 - 数据库初始化完成
+2025-08-31 01:39:38 | INFO     | src.gui.main_window:__init__:70 - 主窗口初始化完成
+2025-08-31 01:39:39 | INFO     | __main__:main:84 - 主窗口已显示
+2025-08-31 01:51:19 | INFO     | src.gui.main_window:closeEvent:527 - 主窗口关闭
+2025-08-31 01:51:19 | INFO     | __main__:main:89 - 应用程序退出，退出码: 0
