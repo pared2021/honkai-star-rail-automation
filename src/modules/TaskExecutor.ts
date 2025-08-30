@@ -1,5 +1,6 @@
 import { EventEmitter } from 'events';
 import { Logger } from '../utils/Logger';
+import { TaskConditionManager, TaskCondition, ConditionGroup } from './TaskConditionManager';
 
 /**
  * 任务执行结果
@@ -31,6 +32,7 @@ export interface TaskExecutorConfig {
   retryDelay: number;
   timeout: number;
   enableLogging: boolean;
+  conditions?: TaskCondition[] | ConditionGroup;
 }
 
 /**
@@ -45,10 +47,12 @@ export abstract class TaskExecutor extends EventEmitter {
   protected endTime: number = 0;
   protected retryCount: number = 0;
   protected cancelled: boolean = false;
+  protected conditionManager?: TaskConditionManager;
 
   constructor(
     protected taskName: string,
-    config: Partial<TaskExecutorConfig> = {}
+    config: Partial<TaskExecutorConfig> = {},
+    conditionManager?: TaskConditionManager
   ) {
     super();
     this.logger = Logger.getInstance();
@@ -59,6 +63,7 @@ export abstract class TaskExecutor extends EventEmitter {
       enableLogging: true,
       ...config
     };
+    this.conditionManager = conditionManager;
   }
 
   /**
@@ -82,6 +87,18 @@ export abstract class TaskExecutor extends EventEmitter {
       const canExecute = await this.canExecute();
       if (!canExecute) {
         throw new Error('任务执行条件不满足');
+      }
+
+      // 检查高级条件（如果配置了条件管理器和条件）
+      if (this.conditionManager && this.config.conditions) {
+        const conditionResult = await this.conditionManager.checkConditions(
+          this.taskName,
+          this.config.conditions
+        );
+        if (!conditionResult.satisfied) {
+          throw new Error(`任务条件不满足: ${conditionResult.message}`);
+        }
+        this.log(`条件检查通过: ${conditionResult.message}`);
       }
 
       // 执行任务主逻辑

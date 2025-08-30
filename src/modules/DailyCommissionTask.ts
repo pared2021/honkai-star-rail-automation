@@ -4,6 +4,7 @@ import { InputController } from './InputController';
 import { ImageRecognition } from './ImageRecognition';
 import { GameDetector } from './GameDetector';
 import { GameScene } from './TemplateManager';
+import { TaskConditionManager, TaskCondition, ConditionType } from './TaskConditionManager';
 
 /**
  * 每日委托任务配置
@@ -31,14 +32,36 @@ export class DailyCommissionTask extends TaskExecutor {
     inputController: InputController,
     imageRecognition: ImageRecognition,
     gameDetector: GameDetector,
-    config: Partial<DailyCommissionConfig> = {}
+    config: Partial<DailyCommissionConfig> = {},
+    conditionManager?: TaskConditionManager
   ) {
+    // 定义每日委托任务的执行条件
+    const taskConditions: TaskCondition[] = [
+      {
+        type: ConditionType.GAME_STATE,
+        gameRunning: true,
+        description: '游戏必须正在运行'
+      },
+      {
+        type: ConditionType.TIME,
+        allowedHours: [6, 7, 8, 9, 10, 11, 18, 19, 20, 21, 22, 23], // 早上6-11点，晚上6-11点
+        description: '只在适合游戏的时间段执行'
+      },
+      {
+        type: ConditionType.RESOURCE,
+        minCpuAvailable: 30,
+        maxNetworkLatency: 200,
+        description: '系统资源充足'
+      }
+    ];
+
     super('DailyCommission', {
       maxRetries: 2,
       retryDelay: 2000,
       timeout: 120000, // 2分钟超时
-      enableLogging: true
-    });
+      enableLogging: true,
+      conditions: taskConditions
+    }, conditionManager);
 
     this.sceneDetector = sceneDetector;
     this.inputController = inputController;

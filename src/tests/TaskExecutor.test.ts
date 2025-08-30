@@ -25,7 +25,7 @@ class MockTaskExecutor extends TaskExecutor {
   }
 
   protected async executeTask(): Promise<TaskResult> {
-    await this.delay(this.executionDelay);
+    await this.waitDelay(this.executionDelay);
     
     if (this.shouldFail) {
       throw new Error('模拟任务执行失败');
@@ -52,7 +52,7 @@ class MockTaskExecutor extends TaskExecutor {
     this.canExecuteResult = result;
   }
 
-  private delay(ms: number): Promise<void> {
+  private waitDelay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
