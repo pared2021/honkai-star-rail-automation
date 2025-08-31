@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-from ..core.enums import TaskStatus, TaskType, TaskPriority
+from core.enums import TaskStatus, TaskType, TaskPriority
 
 
 @dataclass

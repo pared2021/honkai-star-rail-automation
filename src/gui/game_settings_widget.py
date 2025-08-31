@@ -10,7 +10,7 @@ import os
 from typing import Dict, Any
 from loguru import logger
 
-from ..core.config_manager import ConfigManager
+from core.config_manager import ConfigManager
 
 
 class GameSettingsWidget(QWidget):

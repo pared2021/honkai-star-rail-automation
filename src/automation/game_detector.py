@@ -15,7 +15,7 @@ import pyautogui
 from PIL import Image, ImageGrab
 from loguru import logger
 
-from ..core.config_manager import ConfigManager, ConfigType
+from core.config_manager import ConfigManager, ConfigType
 
 
 @dataclass

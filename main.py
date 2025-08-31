@@ -77,8 +77,8 @@ def main():
         db_manager = DatabaseManager()
         db_manager.initialize_database()
         
-        # 创建主窗口
-        main_window = MainWindow()
+        # 创建主窗口，传递数据库管理器
+        main_window = MainWindow(config_manager=config_manager, db_manager=db_manager)
         main_window.show()
         
         logger.info("主窗口已显示")

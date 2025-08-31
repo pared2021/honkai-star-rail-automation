@@ -13,14 +13,14 @@ from PyQt6.QtWidgets import (
     QMessageBox, QDateTimeEdit, QSlider, QTabWidget, QListWidget,
     QListWidgetItem, QSplitter
 )
-from PyQt6.QtCore import Qt, QDateTime, pyqtSignal
+from PyQt6.QtCore import Qt, QDateTime, QTime, pyqtSignal
 from PyQt6.QtGui import QFont, QIcon
 
 from loguru import logger
-from ..core.task_manager import TaskManager, TaskType, TaskPriority, TaskConfig
-from ..core.task_validator import TaskValidator, ValidationLevel
-from ..core.enums import ActionType
-from ..models.task_model import Task
+from core.task_manager import TaskManager, TaskType, TaskPriority, TaskConfig
+from core.task_validator import TaskValidator, ValidationLevel
+from core.enums import ActionType
+from models.task_model import Task
 
 
 class TaskCreationWidget(QWidget):
@@ -576,15 +576,20 @@ class TaskCreationWidget(QWidget):
             description=description,
             task_type=task_type,
             priority=priority,
-            max_duration=max_duration,
-            retry_count=retry_count,
-            retry_interval=retry_interval,
-            safe_mode=safe_mode,
-            scheduled_time=scheduled_time,
-            repeat_interval=repeat_interval,
+            max_retry_count=retry_count,
+            timeout_seconds=max_duration,
             actions=actions,
             custom_params=custom_params
         )
+        
+        # 设置调度配置
+        if not immediate and scheduled_time:
+            config.schedule_enabled = True
+            config.schedule_time = scheduled_time.strftime("%H:%M")
+        
+        # 设置重复间隔
+        if repeat and repeat_interval:
+            config.repeat_interval = repeat_interval
         
         return config
     
@@ -624,7 +629,7 @@ class TaskCreationWidget(QWidget):
             config: 要加载的任务配置
         """
         # 加载基本信息
-        self.name_edit.setText(config.task_name)
+        self.name_edit.setText(config.name)
         self.description_edit.setPlainText(config.description or "")
         
         # 设置任务类型
@@ -640,23 +645,29 @@ class TaskCreationWidget(QWidget):
                 break
         
         # 加载执行设置
-        self.max_duration_spin.setValue(config.max_duration)
-        self.retry_count_spin.setValue(config.retry_count)
-        self.retry_interval_spin.setValue(config.retry_interval)
-        self.safe_mode_check.setChecked(config.safe_mode)
+        self.max_duration_spin.setValue(config.timeout_seconds)
+        self.retry_count_spin.setValue(config.max_retry_count)
+        # retry_interval 和 safe_mode 不是 TaskConfig 的标准属性，使用默认值
+        self.retry_interval_spin.setValue(1.0)
+        self.safe_mode_check.setChecked(True)
         
         # 加载调度设置
-        if config.scheduled_time:
+        if config.schedule_enabled and config.schedule_time:
             self.immediate_check.setChecked(False)
-            self.scheduled_time_edit.setDateTime(QDateTime.fromSecsSinceEpoch(int(config.scheduled_time.timestamp())))
+            # 解析 HH:MM 格式的时间
+            try:
+                hour, minute = map(int, config.schedule_time.split(':'))
+                current_date = QDateTime.currentDateTime().date()
+                scheduled_datetime = QDateTime(current_date, QTime(hour, minute))
+                self.scheduled_time_edit.setDateTime(scheduled_datetime)
+            except (ValueError, AttributeError):
+                self.immediate_check.setChecked(True)
         else:
             self.immediate_check.setChecked(True)
         
-        if config.repeat_interval:
-            self.repeat_check.setChecked(True)
-            self.repeat_interval_spin.setValue(config.repeat_interval)
-        else:
-            self.repeat_check.setChecked(False)
+        # repeat_interval 不是 TaskConfig 的标准属性，使用默认值
+        self.repeat_check.setChecked(False)
+        self.repeat_interval_spin.setValue(60)
         
         # 加载动作序列
         self.actions_list.clear()
@@ -672,4 +683,4 @@ class TaskCreationWidget(QWidget):
             self.custom_params_edit.setPlainText(json.dumps(config.custom_params, indent=2, ensure_ascii=False))
         
         self.current_config = config
-        logger.info(f"已加载任务配置: {config.task_name}")
+        logger.info(f"已加载任务配置: {config.name}")

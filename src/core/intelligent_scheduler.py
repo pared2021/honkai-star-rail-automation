@@ -15,8 +15,8 @@ import json
 from loguru import logger
 from .task_manager import TaskManager, TaskConfig
 from .game_detector import GameDetector, SceneType
-from ..models.task_model import Task, TaskStatus, TaskType, TaskPriority
-from ..automation.automation_controller import AutomationController
+from models.task_model import Task, TaskStatus, TaskType, TaskPriority
+from automation.automation_controller import AutomationController
 
 
 class SchedulerState(Enum):
@@ -203,7 +203,7 @@ class IntelligentScheduler:
             # 添加到队列
             self.task_queue.put(scheduled_task)
             
-            logger.info(f"任务已添加到调度队列: {task.config.task_name} (优先级: {priority})")
+            logger.info(f"任务已添加到调度队列: {task.name} (优先级: {priority})")
             return True
             
         except Exception as e:
@@ -312,8 +312,8 @@ class IntelligentScheduler:
             current_scene = self.game_detector.detect_current_scene()
             suitable_tasks = self.scene_task_mapping.get(current_scene, [])
             
-            if scheduled_task.task.config.task_type not in suitable_tasks:
-                logger.debug(f"当前场景 {current_scene.value} 不适合执行任务 {scheduled_task.task.config.task_type.value}")
+            if scheduled_task.task.task_type not in suitable_tasks:
+                logger.debug(f"当前场景 {current_scene.value} 不适合执行任务 {scheduled_task.task.task_type.value}")
                 return False
         
         # 检查重试延迟
@@ -357,7 +357,7 @@ class IntelligentScheduler:
         if self.task_started_callback:
             self.task_started_callback(task)
         
-        logger.info(f"开始执行任务: {task.config.task_name} (ID: {task_id})")
+        logger.info(f"开始执行任务: {task.name} (ID: {task_id})")
     
     def _task_execution_wrapper(self, scheduled_task: ScheduledTask):
         """任务执行包装器"""
@@ -376,7 +376,7 @@ class IntelligentScheduler:
                 if self.task_completed_callback:
                     self.task_completed_callback(task, result)
                 
-                logger.info(f"任务执行成功: {task.config.task_name}")
+                logger.info(f"任务执行成功: {task.name}")
                 
             elif result == TaskExecutionResult.RETRY:
                 # 需要重试
@@ -388,7 +388,7 @@ class IntelligentScheduler:
                     scheduled_task.scheduled_time = retry_time
                     self.task_queue.put(scheduled_task)
                     
-                    logger.info(f"任务将重试: {task.config.task_name} (第{scheduled_task.retry_count}次)")
+                    logger.info(f"任务将重试: {task.name} (第{scheduled_task.retry_count}次)")
                 else:
                     # 重试次数用尽，标记为失败
                     self.task_manager.update_task_status(task_id, TaskStatus.FAILED)
@@ -397,7 +397,7 @@ class IntelligentScheduler:
                     if self.task_failed_callback:
                         self.task_failed_callback(task, "重试次数用尽")
                     
-                    logger.error(f"任务重试次数用尽，执行失败: {task.config.task_name}")
+                    logger.error(f"任务重试次数用尽，执行失败: {task.name}")
             
             else:
                 # 任务失败
@@ -407,7 +407,7 @@ class IntelligentScheduler:
                 if self.task_failed_callback:
                     self.task_failed_callback(task, f"执行结果: {result.value}")
                 
-                logger.error(f"任务执行失败: {task.config.task_name}")
+                logger.error(f"任务执行失败: {task.name}")
         
         except Exception as e:
             # 异常处理
@@ -417,7 +417,7 @@ class IntelligentScheduler:
             if self.task_failed_callback:
                 self.task_failed_callback(task, str(e))
             
-            logger.error(f"任务执行异常: {task.config.task_name} - {e}")
+            logger.error(f"任务执行异常: {task.name} - {e}")
         
         finally:
             # 清理运行中的任务记录
@@ -436,7 +436,7 @@ class IntelligentScheduler:
             time.sleep(1.0)
             
             # 执行任务配置中的操作序列
-            for action_data in task.config.actions:
+            for action_data in task.config.get('actions', []):
                 if self.stop_event.is_set():
                     return TaskExecutionResult.CANCELLED
                 
@@ -459,7 +459,7 @@ class IntelligentScheduler:
             TaskPriority.MEDIUM: 5,
             TaskPriority.HIGH: 10,
             TaskPriority.URGENT: 20
-        }.get(task.config.priority, 5)
+        }.get(task.priority, 5)
         
         # 根据任务类型调整优先级
         type_bonus = {
@@ -467,14 +467,14 @@ class IntelligentScheduler:
             TaskType.COMBAT_TRAINING: 3,
             TaskType.EXPLORATION: 2,
             TaskType.CUSTOM: 1
-        }.get(task.config.task_type, 1)
+        }.get(task.task_type, 1)
         
         # 根据当前游戏场景调整优先级
         current_scene = self.game_detector.detect_current_scene()
         suitable_tasks = self.scene_task_mapping.get(current_scene, [])
         
         scene_bonus = 0
-        if task.config.task_type in suitable_tasks:
+        if task.task_type in suitable_tasks:
             scene_bonus = int(base_priority * self.config.priority_boost_factor)
         
         return base_priority + type_bonus + scene_bonus

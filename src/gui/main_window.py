@@ -22,11 +22,11 @@ from loguru import logger
 from .game_settings_widget import GameSettingsWidget
 from .automation_settings_widget import AutomationSettingsWidget
 from .log_viewer_widget import LogViewerWidget
-from ..core.config_manager import ConfigManager
-from ..database.db_manager import DatabaseManager
-from ..automation.automation_controller import TaskStatus
-# from ..automation.task_monitor import TaskMonitor  # 暂时注释掉，模块不存在
-from ..automation.automation_controller import AutomationController
+from core.config_manager import ConfigManager
+from database.db_manager import DatabaseManager
+from automation.automation_controller import TaskStatus
+# from automation.task_monitor import TaskMonitor  # 暂时注释掉，模块不存在
+from automation.automation_controller import AutomationController
 
 
 class MainWindow(QMainWindow):
@@ -48,10 +48,9 @@ class MainWindow(QMainWindow):
         
         # 如果没有传入管理器，则创建默认实例
         if config_manager is None:
-            from ..core.config_manager import ConfigManager
+            from core.config_manager import ConfigManager
             config_manager = ConfigManager()
         if db_manager is None:
-            from ..database.db_manager import DatabaseManager
             db_manager = DatabaseManager()
             db_manager.initialize_database()
         
@@ -59,7 +58,7 @@ class MainWindow(QMainWindow):
         self.db_manager = db_manager
         
         # 初始化游戏检测器
-        from ..automation.game_detector import GameDetector
+        from automation.game_detector import GameDetector
         self.game_detector = GameDetector(self.config_manager)
         
         # 创建自动化控制器
@@ -74,7 +73,7 @@ class MainWindow(QMainWindow):
         
         # 创建任务监控器
         try:
-            from ..monitoring.task_monitor import TaskMonitor
+            from monitoring.task_monitor import TaskMonitor
             self.task_monitor = TaskMonitor(
                 db_manager=self.db_manager,
                 automation_controller=self.automation_controller
@@ -106,7 +105,7 @@ class MainWindow(QMainWindow):
         """初始化高级功能模块"""
         try:
             # 初始化性能监控器
-            from ..core.performance_monitor import PerformanceMonitor
+            from core.performance_monitor import PerformanceMonitor
             self.performance_monitor = PerformanceMonitor(
                 monitoring_interval=1.0,
                 history_size=300
@@ -119,7 +118,7 @@ class MainWindow(QMainWindow):
         
         try:
             # 初始化异常恢复机制
-            from ..core.exception_recovery import ExceptionRecovery
+            from core.exception_recovery import ExceptionRecovery
             self.exception_recovery = ExceptionRecovery(
                 game_detector=self.game_detector,
                 automation_controller=self.automation_controller
@@ -131,7 +130,7 @@ class MainWindow(QMainWindow):
         
         try:
             # 初始化多任务管理器
-            from ..core.multi_task_manager import MultiTaskManager
+            from core.multi_task_manager import MultiTaskManager
             self.multi_task_manager = MultiTaskManager(
                 game_detector=self.game_detector,
                 automation_controller=self.automation_controller,
@@ -312,7 +311,7 @@ class MainWindow(QMainWindow):
         """创建任务管理标签页"""
         from .task_creation_widget import TaskCreationWidget
         from .task_list_widget import TaskListWidget
-        from ..core.task_manager import TaskManager
+        from core.task_manager import TaskManager
         
         widget = QWidget()
         layout = QVBoxLayout(widget)
@@ -324,7 +323,7 @@ class MainWindow(QMainWindow):
         
         # 初始化智能调度器（需要任务管理器）
         try:
-            from ..core.intelligent_scheduler import IntelligentScheduler
+            from core.intelligent_scheduler import IntelligentScheduler
             self.intelligent_scheduler = IntelligentScheduler(
                 task_manager=self.task_manager,
                 game_detector=self.game_detector,
@@ -415,6 +414,13 @@ class MainWindow(QMainWindow):
         # 工具菜单
         tools_menu = menubar.addMenu("工具")
         
+        # 执行历史
+        history_action = QAction("执行历史", self)
+        history_action.triggered.connect(self._show_execution_history)
+        tools_menu.addAction(history_action)
+        
+        tools_menu.addSeparator()
+        
         # 数据库管理
         db_action = QAction("数据库管理", self)
         db_action.triggered.connect(self._open_db_manager)
@@ -502,7 +508,7 @@ class MainWindow(QMainWindow):
     def _on_task_edit_requested(self, task_id: str):
         """处理任务编辑请求"""
         try:
-            task = self.task_manager.get_task(task_id)
+            task = self.task_manager.get_task_sync(task_id)
             if task:
                 # 在任务创建组件中加载任务配置进行编辑
                 self.task_creation_widget.load_task_for_edit(task)
@@ -662,7 +668,7 @@ class MainWindow(QMainWindow):
         self.status_changed.emit(f"任务 {task_id[:8]}... 状态变更为: {status}")
         # 更新任务列表中的状态显示
         if hasattr(self, 'task_list_widget'):
-            from ..automation.automation_controller import TaskStatus
+            from automation.automation_controller import TaskStatus
             try:
                 task_status = TaskStatus(status)
                 self.task_list_widget.update_task_status(task_id, task_status)
@@ -717,6 +723,16 @@ class MainWindow(QMainWindow):
     def _open_log_manager(self):
         """打开日志管理"""
         QMessageBox.information(self, "提示", "日志管理功能待实现")
+    
+    def _show_execution_history(self):
+        """显示任务执行历史"""
+        try:
+            from .task_execution_history_dialog import TaskExecutionHistoryDialog
+            dialog = TaskExecutionHistoryDialog(self.task_manager, self)
+            dialog.exec()
+        except Exception as e:
+            logger.error(f"打开执行历史对话框失败: {e}")
+            QMessageBox.critical(self, "错误", f"打开执行历史失败：{str(e)}")
     
     def _open_settings(self):
         """打开设置"""

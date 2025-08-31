@@ -17,8 +17,8 @@ import json
 
 from loguru import logger
 from .game_detector import GameDetector, SceneType
-from ..automation.automation_controller import AutomationController
-from ..models.task_model import Task, TaskStatus
+from automation.automation_controller import AutomationController
+from models.task_model import Task, TaskStatus
 from .performance_monitor import PerformanceMonitor, PerformanceLevel
 
 

@@ -383,7 +383,41 @@ class DatabaseManager:
             conn.commit()
             
         logger.info(f"删除任务: {task_id}")
-    
+
+    def get_task_config(self, task_id: str) -> Dict[str, Any]:
+        """获取任务配置
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            Dict[str, Any]: 任务配置字典
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT config_key, config_value, data_type FROM task_configs WHERE task_id = ?",
+                (task_id,)
+            )
+            
+            config = {}
+            for row in cursor.fetchall():
+                key, value, data_type = row
+                # 根据数据类型转换值
+                if data_type == 'integer':
+                    config[key] = int(value)
+                elif data_type == 'float':
+                    config[key] = float(value)
+                elif data_type == 'boolean':
+                    config[key] = value.lower() in ('true', '1', 'yes')
+                elif data_type == 'json':
+                    import json
+                    config[key] = json.loads(value)
+                else:
+                    config[key] = value
+            
+            return config
+
     def add_execution_log(self, task_id: str, level: str, message: str, details: str = None):
         """添加执行日志
         

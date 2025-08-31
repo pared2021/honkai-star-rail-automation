@@ -13,8 +13,9 @@ from queue import Queue, Empty
 from loguru import logger
 from PyQt6.QtCore import QObject, pyqtSignal, QTimer
 
-from ..database.db_manager import DatabaseManager
-from .automation_controller import TaskStatus, AutomationController
+from database.db_manager import DatabaseManager
+from automation.automation_controller import AutomationController
+from core.enums import TaskStatus
 
 
 @dataclass

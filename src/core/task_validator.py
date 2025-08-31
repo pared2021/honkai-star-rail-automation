@@ -91,19 +91,19 @@ class TaskValidator:
         results = []
         
         # 验证任务名称
-        if not config.task_name:
+        if not config.name:
             results.append(ValidationResult(
                 is_valid=False,
                 level=ValidationLevel.ERROR,
-                field="task_name",
+                field="name",
                 message="任务名称不能为空",
                 suggestion="请输入有效的任务名称"
             ))
-        elif not self.task_name_pattern.match(config.task_name):
+        elif not self.task_name_pattern.match(config.name):
             results.append(ValidationResult(
                 is_valid=False,
                 level=ValidationLevel.ERROR,
-                field="task_name",
+                field="name",
                 message="任务名称格式不正确",
                 suggestion="任务名称只能包含中文、英文、数字、下划线、连字符和空格，长度1-50字符"
             ))

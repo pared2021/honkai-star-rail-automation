@@ -16,8 +16,8 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDate, QThread, pyqtSlot
 from PyQt6.QtGui import QFont, QColor, QBrush, QAction, QIcon
 
 from loguru import logger
-from ..core.task_manager import TaskManager, TaskType, TaskPriority, Task
-from ..automation.automation_controller import TaskStatus
+from core.task_manager import TaskManager, TaskType, TaskPriority, Task
+from automation.automation_controller import TaskStatus
 
 
 class TaskListWidget(QWidget):
@@ -378,16 +378,16 @@ class TaskListWidget(QWidget):
                 continue
             
             # 类型过滤
-            if self.filter_type and task.config.task_type != self.filter_type:
+            if self.filter_type and task.task_type != self.filter_type:
                 continue
             
             # 优先级过滤
-            if self.filter_priority and task.config.priority != self.filter_priority:
+            if self.filter_priority and task.priority != self.filter_priority:
                 continue
             
             # 文本搜索
             if self.filter_text:
-                search_text = f"{task.config.task_name} {task.config.description or ''}".lower()
+                search_text = f"{task.name} {task.description or ''}".lower()
                 if self.filter_text not in search_text:
                     continue
             
@@ -444,6 +444,13 @@ class TaskListWidget(QWidget):
         
         menu.addSeparator()
         
+        # 查看执行历史
+        history_action = QAction("查看执行历史", self)
+        history_action.triggered.connect(self._show_execution_history)
+        menu.addAction(history_action)
+        
+        menu.addSeparator()
+        
         # 编辑任务
         edit_action = QAction("编辑任务", self)
         edit_action.triggered.connect(self._edit_selected_task)
@@ -492,11 +499,17 @@ class TaskListWidget(QWidget):
         """复制选中的任务"""
         if self.selected_task_id:
             try:
-                task = self.task_manager.get_task(self.selected_task_id)
+                task = self.task_manager.get_task_sync(self.selected_task_id)
                 if task:
                     # 创建新的任务配置（复制原配置）
-                    new_config = task.config
-                    new_config.task_name = f"{task.config.task_name} (副本)"
+                    from core.task_manager import TaskConfig
+                    new_config = TaskConfig(
+                        task_name=f"{task.name} (副本)",
+                        description=task.description,
+                        task_type=task.task_type,
+                        priority=task.priority,
+                        **task.config  # 复制其他配置项
+                    )
                     
                     # 创建新任务
                     new_task_id = self.task_manager.create_task(
@@ -528,48 +541,79 @@ class TaskListWidget(QWidget):
             if reply == QMessageBox.StandardButton.Yes:
                 self.task_delete_requested.emit(self.selected_task_id)
     
+    def _show_execution_history(self):
+        """显示选中任务的执行历史"""
+        if self.selected_task_id:
+            try:
+                from .task_execution_history_dialog import TaskExecutionHistoryDialog
+                dialog = TaskExecutionHistoryDialog(
+                    task_manager=self.task_manager,
+                    task_id=self.selected_task_id,
+                    parent=self
+                )
+                dialog.exec()
+            except Exception as e:
+                logger.error(f"显示执行历史失败: {e}")
+                QMessageBox.critical(self, "错误", f"显示执行历史失败：{str(e)}")
+    
     def _show_task_details(self, task_id: str):
         """显示任务详情"""
         try:
-            task = self.task_manager.get_task(task_id)
+            task = self.task_manager.get_task_sync(task_id)
             if not task:
                 self._show_no_selection_message()
                 return
             
             # 构建详情文本
             details = []
-            details.append(f"<h3>{task.config.task_name}</h3>")
+            # 使用 task.name 而不是 task.config.task_name
+            details.append(f"<h3>{task.name}</h3>")
             details.append(f"<b>任务ID:</b> {task.task_id}")
-            details.append(f"<b>类型:</b> {task.config.task_type.value}")
-            details.append(f"<b>优先级:</b> {task.config.priority.value}")
+            details.append(f"<b>类型:</b> {task.task_type.value}")
+            details.append(f"<b>优先级:</b> {task.priority.value}")
             details.append(f"<b>状态:</b> {task.status.value}")
             details.append(f"<b>创建时间:</b> {task.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
             
-            if task.started_at:
-                details.append(f"<b>开始时间:</b> {task.started_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            # Task 模型中没有 started_at 和 completed_at 字段，跳过这些
             
-            if task.completed_at:
-                details.append(f"<b>完成时间:</b> {task.completed_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            if task.description:
+                details.append(f"<b>描述:</b><br>{task.description}")
             
-            if task.config.description:
-                details.append(f"<b>描述:</b><br>{task.config.description}")
+            # 从 config 字典中安全地获取配置信息
+            config = task.config or {}
             
-            details.append(f"<b>最大执行时间:</b> {task.config.max_duration} 秒")
-            details.append(f"<b>重试次数:</b> {task.config.retry_count}")
-            details.append(f"<b>重试间隔:</b> {task.config.retry_interval} 秒")
-            details.append(f"<b>安全模式:</b> {'是' if task.config.safe_mode else '否'}")
+            if config.get('max_duration'):
+                details.append(f"<b>最大执行时间:</b> {config['max_duration']} 秒")
             
-            if task.config.scheduled_time:
-                details.append(f"<b>计划执行时间:</b> {task.config.scheduled_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            if config.get('retry_count') is not None:
+                details.append(f"<b>重试次数:</b> {config['retry_count']}")
             
-            if task.config.repeat_interval:
-                details.append(f"<b>重复间隔:</b> {task.config.repeat_interval} 分钟")
+            if config.get('retry_interval') is not None:
+                details.append(f"<b>重试间隔:</b> {config['retry_interval']} 秒")
             
-            if task.config.actions:
-                details.append(f"<b>动作数量:</b> {len(task.config.actions)}")
+            if config.get('safe_mode') is not None:
+                details.append(f"<b>安全模式:</b> {'是' if config['safe_mode'] else '否'}")
             
-            if task.config.custom_params:
-                details.append(f"<b>自定义参数:</b><br><pre>{task.config.custom_params}</pre>")
+            if config.get('scheduled_time'):
+                # 如果 scheduled_time 是字符串，需要转换为 datetime
+                scheduled_time = config['scheduled_time']
+                if isinstance(scheduled_time, str):
+                    try:
+                        scheduled_time = datetime.fromisoformat(scheduled_time)
+                        details.append(f"<b>计划执行时间:</b> {scheduled_time.strftime('%Y-%m-%d %H:%M:%S')}")
+                    except:
+                        details.append(f"<b>计划执行时间:</b> {scheduled_time}")
+                elif hasattr(scheduled_time, 'strftime'):
+                    details.append(f"<b>计划执行时间:</b> {scheduled_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            if task.repeat_interval:
+                details.append(f"<b>重复间隔:</b> {task.repeat_interval} 秒")
+            
+            if config.get('actions'):
+                details.append(f"<b>动作数量:</b> {len(config['actions'])}")
+            
+            if config.get('custom_params'):
+                details.append(f"<b>自定义参数:</b><br><pre>{config['custom_params']}</pre>")
             
             # 显示详情
             detail_html = "<br>".join(details)
@@ -594,20 +638,20 @@ class TaskListWidget(QWidget):
         
         for row, task in enumerate(tasks):
             # 任务名称
-            name_item = QTableWidgetItem(task.config.task_name)
+            name_item = QTableWidgetItem(task.name)
             name_item.setData(Qt.ItemDataRole.UserRole, task.task_id)
             self.task_table.setItem(row, 0, name_item)
             
             # 类型
-            type_item = QTableWidgetItem(task.config.task_type.value)
+            type_item = QTableWidgetItem(task.task_type.value)
             self.task_table.setItem(row, 1, type_item)
             
             # 优先级
-            priority_item = QTableWidgetItem(task.config.priority.value)
+            priority_item = QTableWidgetItem(task.priority.value)
             # 设置优先级颜色
-            if task.config.priority == TaskPriority.HIGH:
+            if task.priority == TaskPriority.HIGH:
                 priority_item.setBackground(QBrush(QColor(255, 200, 200)))
-            elif task.config.priority == TaskPriority.LOW:
+            elif task.priority == TaskPriority.LOW:
                 priority_item.setBackground(QBrush(QColor(200, 255, 200)))
             self.task_table.setItem(row, 2, priority_item)
             
@@ -648,8 +692,8 @@ class TaskListWidget(QWidget):
     def refresh_task_list(self):
         """刷新任务列表"""
         try:
-            # 获取所有任务
-            self.current_tasks = self.task_manager.list_tasks(user_id="default_user")
+            # 使用同步方法获取所有任务
+            self.current_tasks = self.task_manager.list_tasks_sync(user_id="default_user")
             
             # 应用过滤
             self._apply_filters()

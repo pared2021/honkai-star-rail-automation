@@ -16,8 +16,8 @@ import weakref
 import time
 
 from loguru import logger
-from ..database.db_manager import DatabaseManager
-from ..models.task_model import Task, TaskStatus, TaskType, TaskPriority
+from database.db_manager import DatabaseManager
+from models.task_model import Task, TaskStatus, TaskType, TaskPriority
 from .task_executor import TaskExecutor
 from .task_actions import ActionFactory
 from .enums import ActionType
@@ -27,7 +27,7 @@ from .enums import ActionType
 class TaskConfig:
     """任务配置数据结构"""
     # 基本信息
-    task_name: str
+    name: str
     task_type: TaskType
     description: str = ""
     priority: TaskPriority = TaskPriority.MEDIUM
@@ -60,7 +60,7 @@ class TaskConfig:
             self.schedule_days = []
         
         # 验证参数
-        if not self.task_name or not self.task_name.strip():
+        if not self.name or not self.name.strip():
             raise ValueError("任务名称不能为空")
         if self.max_retry_count < 0:
             raise ValueError("重试次数不能为负数")
@@ -625,10 +625,10 @@ class TaskManager:
         Raises:
             TaskValidationError: 配置验证失败
         """
-        if not config.task_name or not config.task_name.strip():
+        if not config.name or not config.name.strip():
             raise TaskValidationError("任务名称不能为空")
         
-        if len(config.task_name) > 255:
+        if len(config.name) > 255:
             raise TaskValidationError("任务名称长度不能超过255个字符")
         
         if config.description and len(config.description) > 1000:
@@ -890,9 +890,9 @@ class TaskManager:
                 
                 # 插入任务基本信息
                 await conn.execute(
-                    "INSERT INTO tasks (task_id, user_id, task_name, task_type, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?)",
-                    (task_id, user_id, config.task_name, config.task_type.value, TaskStatus.PENDING.value, 
-                     task.created_at.isoformat(), task.updated_at.isoformat())
+                    "INSERT INTO tasks (task_id, user_id, task_name, description, task_type, priority, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (task_id, user_id, config.name, config.description or '', config.task_type.value, 
+                     config.priority.value, TaskStatus.PENDING.value, task.created_at.isoformat(), task.updated_at.isoformat())
                 )
                 
                 # 插入任务配置
@@ -906,7 +906,7 @@ class TaskManager:
                 )
                 
                 await conn.commit()
-                logger.info(f"创建任务成功: {config.task_name} (ID: {task_id})")
+                logger.info(f"创建任务成功: {config.name} (ID: {task_id})")
                 return task_id
                 
             except Exception as e:
@@ -927,7 +927,7 @@ class TaskManager:
             try:
                 # 获取任务基本信息
                 cursor = await conn.execute(
-                    "SELECT * FROM tasks WHERE task_id = ?",
+                    "SELECT task_id, user_id, task_name, description, task_type, priority, status, created_at, updated_at, last_execution FROM tasks WHERE task_id = ?",
                     (task_id,)
                 )
                 
@@ -947,21 +947,19 @@ class TaskManager:
                     return None
                 
                 config_data = json.loads(config_row[0])
-                config_data['task_type'] = TaskType(config_data['task_type'])
-                config_data['priority'] = TaskPriority(config_data['priority'])
-                config = TaskConfig(**config_data)
                 
                 task = Task(
-                    task_id=task_row['task_id'],
-                    user_id=task_row['user_id'],
-                    name=config.task_name,  # 从配置中获取任务名称
-                    description=getattr(config, 'description', ''),  # 从配置中获取描述
-                    task_type=config.task_type,
-                    priority=config.priority,
-                    status=TaskStatus(task_row['status']),
-                    config=config,
-                    created_at=datetime.fromisoformat(task_row['created_at']),
-                    updated_at=datetime.fromisoformat(task_row['updated_at'])
+                    task_id=task_row[0],  # task_id
+                    user_id=task_row[1],  # user_id
+                    name=task_row[2],     # task_name
+                    description=task_row[3] or '',  # description
+                    task_type=TaskType(task_row[4]),  # task_type
+                    priority=TaskPriority(task_row[5]),  # priority
+                    status=TaskStatus(task_row[6]),  # status
+                    config=config_data,  # 直接使用配置字典
+                    created_at=datetime.fromisoformat(task_row[7]),  # created_at
+                    updated_at=datetime.fromisoformat(task_row[8]),  # updated_at
+                    last_executed_at=datetime.fromisoformat(task_row[9]) if task_row[9] else None  # last_execution
                 )
                 
                 return task
@@ -969,6 +967,60 @@ class TaskManager:
             except Exception as e:
                 logger.error(f"获取任务失败: {e}")
                 return None
+    
+    def get_task_sync(self, task_id: str) -> Optional[Task]:
+        """同步获取任务详情
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            Optional[Task]: 任务对象，如果不存在则返回None
+        """
+        try:
+            with self.db_manager.get_connection() as conn:
+                # 获取任务基本信息
+                cursor = conn.execute(
+                    "SELECT task_id, user_id, task_name, description, task_type, priority, status, created_at, updated_at, last_execution FROM tasks WHERE task_id = ?",
+                    (task_id,)
+                )
+                
+                task_row = cursor.fetchone()
+                if not task_row:
+                    return None
+                
+                # 获取任务配置
+                cursor = conn.execute(
+                    "SELECT config_value FROM task_configs WHERE task_id = ? AND config_key = 'full_config'",
+                    (task_id,)
+                )
+                
+                config_row = cursor.fetchone()
+                if not config_row:
+                    logger.warning(f"任务 {task_id} 缺少配置信息")
+                    return None
+                
+                config_data = json.loads(config_row[0])
+                
+                task = Task(
+                    task_id=task_row[0],  # task_id
+                    user_id=task_row[1],  # user_id
+                    name=task_row[2],     # task_name
+                    description=task_row[3] or '',  # description
+                    task_type=TaskType(task_row[4]),  # task_type
+                    priority=TaskPriority(task_row[5]),  # priority
+                    status=TaskStatus(task_row[6]),  # status
+                    config=config_data,  # 直接使用配置字典
+                    created_at=datetime.fromisoformat(task_row[7]),  # created_at
+                    updated_at=datetime.fromisoformat(task_row[8]),  # updated_at
+                    last_executed_at=datetime.fromisoformat(task_row[9]) if task_row[9] else None  # last_execution
+                )
+                
+                return task
+                
+        except Exception as e:
+            logger.error(f"获取任务失败: {e}")
+            return None
     
     async def update_task(self, task_id: str, config: Optional[TaskConfig] = None, 
                          status: Optional[TaskStatus] = None) -> bool:
@@ -1018,6 +1070,13 @@ class TaskManager:
                     config_data = asdict(config)
                     config_data['task_type'] = config.task_type.value
                     config_data['priority'] = config.priority.value
+                    
+                    # 同时更新tasks表中的基本信息
+                    await conn.execute(
+                        "UPDATE tasks SET task_name = ?, description = ?, task_type = ?, priority = ?, updated_at = ? WHERE task_id = ?",
+                        (config.name, config.description or '', config.task_type.value, 
+                         config.priority.value, datetime.now().isoformat(), task_id)
+                    )
                     
                     await conn.execute(
                         "UPDATE task_configs SET config_value = ? WHERE task_id = ? AND config_key = 'full_config'",
@@ -1189,7 +1248,7 @@ class TaskManager:
             for row_dict in rows_data:
                 task_dict = {
                     'task_id': row_dict['task_id'],
-                    'task_name': row_dict['task_name'],
+                    'task_name': row_dict['task_name'],  # 保持数据库字段名
                     'task_type': row_dict['task_type'],
                     'status': row_dict['status'],
                     'priority': row_dict['priority'],
@@ -1209,7 +1268,7 @@ class TaskManager:
                 for row in rows:
                     task_dict = {
                         'task_id': row[0],
-                        'task_name': row[1],
+                        'task_name': row[1],  # 保持数据库字段名
                         'task_type': row[2],
                         'status': row[3],
                         'priority': row[4],
@@ -1221,6 +1280,61 @@ class TaskManager:
                     tasks.append(task_dict)
         
         return tasks
+    
+    def list_tasks_sync(self, user_id: Optional[str] = None, status: Optional[TaskStatus] = None,
+                       limit: int = 100, offset: int = 0) -> List[Task]:
+        """同步获取任务列表（用于GUI调用）
+        
+        Args:
+            user_id: 用户ID（可选）
+            status: 任务状态（可选）
+            limit: 返回数量限制
+            offset: 偏移量
+            
+        Returns:
+            List[Task]: 任务对象列表
+        """
+        try:
+            # 使用数据库管理器的同步方法
+            tasks_data = self.db_manager.get_tasks_by_user(user_id or "default_user", status)
+            
+            # 转换为Task对象
+            tasks = []
+            for task_data in tasks_data[:limit]:
+                try:
+                    # 获取任务配置
+                    config_data = self.db_manager.get_task_config(task_data['task_id'])
+                    
+                    # 创建Task对象，config字段使用字典
+                    task = Task(
+                        task_id=task_data['task_id'],
+                        user_id=task_data['user_id'],
+                        name=task_data['task_name'],
+                        description=task_data.get('description', ''),
+                        task_type=TaskType(task_data.get('task_type', 'custom')),
+                        priority=TaskPriority(task_data.get('priority', 'medium')),
+                        status=TaskStatus(task_data['status']),
+                        config=config_data or {},  # 使用字典而不是TaskConfig对象
+                        created_at=datetime.fromisoformat(task_data['created_at']) if isinstance(task_data['created_at'], str) else task_data['created_at'],
+                        updated_at=datetime.fromisoformat(task_data['updated_at']) if isinstance(task_data['updated_at'], str) else task_data['updated_at']
+                    )
+                    
+                    # 设置执行时间
+                    if task_data.get('last_execution'):
+                        task.last_executed_at = datetime.fromisoformat(task_data['last_execution']) if isinstance(task_data['last_execution'], str) else task_data['last_execution']
+                    
+                    tasks.append(task)
+                    
+                except Exception as e:
+                    logger.error(f"转换任务数据失败 {task_data.get('task_id', 'unknown')}: {e}")
+                    continue
+            
+            logger.debug(f"同步获取任务列表成功，共 {len(tasks)} 个任务")
+            return tasks
+            
+        except Exception as e:
+            logger.error(f"同步获取任务列表失败: {e}")
+            return []
     
     async def get_task_statistics(self, user_id: Optional[str] = None, use_cache: bool = True) -> Dict[str, Any]:
         """异步获取任务统计信息（支持缓存）

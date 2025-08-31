@@ -13,9 +13,9 @@ from queue import Queue, Empty
 import pyautogui
 from loguru import logger
 
-from ..core.config_manager import ConfigManager, ConfigType
-from ..core.enums import ActionType, TaskStatus
-from ..database.db_manager import DatabaseManager
+from core.config_manager import ConfigManager, ConfigType
+from core.enums import ActionType, TaskStatus
+from database.db_manager import DatabaseManager
 from .game_detector import GameDetector, DetectionResult
 
 

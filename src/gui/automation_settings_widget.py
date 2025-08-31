@@ -11,8 +11,8 @@ import json
 from typing import Dict, Any, List
 from loguru import logger
 
-from ..core.config_manager import ConfigManager
-from ..core.task_manager import TaskType
+from core.config_manager import ConfigManager
+from core.task_manager import TaskType
 
 
 class AutomationSettingsWidget(QWidget):

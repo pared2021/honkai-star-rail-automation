@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+测试 TaskManager 类中的方法是否存在
+"""
+
+import sys
+import os
+from pathlib import Path
+
+# 添加src目录到路径
+src_path = Path(__file__).parent / "src"
+sys.path.insert(0, str(src_path))
+
+try:
+    # 导入必要的模块
+    from database.db_manager import DatabaseManager
+    from core.task_manager import TaskManager
+    
+    print("模块导入成功")
+    
+    # 检查 TaskManager 类的方法
+    print("\nTaskManager 类的方法:")
+    methods = [method for method in dir(TaskManager) if not method.startswith('_')]
+    for method in sorted(methods):
+        print(f"  - {method}")
+    
+    # 特别检查 get_task_sync 方法
+    has_get_task_sync = hasattr(TaskManager, 'get_task_sync')
+    print(f"\nget_task_sync 方法存在: {has_get_task_sync}")
+    
+    if has_get_task_sync:
+        method = getattr(TaskManager, 'get_task_sync')
+        print(f"方法类型: {type(method)}")
+        print(f"方法文档: {method.__doc__}")
+    
+    # 尝试创建实例
+    print("\n尝试创建 TaskManager 实例...")
+    db_manager = DatabaseManager()
+    task_manager = TaskManager(db_manager)
+    
+    print("TaskManager 实例创建成功")
+    
+    # 检查实例方法
+    has_instance_method = hasattr(task_manager, 'get_task_sync')
+    print(f"实例中 get_task_sync 方法存在: {has_instance_method}")
+    
+except Exception as e:
+    print(f"错误: {e}")
+    import traceback
+    traceback.print_exc()
