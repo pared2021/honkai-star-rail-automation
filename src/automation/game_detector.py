@@ -15,7 +15,7 @@ import pyautogui
 from PIL import Image, ImageGrab
 from loguru import logger
 
-from ..core.config_manager import ConfigManager
+from ..core.config_manager import ConfigManager, ConfigType
 
 
 @dataclass
@@ -50,7 +50,7 @@ class GameDetector:
         self.config_manager = config_manager
         
         # 检测配置
-        self.detection_threshold = float(config_manager.get('automation', 'detection_threshold', 0.8))
+        self.detection_threshold = config_manager.get_setting(ConfigType.AUTOMATION_CONFIG, 'detection_threshold', 0.8)
         self.game_process_names = ['StarRail.exe', 'YuanShen.exe']  # 可能的游戏进程名
         
         # 模板图片缓存

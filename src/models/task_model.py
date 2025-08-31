@@ -3,43 +3,11 @@
 任务数据模型
 """
 
-from enum import Enum
 from dataclasses import dataclass
 from typing import Dict, Any, Optional
 from datetime import datetime
 
-
-class TaskStatus(Enum):
-    """任务状态枚举"""
-    PENDING = "pending"
-    RUNNING = "running"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    PAUSED = "paused"
-    CANCELLED = "cancelled"
-
-
-class TaskType(Enum):
-    """任务类型枚举"""
-    DAILY_MISSION = "daily_mission"  # 日常任务
-    WEEKLY_MISSION = "weekly_mission"  # 周常任务
-    MATERIAL_FARMING = "material_farming"  # 材料刷取
-    CUSTOM_SEQUENCE = "custom_sequence"  # 自定义序列
-    EXPLORATION = "exploration"  # 探索任务
-    COMBAT_TRAINING = "combat_training"  # 战斗训练
-    CLICK = "click"
-    KEY_PRESS = "key_press"
-    WAIT = "wait"
-    SCREENSHOT = "screenshot"
-    CUSTOM = "custom"
-
-
-class TaskPriority(Enum):
-    """任务优先级枚举"""
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    URGENT = "urgent"
+from ..core.enums import TaskStatus, TaskType, TaskPriority
 
 
 @dataclass

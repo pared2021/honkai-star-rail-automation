@@ -1,0 +1,20 @@
+{
+  "config_type": "performance_config",
+  "data": {
+    "cpu_limit": 80.0,
+    "memory_limit": 70.0,
+    "image_cache_size": 100,
+    "optimization_level": "basic",
+    "monitoring_interval": 5.0
+  },
+  "metadata": {
+    "export_time": "2025-01-31T12:00:00",
+    "version": "1.0",
+    "application": "星铁自动化助手",
+    "validation_result": {
+      "is_valid": true,
+      "error_count": 0,
+      "warning_count": 0
+    }
+  }
+}

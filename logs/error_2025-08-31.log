@@ -1,0 +1,61 @@
+2025-08-31 04:21:58 | ERROR    | src.gui.game_settings_widget:_load_settings:298 - 加载游戏设置失败: 'ConfigManager' object has no attribute 'get_game_config'
+2025-08-31 04:22:00 | ERROR    | src.gui.automation_settings_widget:_load_settings:591 - 加载自动化配置失败: 'ConfigManager' object has no attribute 'get_automation_config'
+2025-08-31 07:18:37 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:18:42 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:20:42 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:20:44 | ERROR    | __main__:main:108 - 应用程序启动失败: type object 'ActionType' has no attribute 'DOUBLE_CLICK'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001F32166EDE0>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 92, in __init__
+    self._init_ui()
+    │    └ <function MainWindow._init_ui at 0x000001F339B0B1A0>
+    └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 178, in _init_ui
+    right_panel = self._create_right_panel()
+                  │    └ <function MainWindow._create_right_panel at 0x000001F339B0B2E0>
+                  └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 294, in _create_right_panel
+    task_tab = self._create_task_tab()
+               │    └ <function MainWindow._create_task_tab at 0x000001F339B0B380>
+               └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 346, in _create_task_tab
+    self.task_creation_widget = TaskCreationWidget(self.task_manager)
+    │                           │                  │    └ <src.core.task_manager.TaskManager object at 0x000001F33A848590>
+    │                           │                  └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+    │                           └ <class 'src.gui.task_creation_widget.TaskCreationWidget'>
+    └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\task_creation_widget.py", line 43, in __init__
+    self.validator = TaskValidator()
+    │                └ <class 'src.core.task_validator.TaskValidator'>
+    └ <src.gui.task_creation_widget.TaskCreationWidget object at 0x000001F33A9111D0>
+
+  File "E:\UGit\xingtie\src\core\task_validator.py", line 52, in __init__
+    ActionType.DOUBLE_CLICK: ['x', 'y', 'template'],
+    └ <enum 'ActionType'>
+
+AttributeError: type object 'ActionType' has no attribute 'DOUBLE_CLICK'
+2025-08-31 07:21:14 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:19 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:29 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:34 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:39 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:44 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:49 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:54 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:22:04 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:22:09 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 08:24:48 | ERROR    | src.database.db_manager:get_connection:51 - 数据库操作失败: CHECK constraint failed: status IN ('pending', 'running', 'completed', 'failed', 'paused', 'cancelled')

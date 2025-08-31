@@ -5,4 +5,4 @@
 
 from .task_monitor import TaskMonitor
 
-__all__ = ['TaskMon
+__all__ = ['TaskMonitor']

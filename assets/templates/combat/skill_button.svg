@@ -1,0 +1,4 @@
+<svg width="90" height="40" xmlns="http://www.w3.org/2000/svg">
+  <rect width="90" height="40" fill="#9C27B0" stroke="#7B1FA2" stroke-width="2" rx="5"/>
+  <text x="45" y="25" font-family="Arial, sans-serif" font-size="14" fill="white" text-anchor="middle">技能</text>
+</svg>

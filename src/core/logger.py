@@ -171,6 +171,20 @@ def log_game_state(state_info: dict):
     automation_logger.info(f"[{timestamp}] 游戏状态: {state_info}")
 
 
+def get_logger(name: str = None):
+    """获取logger实例
+    
+    Args:
+        name: logger名称，可选
+        
+    Returns:
+        logger实例
+    """
+    if name:
+        return logger.bind(name=name)
+    return logger
+
+
 def log_error_with_context(error: Exception, context: str = ""):
     """记录带上下文的错误日志
     

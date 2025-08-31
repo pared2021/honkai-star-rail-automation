@@ -1,0 +1,28 @@
+{
+  "config_type": "ui_preferences",
+  "data": {
+    "theme": "auto",
+    "window_size": {
+      "width": 1400,
+      "height": 900
+    },
+    "window_position": {
+      "x": 100,
+      "y": 100
+    },
+    "auto_save_interval": 300,
+    "show_notifications": true,
+    "minimize_to_tray": false,
+    "language": "zh_CN"
+  },
+  "metadata": {
+    "export_time": "2025-01-31T12:00:00",
+    "version": "1.0",
+    "application": "星铁自动化助手",
+    "validation_result": {
+      "is_valid": true,
+      "error_count": 0,
+      "warning_count": 0
+    }
+  }
+}

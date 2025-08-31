@@ -17,10 +17,15 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QThread
 from PyQt6.QtGui import QIcon, QFont, QPixmap, QAction
 
 from loguru import logger
+
+# 导入新的UI组件
+from .game_settings_widget import GameSettingsWidget
+from .automation_settings_widget import AutomationSettingsWidget
+from .log_viewer_widget import LogViewerWidget
 from ..core.config_manager import ConfigManager
 from ..database.db_manager import DatabaseManager
 from ..automation.automation_controller import TaskStatus
-from ..automation.task_monitor import TaskMonitor
+# from ..automation.task_monitor import TaskMonitor  # 暂时注释掉，模块不存在
 from ..automation.automation_controller import AutomationController
 
 
@@ -53,17 +58,31 @@ class MainWindow(QMainWindow):
         self.config_manager = config_manager
         self.db_manager = db_manager
         
+        # 初始化游戏检测器
+        from ..automation.game_detector import GameDetector
+        self.game_detector = GameDetector(self.config_manager)
+        
         # 创建自动化控制器
         self.automation_controller = AutomationController(
             config_manager=self.config_manager,
-            db_manager=self.db_manager
+            db_manager=self.db_manager,
+            game_detector=self.game_detector
         )
         
+        # 初始化高级功能模块
+        self._init_advanced_modules()
+        
         # 创建任务监控器
-        self.task_monitor = TaskMonitor(
-            db_manager=self.db_manager,
-            automation_controller=self.automation_controller
-        )
+        try:
+            from ..monitoring.task_monitor import TaskMonitor
+            self.task_monitor = TaskMonitor(
+                db_manager=self.db_manager,
+                automation_controller=self.automation_controller
+            )
+            logger.info("任务监控器初始化完成")
+        except ImportError:
+            self.task_monitor = None
+            logger.warning("任务监控器模块未找到，跳过初始化")
         
         # 窗口状态
         self.current_task_id: Optional[str] = None
@@ -82,6 +101,49 @@ class MainWindow(QMainWindow):
         self.status_timer.start(1000)  # 每秒更新一次
         
         logger.info("主窗口初始化完成")
+    
+    def _init_advanced_modules(self):
+        """初始化高级功能模块"""
+        try:
+            # 初始化性能监控器
+            from ..core.performance_monitor import PerformanceMonitor
+            self.performance_monitor = PerformanceMonitor(
+                monitoring_interval=1.0,
+                history_size=300
+            )
+            self.performance_monitor.start_monitoring()
+            logger.info("性能监控器初始化完成")
+        except ImportError as e:
+            self.performance_monitor = None
+            logger.warning(f"性能监控器初始化失败: {e}")
+        
+        try:
+            # 初始化异常恢复机制
+            from ..core.exception_recovery import ExceptionRecovery
+            self.exception_recovery = ExceptionRecovery(
+                game_detector=self.game_detector,
+                automation_controller=self.automation_controller
+            )
+            logger.info("异常恢复机制初始化完成")
+        except ImportError as e:
+            self.exception_recovery = None
+            logger.warning(f"异常恢复机制初始化失败: {e}")
+        
+        try:
+            # 初始化多任务管理器
+            from ..core.multi_task_manager import MultiTaskManager
+            self.multi_task_manager = MultiTaskManager(
+                game_detector=self.game_detector,
+                automation_controller=self.automation_controller,
+                performance_monitor=self.performance_monitor
+            )
+            logger.info("多任务管理器初始化完成")
+        except ImportError as e:
+            self.multi_task_manager = None
+            logger.warning(f"多任务管理器初始化失败: {e}")
+        
+        # 智能调度器需要任务管理器，所以在创建任务管理器后初始化
+        self.intelligent_scheduler = None
     
     def _init_ui(self):
         """初始化用户界面"""
@@ -260,12 +322,24 @@ class MainWindow(QMainWindow):
         # 创建任务管理器实例
         self.task_manager = TaskManager(self.db_manager)
         
+        # 初始化智能调度器（需要任务管理器）
+        try:
+            from ..core.intelligent_scheduler import IntelligentScheduler
+            self.intelligent_scheduler = IntelligentScheduler(
+                task_manager=self.task_manager,
+                game_detector=self.game_detector,
+                automation_controller=self.automation_controller
+            )
+            logger.info("智能任务调度器初始化完成")
+        except ImportError as e:
+            logger.warning(f"智能任务调度器初始化失败: {e}")
+        
         # 创建水平分割器
         splitter = QSplitter(Qt.Orientation.Horizontal)
         layout.addWidget(splitter)
         
         # 左侧：任务列表
-        self.task_list_widget = TaskListWidget(self.task_manager)
+        self.task_list_widget = TaskListWidget(self.task_manager, self.task_monitor)
         splitter.addWidget(self.task_list_widget)
         
         # 右侧：任务创建/编辑
@@ -284,61 +358,34 @@ class MainWindow(QMainWindow):
     
     def _create_game_tab(self) -> QWidget:
         """创建游戏设置标签页"""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        # 使用新的游戏设置组件
+        self.game_settings_widget = GameSettingsWidget(self.config_manager)
         
-        # 占位符内容
-        label = QLabel("游戏设置")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setFont(QFont("Microsoft YaHei", 16))
-        layout.addWidget(label)
+        # 连接信号
+        self.game_settings_widget.settings_changed.connect(self._on_game_settings_changed)
         
-        placeholder = QLabel("此处将显示游戏路径设置、分辨率配置、窗口检测等功能")
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setStyleSheet("color: #666; font-size: 12px;")
-        layout.addWidget(placeholder)
-        
-        return widget
+        return self.game_settings_widget
     
     def _create_automation_tab(self) -> QWidget:
         """创建自动化配置标签页"""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        # 使用新的自动化设置组件
+        self.automation_settings_widget = AutomationSettingsWidget(self.config_manager)
         
-        # 占位符内容
-        label = QLabel("自动化配置")
-        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        label.setFont(QFont("Microsoft YaHei", 16))
-        layout.addWidget(label)
+        # 连接信号
+        self.automation_settings_widget.settings_changed.connect(self._on_automation_settings_changed)
         
-        placeholder = QLabel("此处将显示自动化参数设置、安全选项、检测阈值等配置")
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setStyleSheet("color: #666; font-size: 12px;")
-        layout.addWidget(placeholder)
-        
-        return widget
+        return self.automation_settings_widget
     
     def _create_log_tab(self) -> QWidget:
         """创建日志查看标签页"""
-        widget = QWidget()
-        layout = QVBoxLayout(widget)
+        # 使用新的日志查看器组件
+        self.log_viewer_widget = LogViewerWidget()
         
-        # 日志显示区域
-        self.log_text = QTextEdit()
-        self.log_text.setReadOnly(True)
-        self.log_text.setStyleSheet("""
-            QTextEdit {
-                background-color: #1e1e1e;
-                color: #ffffff;
-                border: 1px solid #333;
-                font-family: 'Consolas', 'Monaco', monospace;
-                font-size: 9pt;
-                line-height: 1.2;
-            }
-        """)
-        layout.addWidget(self.log_text)
+        # 连接信号
+        self.log_viewer_widget.log_exported.connect(self._on_log_exported)
+        self.log_viewer_widget.log_cleared.connect(self._on_log_cleared)
         
-        return widget
+        return self.log_viewer_widget
     
     def _init_menu_bar(self):
         """初始化菜单栏"""
@@ -430,11 +477,14 @@ class MainWindow(QMainWindow):
         self.task_stopped.connect(self._on_task_stopped)
         self.status_changed.connect(self._on_status_changed)
         
-        # 连接任务监控器信号
-        self.task_monitor.task_status_changed.connect(self._on_monitor_task_status_changed)
-        self.task_monitor.task_progress_updated.connect(self._on_monitor_task_progress_updated)
-        self.task_monitor.task_message_updated.connect(self._on_monitor_task_message_updated)
-        self.task_monitor.task_completed.connect(self._on_monitor_task_completed)
+        # 注意：TaskManager没有信号，任务相关信号通过TaskCreationWidget等组件处理
+        
+        # 连接任务监控器信号（如果存在）
+        if self.task_monitor is not None:
+            self.task_monitor.task_status_changed.connect(self._on_monitor_task_status_changed)
+            self.task_monitor.task_completed.connect(self._on_monitor_task_completed)
+            self.task_monitor.task_progress_updated.connect(self._on_monitor_task_progress_updated)
+            self.task_monitor.task_message_updated.connect(self._on_monitor_task_message_updated)
     
     def _connect_task_signals(self):
         """连接任务管理相关信号"""
@@ -551,8 +601,9 @@ class MainWindow(QMainWindow):
         self.current_task_id = task_id
         self.is_automation_running = True
         
-        # 启动任务监控器
-        self.task_monitor.start_monitoring()
+        # 启动任务监控器（如果task_monitor存在）
+        if self.task_monitor is not None:
+            self.task_monitor.start_monitoring()
         
         # 更新UI状态
         self.start_btn.setEnabled(False)
@@ -568,8 +619,9 @@ class MainWindow(QMainWindow):
         if not self.is_automation_running:
             return
         
-        # 停止任务监控器
-        self.task_monitor.stop_monitoring()
+        # 停止任务监控器（如果task_monitor存在）
+        if self.task_monitor is not None:
+            self.task_monitor.stop_monitoring()
         
         if self.current_task_id:
             # 更新任务状态
@@ -670,6 +722,24 @@ class MainWindow(QMainWindow):
         """打开设置"""
         QMessageBox.information(self, "提示", "设置功能待实现")
     
+    def _on_game_settings_changed(self):
+        """游戏设置变更处理"""
+        logger.info("游戏设置已更新")
+        # 这里可以添加设置变更后的处理逻辑
+    
+    def _on_automation_settings_changed(self):
+        """自动化设置变更处理"""
+        logger.info("自动化设置已更新")
+        # 这里可以添加设置变更后的处理逻辑
+    
+    def _on_log_exported(self, file_path: str):
+        """日志导出完成处理"""
+        self.status_bar.showMessage(f"日志已导出到: {file_path}", 3000)
+    
+    def _on_log_cleared(self):
+        """日志清空处理"""
+        self.status_bar.showMessage("日志显示已清空", 2000)
+    
     def _show_about(self):
         """显示关于对话框"""
         QMessageBox.about(self, "关于", 
@@ -695,7 +765,7 @@ class MainWindow(QMainWindow):
                 return
         
         # 确保任务监控器被停止
-        if hasattr(self, 'task_monitor'):
+        if hasattr(self, 'task_monitor') and self.task_monitor is not None:
             self.task_monitor.stop_monitoring()
         
         event.accept()

@@ -225,7 +225,7 @@ class TestTaskManager(unittest.TestCase):
         # 验证状态更新
         task = self.task_manager.get_task(task_id)
         self.assertEqual(task.status, TaskStatus.RUNNING)
-        self.assertIsNotNone(task.started_at)
+        self.assertIsNotNone(task.last_executed_at)
         
         # 更新任务状态为完成
         success = self.task_manager.update_task_status(task_id, TaskStatus.COMPLETED)
@@ -234,7 +234,7 @@ class TestTaskManager(unittest.TestCase):
         # 验证状态更新
         task = self.task_manager.get_task(task_id)
         self.assertEqual(task.status, TaskStatus.COMPLETED)
-        self.assertIsNotNone(task.completed_at)
+        self.assertIsNotNone(task.last_executed_at)
         
         # 测试更新不存在任务的状态
         update_result = self.task_manager.update_task_status("non_existent_id", TaskStatus.FAILED)

@@ -54,6 +54,55 @@ class DatabaseManager:
             if conn:
                 conn.close()
     
+    def run_migrations(self):
+        """运行数据库迁移"""
+        migrations_dir = Path(__file__).parent / "migrations"
+        if not migrations_dir.exists():
+            logger.info("迁移目录不存在，跳过迁移")
+            return
+            
+        # 创建迁移记录表
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS schema_migrations (
+                    migration_id TEXT PRIMARY KEY,
+                    filename TEXT NOT NULL,
+                    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            """)
+            
+            # 获取已应用的迁移
+            cursor.execute("SELECT filename FROM schema_migrations")
+            applied_migrations = {row[0] for row in cursor.fetchall()}
+            
+            # 执行未应用的迁移
+            migration_files = sorted(migrations_dir.glob("*.sql"))
+            for migration_file in migration_files:
+                if migration_file.name not in applied_migrations:
+                    logger.info(f"应用迁移: {migration_file.name}")
+                    try:
+                        with open(migration_file, 'r', encoding='utf-8') as f:
+                            migration_sql = f.read()
+                        
+                        # 执行迁移SQL
+                        cursor.executescript(migration_sql)
+                        
+                        # 记录迁移
+                        migration_id = str(uuid.uuid4())
+                        cursor.execute(
+                            "INSERT INTO schema_migrations (migration_id, filename) VALUES (?, ?)",
+                            (migration_id, migration_file.name)
+                        )
+                        
+                        logger.info(f"迁移 {migration_file.name} 应用成功")
+                    except Exception as e:
+                        logger.error(f"迁移 {migration_file.name} 应用失败: {e}")
+                        conn.rollback()
+                        raise
+            
+            conn.commit()
+    
     def initialize_database(self):
         """初始化数据库表结构"""
         with self.get_connection() as conn:
@@ -78,7 +127,7 @@ class DatabaseManager:
                     description TEXT,
                     task_type TEXT NOT NULL,
                     priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high')),
-                    status TEXT DEFAULT 'created' CHECK (status IN ('created', 'running', 'completed', 'failed', 'stopped', 'paused')),
+                    status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'running', 'completed', 'failed', 'paused', 'cancelled')),
                     max_duration INTEGER DEFAULT 300,
                     retry_count INTEGER DEFAULT 3,
                     retry_interval REAL DEFAULT 1.0,
@@ -175,6 +224,9 @@ class DatabaseManager:
             
             conn.commit()
             logger.info("数据库初始化完成")
+            
+        # 运行迁移
+        self.run_migrations()
     
     def create_user(self, username: str) -> str:
         """创建新用户
@@ -433,3 +485,266 @@ class DatabaseManager:
             stats['db_size_bytes'] = self.db_path.stat().st_size
             
         return stats
+    
+    # 任务动作管理方法
+    def create_task_action(self, task_id: str, action_type: str, action_order: int,
+                          target_element: str = None, coordinates: str = None,
+                          key_code: str = None, wait_duration: float = None,
+                          screenshot_path: str = None, custom_script: str = None,
+                          parameters: str = None) -> str:
+        """创建任务动作
+        
+        Args:
+            task_id: 任务ID
+            action_type: 动作类型
+            action_order: 动作顺序
+            target_element: 目标元素
+            coordinates: 坐标信息（JSON格式）
+            key_code: 按键代码
+            wait_duration: 等待时长
+            screenshot_path: 截图路径
+            custom_script: 自定义脚本
+            parameters: 其他参数（JSON格式）
+            
+        Returns:
+            str: 动作ID
+        """
+        action_id = str(uuid.uuid4())
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """INSERT INTO task_actions (action_id, task_id, action_type, action_order,
+                   target_element, coordinates, key_code, wait_duration, screenshot_path,
+                   custom_script, parameters) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                (action_id, task_id, action_type, action_order, target_element,
+                 coordinates, key_code, wait_duration, screenshot_path,
+                 custom_script, parameters)
+            )
+            conn.commit()
+            
+        logger.info(f"创建任务动作: {action_type} (ID: {action_id})")
+        return action_id
+    
+    def get_task_actions(self, task_id: str) -> List[Dict[str, Any]]:
+        """获取任务的所有动作
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            List[Dict]: 动作列表
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM task_actions WHERE task_id = ? AND is_enabled = 1 ORDER BY action_order",
+                (task_id,)
+            )
+            
+            return [dict(row) for row in cursor.fetchall()]
+    
+    def update_task_action(self, action_id: str, **kwargs):
+        """更新任务动作
+        
+        Args:
+            action_id: 动作ID
+            **kwargs: 要更新的字段
+        """
+        if not kwargs:
+            return
+            
+        set_clauses = []
+        values = []
+        
+        for key, value in kwargs.items():
+            if key in ['action_type', 'action_order', 'target_element', 'coordinates',
+                      'key_code', 'wait_duration', 'screenshot_path', 'custom_script',
+                      'parameters', 'is_enabled']:
+                set_clauses.append(f"{key} = ?")
+                values.append(value)
+        
+        if not set_clauses:
+            return
+            
+        set_clauses.append("updated_at = CURRENT_TIMESTAMP")
+        values.append(action_id)
+        
+        sql = f"UPDATE task_actions SET {', '.join(set_clauses)} WHERE action_id = ?"
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(sql, values)
+            conn.commit()
+            
+        logger.info(f"更新任务动作: {action_id}")
+    
+    def delete_task_action(self, action_id: str):
+        """删除任务动作
+        
+        Args:
+            action_id: 动作ID
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM task_actions WHERE action_id = ?", (action_id,))
+            conn.commit()
+            
+        logger.info(f"删除任务动作: {action_id}")
+    
+    # 任务执行记录管理方法
+    def create_task_execution(self, task_id: str) -> str:
+        """创建任务执行记录
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            str: 执行记录ID
+        """
+        execution_id = str(uuid.uuid4())
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "INSERT INTO task_executions (execution_id, task_id) VALUES (?, ?)",
+                (execution_id, task_id)
+            )
+            conn.commit()
+            
+        logger.info(f"创建任务执行记录: {execution_id}")
+        return execution_id
+    
+    def update_task_execution(self, execution_id: str, **kwargs):
+        """更新任务执行记录
+        
+        Args:
+            execution_id: 执行记录ID
+            **kwargs: 要更新的字段
+        """
+        if not kwargs:
+            return
+            
+        set_clauses = []
+        values = []
+        
+        for key, value in kwargs.items():
+            if key in ['execution_status', 'end_time', 'duration_seconds',
+                      'success_count', 'failure_count', 'current_action_index',
+                      'progress_percentage', 'error_message', 'execution_log']:
+                set_clauses.append(f"{key} = ?")
+                values.append(value)
+        
+        if not set_clauses:
+            return
+            
+        values.append(execution_id)
+        sql = f"UPDATE task_executions SET {', '.join(set_clauses)} WHERE execution_id = ?"
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(sql, values)
+            conn.commit()
+            
+        logger.info(f"更新任务执行记录: {execution_id}")
+    
+    def get_task_executions(self, task_id: str, limit: int = 50) -> List[Dict[str, Any]]:
+        """获取任务执行记录
+        
+        Args:
+            task_id: 任务ID
+            limit: 返回记录数限制
+            
+        Returns:
+            List[Dict]: 执行记录列表
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM task_executions WHERE task_id = ? ORDER BY start_time DESC LIMIT ?",
+                (task_id, limit)
+            )
+            
+            return [dict(row) for row in cursor.fetchall()]
+    
+    def get_execution_by_id(self, execution_id: str) -> Optional[Dict[str, Any]]:
+        """根据ID获取执行记录
+        
+        Args:
+            execution_id: 执行记录ID
+            
+        Returns:
+            Optional[Dict]: 执行记录信息
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                "SELECT * FROM task_executions WHERE execution_id = ?",
+                (execution_id,)
+            )
+            
+            row = cursor.fetchone()
+            return dict(row) if row else None
+    
+    # 任务模板管理方法
+    def create_task_template(self, template_name: str, template_type: str,
+                           description: str, template_config: str,
+                           is_public: bool = False, created_by: str = 'default_user') -> str:
+        """创建任务模板
+        
+        Args:
+            template_name: 模板名称
+            template_type: 模板类型
+            description: 模板描述
+            template_config: 模板配置（JSON格式）
+            is_public: 是否公开
+            created_by: 创建者
+            
+        Returns:
+            str: 模板ID
+        """
+        template_id = str(uuid.uuid4())
+        
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """INSERT INTO task_templates (template_id, template_name, template_type,
+                   description, template_config, is_public, created_by)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (template_id, template_name, template_type, description,
+                 template_config, is_public, created_by)
+            )
+            conn.commit()
+            
+        logger.info(f"创建任务模板: {template_name} (ID: {template_id})")
+        return template_id
+    
+    def get_task_templates(self, template_type: str = None, is_public: bool = None) -> List[Dict[str, Any]]:
+        """获取任务模板列表
+        
+        Args:
+            template_type: 模板类型过滤
+            is_public: 是否公开过滤
+            
+        Returns:
+            List[Dict]: 模板列表
+        """
+        with self.get_connection() as conn:
+            cursor = conn.cursor()
+            
+            conditions = []
+            params = []
+            
+            if template_type:
+                conditions.append("template_type = ?")
+                params.append(template_type)
+            
+            if is_public is not None:
+                conditions.append("is_public = ?")
+                params.append(is_public)
+            
+            where_clause = " WHERE " + " AND ".join(conditions) if conditions else ""
+            sql = f"SELECT * FROM task_templates{where_clause} ORDER BY usage_count DESC, created_at DESC"
+            
+            cursor.execute(sql, params)
+            return [dict(row) for row in cursor.fetchall()]

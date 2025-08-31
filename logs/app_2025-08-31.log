@@ -7,3 +7,1196 @@
 2025-08-31 01:39:39 | INFO     | __main__:main:84 - 主窗口已显示
 2025-08-31 01:51:19 | INFO     | src.gui.main_window:closeEvent:527 - 主窗口关闭
 2025-08-31 01:51:19 | INFO     | __main__:main:89 - 应用程序退出，退出码: 0
+2025-08-31 03:17:39 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:17:39 | ERROR    | __main__:main:108 - 应用程序启动失败: type object 'ApplicationAttribute' has no attribute 'AA_EnableHighDpiScaling'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001DD29D905E0>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 85, in main
+    setup_application()
+    └ <function setup_application at 0x000001DD29D90540>
+
+  File "E:\UGit\xingtie\src\main.py", line 73, in setup_application
+    QApplication.setAttribute(Qt.ApplicationAttribute.AA_EnableHighDpiScaling, True)
+    │            │            │  └ <enum 'ApplicationAttribute'>
+    │            │            └ <class 'PyQt6.QtCore.Qt'>
+    │            └ <built-in method setAttribute>
+    └ <class 'PyQt6.QtWidgets.QApplication'>
+
+AttributeError: type object 'ApplicationAttribute' has no attribute 'AA_EnableHighDpiScaling'
+2025-08-31 03:17:57 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:17:57 | INFO     | src.database.db_manager:_ensure_database_exists:38 - 创建数据库文件: E:\UGit\xingtie\data\app.db
+2025-08-31 03:17:57 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:17:57 | ERROR    | __main__:main:108 - 应用程序启动失败: AutomationController.__init__() missing 1 required positional argument: 'game_detector'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001D678990540>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 62, in __init__
+    self.automation_controller = AutomationController(
+    │                            └ <class 'src.automation.automation_controller.AutomationController'>
+    └ <src.gui.main_window.MainWindow object at 0x000001D611007A70>
+
+TypeError: AutomationController.__init__() missing 1 required positional argument: 'game_detector'
+2025-08-31 03:18:31 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:18:31 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:18:31 | ERROR    | __main__:main:108 - 应用程序启动失败: 'ConfigManager' object has no attribute 'get'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x0000018462990900>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 63, in __init__
+    self.game_detector = GameDetector(self.config_manager)
+    │                    │            │    └ <src.core.config_manager.ConfigManager object at 0x0000018462935160>
+    │                    │            └ <src.gui.main_window.MainWindow object at 0x000001847AF07A70>
+    │                    └ <class 'src.automation.game_detector.GameDetector'>
+    └ <src.gui.main_window.MainWindow object at 0x000001847AF07A70>
+
+  File "E:\UGit\xingtie\src\automation\game_detector.py", line 53, in __init__
+    self.detection_threshold = float(config_manager.get('automation', 'detection_threshold', 0.8))
+    │                                └ <src.core.config_manager.ConfigManager object at 0x0000018462935160>
+    └ <src.automation.game_detector.GameDetector object at 0x000001847ABF0830>
+
+AttributeError: 'ConfigManager' object has no attribute 'get'
+2025-08-31 03:18:59 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:18:59 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:18:59 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:18:59 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:18:59 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:18:59 | ERROR    | __main__:main:108 - 应用程序启动失败: name 'Task' is not defined
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001B791B90540>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 84, in __init__
+    self._init_ui()
+    │    └ <function MainWindow._init_ui at 0x000001B7A8FE6D40>
+    └ <src.gui.main_window.MainWindow object at 0x000001B7AA117A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 127, in _init_ui
+    right_panel = self._create_right_panel()
+                  │    └ <function MainWindow._create_right_panel at 0x000001B7AA1149A0>
+                  └ <src.gui.main_window.MainWindow object at 0x000001B7AA117A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 243, in _create_right_panel
+    task_tab = self._create_task_tab()
+               │    └ <function MainWindow._create_task_tab at 0x000001B7AA114A40>
+               └ <src.gui.main_window.MainWindow object at 0x000001B7AA117A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 262, in _create_task_tab
+    from .task_creation_widget import TaskCreationWidget
+
+  File "E:\UGit\xingtie\src\gui\task_creation_widget.py", line 25, in <module>
+    class TaskCreationWidget(QWidget):
+                             └ <class 'PyQt6.QtWidgets.QWidget'>
+
+  File "E:\UGit\xingtie\src\gui\task_creation_widget.py", line 54, in TaskCreationWidget
+    def load_task_for_edit(self, task: Task):
+
+NameError: name 'Task' is not defined
+2025-08-31 03:19:26 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:19:26 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:19:26 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:19:26 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:19:26 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:19:26 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:19:26 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:19:26 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:19:26 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:19:26 | ERROR    | __main__:main:108 - 应用程序启动失败: type object 'ValidationLevel' has no attribute 'STANDARD'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001F85A290540>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 84, in __init__
+    self._init_ui()
+    │    └ <function MainWindow._init_ui at 0x000001F8726EED40>
+    └ <src.gui.main_window.MainWindow object at 0x000001F872807A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 127, in _init_ui
+    right_panel = self._create_right_panel()
+                  │    └ <function MainWindow._create_right_panel at 0x000001F8728049A0>
+                  └ <src.gui.main_window.MainWindow object at 0x000001F872807A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 243, in _create_right_panel
+    task_tab = self._create_task_tab()
+               │    └ <function MainWindow._create_task_tab at 0x000001F872804A40>
+               └ <src.gui.main_window.MainWindow object at 0x000001F872807A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 283, in _create_task_tab
+    self.task_creation_widget = TaskCreationWidget(self.task_manager)
+    │                           │                  │    └ <src.core.task_manager.TaskManager object at 0x000001F8728D4D70>
+    │                           │                  └ <src.gui.main_window.MainWindow object at 0x000001F872807A70>
+    │                           └ <class 'src.gui.task_creation_widget.TaskCreationWidget'>
+    └ <src.gui.main_window.MainWindow object at 0x000001F872807A70>
+
+  File "E:\UGit\xingtie\src\gui\task_creation_widget.py", line 50, in __init__
+    self._init_ui()
+    │    └ <function TaskCreationWidget._init_ui at 0x000001F87283F9C0>
+    └ <src.gui.task_creation_widget.TaskCreationWidget object at 0x000001F8728EBED0>
+
+  File "E:\UGit\xingtie\src\gui\task_creation_widget.py", line 190, in _init_ui
+    advanced_group = self._create_advanced_settings_group()
+                     │    └ <function TaskCreationWidget._create_advanced_settings_group at 0x000001F87283FCE0>
+                     └ <src.gui.task_creation_widget.TaskCreationWidget object at 0x000001F8728EBED0>
+
+  File "E:\UGit\xingtie\src\gui\task_creation_widget.py", line 347, in _create_advanced_settings_group
+    self.validation_level_combo.setCurrentText(ValidationLevel.STANDARD.value)
+    │    │                      │              └ <enum 'ValidationLevel'>
+    │    │                      └ <built-in method setCurrentText>
+    │    └ <PyQt6.QtWidgets.QComboBox object at 0x000001F877AEDBD0>
+    └ <src.gui.task_creation_widget.TaskCreationWidget object at 0x000001F8728EBED0>
+
+AttributeError: type object 'ValidationLevel' has no attribute 'STANDARD'
+2025-08-31 03:19:47 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:19:47 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:19:47 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:19:47 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:19:47 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:19:47 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:19:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:19:47 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:19:47 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:19:47 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 03:19:47 | ERROR    | __main__:main:108 - 应用程序启动失败: GameSettingsWidget.__init__() missing 1 required positional argument: 'config_manager'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x00000243B5DC0540>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 84, in __init__
+    self._init_ui()
+    │    └ <function MainWindow._init_ui at 0x00000243CE2EED40>
+    └ <src.gui.main_window.MainWindow object at 0x00000243CE407A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 127, in _init_ui
+    right_panel = self._create_right_panel()
+                  │    └ <function MainWindow._create_right_panel at 0x00000243CE4049A0>
+                  └ <src.gui.main_window.MainWindow object at 0x00000243CE407A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 247, in _create_right_panel
+    game_tab = self._create_game_tab()
+               │    └ <function MainWindow._create_game_tab at 0x00000243CE404AE0>
+               └ <src.gui.main_window.MainWindow object at 0x00000243CE407A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 299, in _create_game_tab
+    self.game_settings_widget = GameSettingsWidget()
+    │                           └ <class 'src.gui.game_settings_widget.GameSettingsWidget'>
+    └ <src.gui.main_window.MainWindow object at 0x00000243CE407A70>
+
+TypeError: GameSettingsWidget.__init__() missing 1 required positional argument: 'config_manager'
+2025-08-31 03:20:02 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:20:02 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:20:02 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:20:02 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:20:02 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:20:02 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:20:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:20:02 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:20:02 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:20:02 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 03:20:02 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 03:20:02 | ERROR    | __main__:main:108 - 应用程序启动失败: AutomationSettingsWidget.__init__() missing 1 required positional argument: 'config_manager'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001BF23A90900>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 84, in __init__
+    self._init_ui()
+    │    └ <function MainWindow._init_ui at 0x000001BF3AEEED40>
+    └ <src.gui.main_window.MainWindow object at 0x000001BF3C007A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 127, in _init_ui
+    right_panel = self._create_right_panel()
+                  │    └ <function MainWindow._create_right_panel at 0x000001BF3C0049A0>
+                  └ <src.gui.main_window.MainWindow object at 0x000001BF3C007A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 251, in _create_right_panel
+    automation_tab = self._create_automation_tab()
+                     │    └ <function MainWindow._create_automation_tab at 0x000001BF3C004B80>
+                     └ <src.gui.main_window.MainWindow object at 0x000001BF3C007A70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 309, in _create_automation_tab
+    self.automation_settings_widget = AutomationSettingsWidget()
+    │                                 └ <class 'src.gui.automation_settings_widget.AutomationSettingsWidget'>
+    └ <src.gui.main_window.MainWindow object at 0x000001BF3C007A70>
+
+TypeError: AutomationSettingsWidget.__init__() missing 1 required positional argument: 'config_manager'
+2025-08-31 03:20:16 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:20:16 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:20:16 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:20:16 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:20:16 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:20:16 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:20:16 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:20:16 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:20:16 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:20:16 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 03:20:16 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 03:20:16 | ERROR    | src.gui.automation_settings_widget:_load_settings:591 - 加载自动化配置失败: setValue(self, val: int): argument 1 has unexpected type 'float'
+2025-08-31 03:20:21 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:20:26 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:20:28 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 03:20:28 | ERROR    | __main__:main:108 - 应用程序启动失败: 'NoneType' object has no attribute 'task_status_changed'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001F1B6490900>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 88, in __init__
+    self._connect_signals()
+    │    └ <function MainWindow._connect_signals at 0x000001F1CEA08EA0>
+    └ <src.gui.main_window.MainWindow object at 0x000001F1CEA0BA70>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 418, in _connect_signals
+    self.task_monitor.task_status_changed.connect(self._on_monitor_task_status_changed)
+    │    │                                        │    └ <function MainWindow._on_monitor_task_status_changed at 0x000001F1CEA09760>
+    │    │                                        └ <src.gui.main_window.MainWindow object at 0x000001F1CEA0BA70>
+    │    └ None
+    └ <src.gui.main_window.MainWindow object at 0x000001F1CEA0BA70>
+
+AttributeError: 'NoneType' object has no attribute 'task_status_changed'
+2025-08-31 03:21:04 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:21:04 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:21:04 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:21:04 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:21:04 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:21:04 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:21:04 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:21:04 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:21:04 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:21:04 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 03:21:04 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 03:21:04 | ERROR    | src.gui.automation_settings_widget:_load_settings:591 - 加载自动化配置失败: setValue(self, val: int): argument 1 has unexpected type 'float'
+2025-08-31 03:21:07 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\error_2025-08-31.log
+2025-08-31 03:21:07 | ERROR    | __main__:main:108 - 应用程序启动失败: 'NoneType' object has no attribute 'task_status_changed'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x00000266BC390540>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 88, in __init__
+    self._connect_signals()
+    │    └ <function MainWindow._connect_signals at 0x00000266D49951C0>
+    └ <src.gui.main_window.MainWindow object at 0x00000266D4997D90>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 418, in _connect_signals
+    self.task_monitor.task_status_changed.connect(self._on_monitor_task_status_changed)
+    │    │                                        │    └ <function MainWindow._on_monitor_task_status_changed at 0x00000266D4995A80>
+    │    │                                        └ <src.gui.main_window.MainWindow object at 0x00000266D4997D90>
+    │    └ None
+    └ <src.gui.main_window.MainWindow object at 0x00000266D4997D90>
+
+AttributeError: 'NoneType' object has no attribute 'task_status_changed'
+2025-08-31 03:21:57 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:21:57 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:21:57 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:21:57 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:21:57 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:21:57 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:21:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:21:57 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:21:57 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:21:57 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 03:21:57 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 03:21:57 | ERROR    | src.gui.automation_settings_widget:_load_settings:591 - 加载自动化配置失败: setValue(self, val: int): argument 1 has unexpected type 'float'
+2025-08-31 03:22:00 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 03:22:00 | INFO     | src.gui.main_window:__init__:95 - 主窗口初始化完成
+2025-08-31 03:22:01 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 03:22:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:22:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:22:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:22:14 | INFO     | src.gui.main_window:closeEvent:707 - 主窗口关闭
+2025-08-31 03:22:14 | INFO     | __main__:main:104 - 应用程序退出，退出代码: 0
+2025-08-31 03:22:38 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:22:38 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:22:38 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:22:38 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:22:38 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:22:38 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:22:38 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:22:38 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:22:38 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:22:38 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 03:22:38 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 03:22:38 | INFO     | src.gui.automation_settings_widget:_load_settings:588 - 自动化配置加载完成
+2025-08-31 03:22:38 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 03:22:38 | INFO     | src.gui.main_window:__init__:95 - 主窗口初始化完成
+2025-08-31 03:22:38 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 03:22:43 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:22:48 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:22:53 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:22:58 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:23:01 | INFO     | src.gui.main_window:closeEvent:707 - 主窗口关闭
+2025-08-31 03:23:01 | INFO     | __main__:main:104 - 应用程序退出，退出代码: 0
+2025-08-31 03:28:41 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:28:41 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:28:41 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 03:28:41 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 03:28:41 | INFO     | src.automation.automation_controller:__init__:111 - 自动化控制器初始化完成
+2025-08-31 03:28:41 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 03:28:41 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:28:41 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 03:28:41 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 03:28:41 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 03:28:41 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 03:28:41 | INFO     | src.gui.automation_settings_widget:_load_settings:588 - 自动化配置加载完成
+2025-08-31 03:28:41 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 03:28:41 | INFO     | src.gui.main_window:__init__:95 - 主窗口初始化完成
+2025-08-31 03:28:41 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 03:28:46 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:28:51 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:28:56 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:01 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:06 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:11 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:16 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:21 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:26 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:31 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:36 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:41 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:46 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:51 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:29:56 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:01 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:06 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:11 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:16 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:21 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:26 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:31 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:36 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:41 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:46 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:51 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:30:56 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:01 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:06 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:11 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:16 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:21 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:26 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:31 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:36 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:41 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:46 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:51 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:31:56 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:01 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:06 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:11 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:16 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:21 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:26 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:31 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:36 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:41 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:46 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:51 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:32:56 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:01 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:06 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:11 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:16 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:21 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:26 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:31 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 03:33:32 | INFO     | src.gui.main_window:closeEvent:707 - 主窗口关闭
+2025-08-31 03:33:32 | INFO     | __main__:main:104 - 应用程序退出，退出代码: 0
+2025-08-31 03:38:03 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 03:38:03 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 03:38:03 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 03:38:03 | ERROR    | __main__:main:108 - 应用程序启动失败: 'ConfigManager' object has no attribute 'get_setting'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x0000019DD5C6ECA0>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 63, in __init__
+    self.game_detector = GameDetector(self.config_manager)
+    │                    │            │    └ <src.core.config_manager.ConfigManager object at 0x0000019DD5C20EC0>
+    │                    │            └ <src.gui.main_window.MainWindow object at 0x0000019DEE19AC10>
+    │                    └ <class 'src.automation.game_detector.GameDetector'>
+    └ <src.gui.main_window.MainWindow object at 0x0000019DEE19AC10>
+
+  File "E:\UGit\xingtie\src\automation\game_detector.py", line 53, in __init__
+    self.detection_threshold = float(config_manager.get_setting('automation', 'detection_threshold', 0.8))
+    │                                └ <src.core.config_manager.ConfigManager object at 0x0000019DD5C20EC0>
+    └ <src.automation.game_detector.GameDetector object at 0x0000019DEE0717F0>
+
+AttributeError: 'ConfigManager' object has no attribute 'get_setting'
+2025-08-31 04:21:58 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 04:21:58 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 04:21:58 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 04:21:58 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 04:21:58 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 04:21:58 | INFO     | src.automation.automation_controller:__init__:112 - 自动化控制器初始化完成
+2025-08-31 04:21:58 | INFO     | src.core.performance_monitor:__init__:235 - 性能监控系统初始化完成
+2025-08-31 04:21:58 | INFO     | src.core.performance_monitor:start_monitoring:246 - 性能监控已启动
+2025-08-31 04:21:58 | INFO     | src.gui.main_window:_init_advanced_modules:115 - 性能监控器初始化完成
+2025-08-31 04:21:58 | INFO     | src.core.exception_recovery:__init__:180 - 异常恢复系统初始化完成
+2025-08-31 04:21:58 | INFO     | src.gui.main_window:_init_advanced_modules:127 - 异常恢复机制初始化完成
+2025-08-31 04:21:58 | INFO     | src.core.multi_task_manager:__init__:305 - 多任务并行管理器初始化完成
+2025-08-31 04:21:58 | INFO     | src.gui.main_window:_init_advanced_modules:140 - 多任务管理器初始化完成
+2025-08-31 04:21:58 | WARNING  | src.gui.main_window:__init__:85 - 任务监控器模块未找到，跳过初始化
+2025-08-31 04:21:58 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 04:21:58 | INFO     | src.core.intelligent_scheduler:__init__:114 - 智能任务调度器初始化完成
+2025-08-31 04:21:58 | INFO     | src.gui.main_window:_create_task_tab:333 - 智能任务调度器初始化完成
+2025-08-31 04:21:58 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:21:58 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 04:21:58 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 04:21:58 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 04:21:58 | ERROR    | src.gui.game_settings_widget:_load_settings:298 - 加载游戏设置失败: 'ConfigManager' object has no attribute 'get_game_config'
+2025-08-31 04:22:00 | ERROR    | src.gui.automation_settings_widget:_load_settings:591 - 加载自动化配置失败: 'ConfigManager' object has no attribute 'get_automation_config'
+2025-08-31 04:22:01 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 04:22:01 | INFO     | src.gui.main_window:__init__:103 - 主窗口初始化完成
+2025-08-31 04:22:01 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 04:22:03 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:22:06 | INFO     | src.gui.main_window:closeEvent:772 - 主窗口关闭
+2025-08-31 04:22:06 | INFO     | __main__:main:104 - 应用程序退出，退出代码: 0
+2025-08-31 04:24:18 | INFO     | src.main:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 04:24:18 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 04:24:18 | INFO     | src.database.db_manager:initialize_database:177 - 数据库初始化完成
+2025-08-31 04:24:18 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 04:24:18 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 04:24:18 | INFO     | src.automation.automation_controller:__init__:112 - 自动化控制器初始化完成
+2025-08-31 04:24:18 | INFO     | src.core.performance_monitor:__init__:235 - 性能监控系统初始化完成
+2025-08-31 04:24:18 | INFO     | src.core.performance_monitor:start_monitoring:246 - 性能监控已启动
+2025-08-31 04:24:18 | INFO     | src.gui.main_window:_init_advanced_modules:115 - 性能监控器初始化完成
+2025-08-31 04:24:18 | INFO     | src.core.exception_recovery:__init__:180 - 异常恢复系统初始化完成
+2025-08-31 04:24:18 | INFO     | src.gui.main_window:_init_advanced_modules:127 - 异常恢复机制初始化完成
+2025-08-31 04:24:18 | INFO     | src.core.multi_task_manager:__init__:305 - 多任务并行管理器初始化完成
+2025-08-31 04:24:18 | INFO     | src.gui.main_window:_init_advanced_modules:140 - 多任务管理器初始化完成
+2025-08-31 04:24:18 | WARNING  | src.gui.main_window:__init__:85 - 任务监控器模块未找到，跳过初始化
+2025-08-31 04:24:18 | INFO     | src.core.task_manager:__init__:79 - 任务管理器初始化完成
+2025-08-31 04:24:18 | INFO     | src.core.intelligent_scheduler:__init__:114 - 智能任务调度器初始化完成
+2025-08-31 04:24:18 | INFO     | src.gui.main_window:_create_task_tab:333 - 智能任务调度器初始化完成
+2025-08-31 04:24:18 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:18 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 04:24:18 | INFO     | src.core.task_validator:__init__:63 - 任务验证器初始化完成
+2025-08-31 04:24:18 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 04:24:18 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 04:24:18 | INFO     | src.gui.automation_settings_widget:_load_settings:588 - 自动化配置加载完成
+2025-08-31 04:24:18 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 04:24:18 | INFO     | src.gui.main_window:__init__:103 - 主窗口初始化完成
+2025-08-31 04:24:19 | INFO     | src.main:main:99 - 应用程序界面已启动
+2025-08-31 04:24:23 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:28 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:33 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:38 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:43 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:48 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:53 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:24:58 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:03 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:08 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:13 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:18 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:23 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:28 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:33 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:38 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:43 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:48 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:53 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:25:58 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:03 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:08 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:13 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:18 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:23 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:28 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:33 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:38 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:43 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:48 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:53 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:26:58 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:27:03 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:27:08 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:27:13 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:27:18 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:27:23 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 0 个任务
+2025-08-31 04:27:26 | INFO     | src.gui.main_window:closeEvent:772 - 主窗口关闭
+2025-08-31 04:27:26 | INFO     | src.main:main:104 - 应用程序退出，退出代码: 0
+2025-08-31 07:18:37 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 07:18:37 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 07:18:37 | INFO     | src.database.db_manager:initialize_database:226 - 数据库初始化完成
+2025-08-31 07:18:37 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 07:18:37 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 07:18:37 | INFO     | src.automation.automation_controller:__init__:112 - 自动化控制器初始化完成
+2025-08-31 07:18:37 | INFO     | src.core.performance_monitor:__init__:235 - 性能监控系统初始化完成
+2025-08-31 07:18:37 | INFO     | src.core.performance_monitor:start_monitoring:246 - 性能监控已启动
+2025-08-31 07:18:37 | INFO     | src.gui.main_window:_init_advanced_modules:115 - 性能监控器初始化完成
+2025-08-31 07:18:37 | INFO     | src.core.exception_recovery:__init__:180 - 异常恢复系统初始化完成
+2025-08-31 07:18:37 | INFO     | src.gui.main_window:_init_advanced_modules:127 - 异常恢复机制初始化完成
+2025-08-31 07:18:37 | INFO     | src.core.multi_task_manager:__init__:305 - 多任务并行管理器初始化完成
+2025-08-31 07:18:37 | INFO     | src.gui.main_window:_init_advanced_modules:140 - 多任务管理器初始化完成
+2025-08-31 07:18:37 | WARNING  | src.gui.main_window:__init__:85 - 任务监控器模块未找到，跳过初始化
+2025-08-31 07:18:37 | INFO     | src.core.task_manager:__init__:81 - 任务管理器初始化完成
+2025-08-31 07:18:37 | INFO     | src.core.intelligent_scheduler:__init__:114 - 智能任务调度器初始化完成
+2025-08-31 07:18:37 | INFO     | src.gui.main_window:_create_task_tab:333 - 智能任务调度器初始化完成
+2025-08-31 07:18:37 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:18:42 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:20:42 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:20:43 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 07:20:44 | ERROR    | __main__:main:108 - 应用程序启动失败: type object 'ActionType' has no attribute 'DOUBLE_CLICK'
+Traceback (most recent call last):
+
+  File "E:\UGit\xingtie\src\main.py", line 113, in <module>
+    sys.exit(main())
+    │   │    └ <function main at 0x000001F32166EDE0>
+    │   └ <built-in function exit>
+    └ <module 'sys' (built-in)>
+
+> File "E:\UGit\xingtie\src\main.py", line 96, in main
+    main_window = MainWindow()
+                  └ <class 'src.gui.main_window.MainWindow'>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 92, in __init__
+    self._init_ui()
+    │    └ <function MainWindow._init_ui at 0x000001F339B0B1A0>
+    └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 178, in _init_ui
+    right_panel = self._create_right_panel()
+                  │    └ <function MainWindow._create_right_panel at 0x000001F339B0B2E0>
+                  └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 294, in _create_right_panel
+    task_tab = self._create_task_tab()
+               │    └ <function MainWindow._create_task_tab at 0x000001F339B0B380>
+               └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\main_window.py", line 346, in _create_task_tab
+    self.task_creation_widget = TaskCreationWidget(self.task_manager)
+    │                           │                  │    └ <src.core.task_manager.TaskManager object at 0x000001F33A848590>
+    │                           │                  └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+    │                           └ <class 'src.gui.task_creation_widget.TaskCreationWidget'>
+    └ <src.gui.main_window.MainWindow object at 0x000001F339B162B0>
+
+  File "E:\UGit\xingtie\src\gui\task_creation_widget.py", line 43, in __init__
+    self.validator = TaskValidator()
+    │                └ <class 'src.core.task_validator.TaskValidator'>
+    └ <src.gui.task_creation_widget.TaskCreationWidget object at 0x000001F33A9111D0>
+
+  File "E:\UGit\xingtie\src\core\task_validator.py", line 52, in __init__
+    ActionType.DOUBLE_CLICK: ['x', 'y', 'template'],
+    └ <enum 'ActionType'>
+
+AttributeError: type object 'ActionType' has no attribute 'DOUBLE_CLICK'
+2025-08-31 07:21:14 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 07:21:14 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 07:21:14 | INFO     | src.database.db_manager:initialize_database:226 - 数据库初始化完成
+2025-08-31 07:21:14 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 07:21:14 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 07:21:14 | INFO     | src.automation.automation_controller:__init__:112 - 自动化控制器初始化完成
+2025-08-31 07:21:14 | INFO     | src.core.performance_monitor:__init__:235 - 性能监控系统初始化完成
+2025-08-31 07:21:14 | INFO     | src.core.performance_monitor:start_monitoring:246 - 性能监控已启动
+2025-08-31 07:21:14 | INFO     | src.gui.main_window:_init_advanced_modules:115 - 性能监控器初始化完成
+2025-08-31 07:21:14 | INFO     | src.core.exception_recovery:__init__:180 - 异常恢复系统初始化完成
+2025-08-31 07:21:14 | INFO     | src.gui.main_window:_init_advanced_modules:127 - 异常恢复机制初始化完成
+2025-08-31 07:21:14 | INFO     | src.core.multi_task_manager:__init__:305 - 多任务并行管理器初始化完成
+2025-08-31 07:21:14 | INFO     | src.gui.main_window:_init_advanced_modules:140 - 多任务管理器初始化完成
+2025-08-31 07:21:14 | WARNING  | src.gui.main_window:__init__:85 - 任务监控器模块未找到，跳过初始化
+2025-08-31 07:21:14 | INFO     | src.core.task_manager:__init__:81 - 任务管理器初始化完成
+2025-08-31 07:21:14 | INFO     | src.core.intelligent_scheduler:__init__:114 - 智能任务调度器初始化完成
+2025-08-31 07:21:14 | INFO     | src.gui.main_window:_create_task_tab:333 - 智能任务调度器初始化完成
+2025-08-31 07:21:14 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:19 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:25 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 07:21:25 | INFO     | src.core.task_validator:__init__:58 - 任务验证器初始化完成
+2025-08-31 07:21:25 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 07:21:25 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 07:21:25 | INFO     | src.gui.automation_settings_widget:_load_settings:588 - 自动化配置加载完成
+2025-08-31 07:21:25 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 07:21:25 | INFO     | src.gui.main_window:__init__:103 - 主窗口初始化完成
+2025-08-31 07:21:25 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 07:21:29 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:34 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:39 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:44 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:49 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:21:54 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:22:04 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:22:09 | ERROR    | src.gui.task_list_widget:refresh_task_list:616 - 刷新任务列表失败: 'TaskConfig' object has no attribute 'name'
+2025-08-31 07:22:24 | INFO     | src.gui.main_window:closeEvent:772 - 主窗口关闭
+2025-08-31 07:22:24 | INFO     | __main__:main:104 - 应用程序退出，退出代码: 0
+2025-08-31 07:39:04 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 07:39:04 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 07:39:04 | INFO     | src.database.db_manager:initialize_database:226 - 数据库初始化完成
+2025-08-31 07:39:04 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 07:39:04 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 07:39:04 | INFO     | src.automation.automation_controller:__init__:112 - 自动化控制器初始化完成
+2025-08-31 07:39:05 | INFO     | src.core.performance_monitor:__init__:235 - 性能监控系统初始化完成
+2025-08-31 07:39:05 | INFO     | src.core.performance_monitor:start_monitoring:246 - 性能监控已启动
+2025-08-31 07:39:05 | INFO     | src.gui.main_window:_init_advanced_modules:115 - 性能监控器初始化完成
+2025-08-31 07:39:07 | INFO     | src.core.exception_recovery:__init__:180 - 异常恢复系统初始化完成
+2025-08-31 07:39:07 | INFO     | src.gui.main_window:_init_advanced_modules:127 - 异常恢复机制初始化完成
+2025-08-31 07:39:07 | INFO     | src.core.multi_task_manager:__init__:305 - 多任务并行管理器初始化完成
+2025-08-31 07:39:07 | INFO     | src.gui.main_window:_init_advanced_modules:140 - 多任务管理器初始化完成
+2025-08-31 07:39:07 | WARNING  | src.gui.main_window:__init__:85 - 任务监控器模块未找到，跳过初始化
+2025-08-31 07:39:07 | INFO     | src.core.task_manager:__init__:81 - 任务管理器初始化完成
+2025-08-31 07:39:07 | INFO     | src.core.intelligent_scheduler:__init__:114 - 智能任务调度器初始化完成
+2025-08-31 07:39:07 | INFO     | src.gui.main_window:_create_task_tab:333 - 智能任务调度器初始化完成
+2025-08-31 07:39:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:07 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 07:39:07 | INFO     | src.core.task_validator:__init__:58 - 任务验证器初始化完成
+2025-08-31 07:39:07 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 07:39:07 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 07:39:07 | INFO     | src.gui.automation_settings_widget:_load_settings:588 - 自动化配置加载完成
+2025-08-31 07:39:07 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 07:39:07 | INFO     | src.gui.main_window:__init__:103 - 主窗口初始化完成
+2025-08-31 07:39:07 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 07:39:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:39:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:40:32 | INFO     | src.gui.main_window:closeEvent:772 - 主窗口关闭
+2025-08-31 07:40:32 | INFO     | __main__:main:104 - 应用程序退出，退出代码: 0
+2025-08-31 07:49:42 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 07:49:42 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 07:49:42 | INFO     | src.database.db_manager:initialize_database:226 - 数据库初始化完成
+2025-08-31 07:49:42 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 07:49:42 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 07:49:42 | INFO     | src.automation.automation_controller:__init__:88 - 自动化控制器初始化完成
+2025-08-31 07:49:42 | INFO     | src.core.performance_monitor:__init__:235 - 性能监控系统初始化完成
+2025-08-31 07:49:42 | INFO     | src.core.performance_monitor:start_monitoring:246 - 性能监控已启动
+2025-08-31 07:49:42 | INFO     | src.gui.main_window:_init_advanced_modules:115 - 性能监控器初始化完成
+2025-08-31 07:49:42 | INFO     | src.core.exception_recovery:__init__:180 - 异常恢复系统初始化完成
+2025-08-31 07:49:42 | INFO     | src.gui.main_window:_init_advanced_modules:127 - 异常恢复机制初始化完成
+2025-08-31 07:49:42 | INFO     | src.core.multi_task_manager:__init__:305 - 多任务并行管理器初始化完成
+2025-08-31 07:49:42 | INFO     | src.gui.main_window:_init_advanced_modules:140 - 多任务管理器初始化完成
+2025-08-31 07:49:42 | WARNING  | src.gui.main_window:__init__:85 - 任务监控器模块未找到，跳过初始化
+2025-08-31 07:49:42 | INFO     | src.core.task_manager:__init__:81 - 任务管理器初始化完成
+2025-08-31 07:49:42 | INFO     | src.core.intelligent_scheduler:__init__:114 - 智能任务调度器初始化完成
+2025-08-31 07:49:42 | INFO     | src.gui.main_window:_create_task_tab:333 - 智能任务调度器初始化完成
+2025-08-31 07:49:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:49:42 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 07:49:42 | INFO     | src.core.task_validator:__init__:58 - 任务验证器初始化完成
+2025-08-31 07:49:42 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 07:49:42 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 07:49:42 | INFO     | src.gui.automation_settings_widget:_load_settings:588 - 自动化配置加载完成
+2025-08-31 07:49:42 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 07:49:42 | INFO     | src.gui.main_window:__init__:103 - 主窗口初始化完成
+2025-08-31 07:49:43 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 07:49:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:49:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:49:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:50:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:51:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:52:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:53:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:54:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:55:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:56:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:57:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:58:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 07:59:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:00:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:01:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:02:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:03:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:04:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:05:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:06:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:07:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:08:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:09:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:10:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:11:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:12:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:13:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:14:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:15:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:16:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:17:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:18:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:02 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:07 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:12 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:17 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:22 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:27 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:32 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:37 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:42 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:47 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:52 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:19:57 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:22:29 | INFO     | __main__:main:82 - 启动崩坏：星穹铁道自动化工具
+2025-08-31 08:22:29 | INFO     | src.core.config_manager:__init__:181 - 配置管理器初始化完成，配置目录: config
+2025-08-31 08:22:29 | INFO     | src.database.db_manager:initialize_database:226 - 数据库初始化完成
+2025-08-31 08:22:29 | INFO     | src.automation.game_detector:_load_templates:83 - 加载了 0 个模板图片
+2025-08-31 08:22:29 | INFO     | src.automation.game_detector:__init__:63 - 游戏检测器初始化完成
+2025-08-31 08:22:29 | INFO     | src.automation.automation_controller:__init__:88 - 自动化控制器初始化完成
+2025-08-31 08:22:29 | INFO     | src.core.performance_monitor:__init__:235 - 性能监控系统初始化完成
+2025-08-31 08:22:29 | INFO     | src.core.performance_monitor:start_monitoring:246 - 性能监控已启动
+2025-08-31 08:22:29 | INFO     | src.gui.main_window:_init_advanced_modules:115 - 性能监控器初始化完成
+2025-08-31 08:22:30 | INFO     | src.core.exception_recovery:__init__:181 - 异常恢复系统初始化完成
+2025-08-31 08:22:30 | INFO     | src.gui.main_window:_init_advanced_modules:127 - 异常恢复机制初始化完成
+2025-08-31 08:22:30 | INFO     | src.core.multi_task_manager:__init__:305 - 多任务并行管理器初始化完成
+2025-08-31 08:22:30 | INFO     | src.gui.main_window:_init_advanced_modules:140 - 多任务管理器初始化完成
+2025-08-31 08:22:30 | WARNING  | src.gui.main_window:__init__:85 - 任务监控器模块未找到，跳过初始化
+2025-08-31 08:22:30 | INFO     | src.core.task_manager:__init__:82 - 任务管理器初始化完成
+2025-08-31 08:22:30 | INFO     | src.core.intelligent_scheduler:__init__:114 - 智能任务调度器初始化完成
+2025-08-31 08:22:30 | INFO     | src.gui.main_window:_create_task_tab:333 - 智能任务调度器初始化完成
+2025-08-31 08:22:30 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:22:30 | INFO     | src.gui.task_list_widget:__init__:66 - 任务列表界面初始化完成
+2025-08-31 08:22:30 | INFO     | src.core.task_validator:__init__:59 - 任务验证器初始化完成
+2025-08-31 08:22:30 | INFO     | src.gui.task_creation_widget:__init__:53 - 任务创建界面初始化完成
+2025-08-31 08:22:30 | INFO     | src.gui.game_settings_widget:_load_settings:295 - 游戏设置加载完成
+2025-08-31 08:22:30 | INFO     | src.gui.automation_settings_widget:_load_settings:588 - 自动化配置加载完成
+2025-08-31 08:22:30 | INFO     | src.gui.log_viewer_widget:_start_monitoring:443 - 开始监控日志文件: logs\app_2025-08-31.log
+2025-08-31 08:22:30 | INFO     | src.gui.main_window:__init__:103 - 主窗口初始化完成
+2025-08-31 08:22:30 | INFO     | __main__:main:99 - 应用程序界面已启动
+2025-08-31 08:22:35 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:22:40 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:22:45 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:22:50 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:22:55 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:00 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:05 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:10 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:15 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:20 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:25 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:30 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:35 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:38 | INFO     | src.database.db_manager:create_task:291 - 创建任务: 自动化任务 (ID: 296cc4b7-191f-4de3-a4c9-fe2ecf207861)
+2025-08-31 08:23:38 | INFO     | src.gui.main_window:_on_start_automation:615 - 开始自动化任务: 296cc4b7-191f-4de3-a4c9-fe2ecf207861
+2025-08-31 08:23:40 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:23:40 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:45 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:23:45 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:50 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:23:50 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:23:55 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:23:55 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:00 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:00 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:05 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:05 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:10 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:10 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:15 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:15 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:20 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:20 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:25 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:25 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:30 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:30 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:35 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:35 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:40 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:40 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:45 | WARNING  | src.core.task_manager:get_task:166 - 任务 296cc4b7-191f-4de3-a4c9-fe2ecf207861 缺少配置信息
+2025-08-31 08:24:45 | DEBUG    | src.gui.task_list_widget:refresh_task_list:613 - 任务列表已刷新，共 2 个任务
+2025-08-31 08:24:48 | ERROR    | src.database.db_manager:get_connection:51 - 数据库操作失败: CHECK constraint failed: status IN ('pending', 'running', 'completed', 'failed', 'paused', 'cancelled')

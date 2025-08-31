@@ -9,7 +9,8 @@ from dataclasses import dataclass
 from enum import Enum
 
 from loguru import logger
-from .task_manager import TaskConfig, TaskType, TaskPriority, ActionType
+from .task_manager import TaskConfig
+from .enums import TaskType, TaskPriority, ActionType
 
 
 class ValidationLevel(Enum):
@@ -48,16 +49,11 @@ class TaskValidator:
         
         # 操作参数验证规则
         self.action_param_rules = {
-            ActionType.CLICK: ['x', 'y', 'template'],
-            ActionType.DOUBLE_CLICK: ['x', 'y', 'template'],
-            ActionType.RIGHT_CLICK: ['x', 'y', 'template'],
+            ActionType.CLICK: ['x', 'y'],
             ActionType.KEY_PRESS: ['key'],
-            ActionType.KEY_COMBINATION: ['keys'],
             ActionType.WAIT: ['duration'],
-            ActionType.WAIT_FOR_TEMPLATE: ['template', 'timeout'],
-            ActionType.SCROLL: ['direction', 'amount'],
-            ActionType.DRAG: ['start_x', 'start_y', 'end_x', 'end_y'],
-            ActionType.TYPE_TEXT: ['text']
+            ActionType.SCREENSHOT: ['path'],
+            ActionType.CUSTOM: ['action_name']
         }
         
         logger.info("任务验证器初始化完成")

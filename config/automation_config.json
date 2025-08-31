@@ -1,0 +1,24 @@
+{
+  "config_type": "automation_config",
+  "data": {
+    "click_delay": 1.0,
+    "operation_timeout": 30,
+    "retry_count": 3,
+    "screenshot_interval": 2.0,
+    "safety_mode": true,
+    "auto_recovery": true,
+    "log_level": "INFO",
+    "performance_mode": "balanced",
+    "detection_threshold": 0.8
+  },
+  "metadata": {
+    "export_time": "2025-01-31T12:00:00",
+    "version": "1.0",
+    "application": "星铁自动化助手",
+    "validation_result": {
+      "is_valid": true,
+      "error_count": 0,
+      "warning_count": 0
+    }
+  }
+}

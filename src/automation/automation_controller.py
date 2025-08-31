@@ -8,39 +8,15 @@ import random
 import threading
 from typing import Optional, Dict, Any, List, Callable
 from dataclasses import dataclass
-from enum import Enum
 from queue import Queue, Empty
 
 import pyautogui
 from loguru import logger
 
-from ..core.config_manager import ConfigManager
+from ..core.config_manager import ConfigManager, ConfigType
+from ..core.enums import ActionType, TaskStatus
 from ..database.db_manager import DatabaseManager
 from .game_detector import GameDetector, DetectionResult
-
-
-class TaskStatus(Enum):
-    """任务状态枚举"""
-    CREATED = "created"
-    RUNNING = "running"
-    PAUSED = "paused"
-    COMPLETED = "completed"
-    FAILED = "failed"
-    STOPPED = "stopped"
-
-
-class ActionType(Enum):
-    """操作类型枚举"""
-    CLICK = "click"
-    DOUBLE_CLICK = "double_click"
-    RIGHT_CLICK = "right_click"
-    KEY_PRESS = "key_press"
-    KEY_COMBINATION = "key_combination"
-    WAIT = "wait"
-    WAIT_FOR_TEMPLATE = "wait_for_template"
-    SCROLL = "scroll"
-    DRAG = "drag"
-    TYPE_TEXT = "type_text"
 
 
 @dataclass
@@ -82,9 +58,10 @@ class AutomationController:
         self.game_detector = game_detector
         
         # 自动化配置
-        self.click_delay = float(config_manager.get('automation', 'click_delay', 1.0))
-        self.random_delay = config_manager.get('security', 'random_delay', 'true').lower() == 'true'
-        self.safe_mode = config_manager.get('security', 'safe_mode', 'true').lower() == 'true'
+        automation_config = config_manager.get_config(ConfigType.AUTOMATION_CONFIG)
+        self.click_delay = float(automation_config.get('click_delay', 1.0) if automation_config else 1.0)
+        self.random_delay = automation_config.get('random_delay', True) if automation_config else True
+        self.safe_mode = automation_config.get('safe_mode', True) if automation_config else True
         
         # 任务管理
         self.current_task_id: Optional[str] = None

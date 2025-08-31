@@ -1,0 +1,24 @@
+{
+  "config_type": "game_settings",
+  "data": {
+    "game_path": "",
+    "game_resolution": {
+      "width": 1920,
+      "height": 1080
+    },
+    "window_mode": "windowed",
+    "language": "zh_CN",
+    "auto_start": false,
+    "close_game_on_exit": false
+  },
+  "metadata": {
+    "export_time": "2025-01-31T12:00:00",
+    "version": "1.0",
+    "application": "星铁自动化助手",
+    "validation_result": {
+      "is_valid": true,
+      "error_count": 0,
+      "warning_count": 0
+    }
+  }
+}

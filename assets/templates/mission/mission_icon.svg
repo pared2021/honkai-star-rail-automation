@@ -1,0 +1,37 @@
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="scrollGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5DEB3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DEB887;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="sealGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#DC143C;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B22222;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 卷轴背景 -->
+  <rect x="8" y="12" width="48" height="40" rx="2" ry="2" fill="url(#scrollGradient)" stroke="#CD853F" stroke-width="1"/>
+  
+  <!-- 卷轴顶部 -->
+  <rect x="6" y="10" width="52" height="4" rx="2" ry="2" fill="#8B4513"/>
+  
+  <!-- 卷轴底部 -->
+  <rect x="6" y="50" width="52" height="4" rx="2" ry="2" fill="#8B4513"/>
+  
+  <!-- 任务文本线条 -->
+  <line x1="12" y1="20" x2="52" y2="20" stroke="#8B4513" stroke-width="1" opacity="0.6"/>
+  <line x1="12" y1="26" x2="48" y2="26" stroke="#8B4513" stroke-width="1" opacity="0.6"/>
+  <line x1="12" y1="32" x2="50" y2="32" stroke="#8B4513" stroke-width="1" opacity="0.6"/>
+  <line x1="12" y1="38" x2="44" y2="38" stroke="#8B4513" stroke-width="1" opacity="0.6"/>
+  
+  <!-- 印章/徽章 -->
+  <circle cx="48" cy="36" r="8" fill="url(#sealGradient)" stroke="#8B0000" stroke-width="1"/>
+  
+  <!-- 印章内部图案 -->
+  <polygon points="48,30 52,36 48,42 44,36" fill="#FFD700" opacity="0.8"/>
+  <circle cx="48" cy="36" r="3" fill="none" stroke="#FFD700" stroke-width="1"/>
+  
+  <!-- 文字标签 -->
+  <text x="32" y="62" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">任务</text>
+</svg>

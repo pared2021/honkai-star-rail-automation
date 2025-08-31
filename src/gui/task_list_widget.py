@@ -30,16 +30,18 @@ class TaskListWidget(QWidget):
     task_start_requested = pyqtSignal(str)  # 任务启动请求信号
     task_stop_requested = pyqtSignal(str)  # 任务停止请求信号
     
-    def __init__(self, task_manager: TaskManager, parent=None):
+    def __init__(self, task_manager: TaskManager, task_monitor=None, parent=None):
         """初始化任务列表界面
         
         Args:
             task_manager: 任务管理器实例
+            task_monitor: 任务监控器实例（可选）
             parent: 父组件
         """
         super().__init__(parent)
         
         self.task_manager = task_manager
+        self.task_monitor = task_monitor
         
         # 当前任务列表
         self.current_tasks: List[Task] = []
@@ -59,6 +61,10 @@ class TaskListWidget(QWidget):
         self.refresh_timer = QTimer()
         self.refresh_timer.timeout.connect(self.refresh_task_list)
         self.refresh_timer.start(5000)  # 每5秒刷新一次
+        
+        # 连接任务监控器信号（如果存在）
+        if self.task_monitor:
+            self._connect_monitor_signals()
         
         # 初始加载任务列表
         self.refresh_task_list()
@@ -297,6 +303,44 @@ class TaskListWidget(QWidget):
         """连接信号和槽"""
         pass
     
+    def _connect_monitor_signals(self):
+        """连接任务监控器信号"""
+        if self.task_monitor:
+            # 任务状态变化
+            self.task_monitor.task_status_changed.connect(self.update_task_status)
+            
+            # 任务进度更新
+            self.task_monitor.task_progress_updated.connect(self.update_task_progress)
+            
+            # 任务消息更新
+            self.task_monitor.task_message_updated.connect(self._on_task_message_updated)
+            
+            # 任务完成
+            self.task_monitor.task_completed.connect(self._on_task_completed)
+            
+            logger.info("任务监控器信号连接完成")
+    
+    def _on_task_message_updated(self, task_id: str, message: str):
+        """任务消息更新处理"""
+        if self.selected_task_id == task_id:
+            # 更新详情显示中的消息
+            self._update_task_details_progress(task_id, -1, message)
+    
+
+    
+    def _on_task_completed(self, task_id: str, success: bool, message: str):
+        """任务完成处理"""
+        # 刷新任务列表以更新状态
+        self.refresh_task_list()
+        
+        # 如果是当前选中的任务，更新详情
+        if self.selected_task_id == task_id:
+            self._show_task_details(task_id)
+        
+        # 记录任务完成信息
+        status_text = "成功" if success else "失败"
+        logger.info(f"任务 {task_id} 执行{status_text}: {message}")
+    
     def _on_filter_changed(self):
         """过滤条件变化"""
         # 更新过滤条件
@@ -343,7 +387,7 @@ class TaskListWidget(QWidget):
             
             # 文本搜索
             if self.filter_text:
-                search_text = f"{task.config.name} {task.config.description or ''}".lower()
+                search_text = f"{task.config.task_name} {task.config.description or ''}".lower()
                 if self.filter_text not in search_text:
                     continue
             
@@ -452,7 +496,7 @@ class TaskListWidget(QWidget):
                 if task:
                     # 创建新的任务配置（复制原配置）
                     new_config = task.config
-                    new_config.name = f"{task.config.name} (副本)"
+                    new_config.task_name = f"{task.config.task_name} (副本)"
                     
                     # 创建新任务
                     new_task_id = self.task_manager.create_task(
@@ -494,7 +538,7 @@ class TaskListWidget(QWidget):
             
             # 构建详情文本
             details = []
-            details.append(f"<h3>{task.config.name}</h3>")
+            details.append(f"<h3>{task.config.task_name}</h3>")
             details.append(f"<b>任务ID:</b> {task.task_id}")
             details.append(f"<b>类型:</b> {task.config.task_type.value}")
             details.append(f"<b>优先级:</b> {task.config.priority.value}")
@@ -550,7 +594,7 @@ class TaskListWidget(QWidget):
         
         for row, task in enumerate(tasks):
             # 任务名称
-            name_item = QTableWidgetItem(task.config.name)
+            name_item = QTableWidgetItem(task.config.task_name)
             name_item.setData(Qt.ItemDataRole.UserRole, task.task_id)
             self.task_table.setItem(row, 0, name_item)
             
@@ -583,7 +627,7 @@ class TaskListWidget(QWidget):
             self.task_table.setItem(row, 4, created_item)
             
             # 最后执行时间
-            last_run = task.started_at or task.created_at
+            last_run = task.last_executed_at or task.created_at
             last_run_item = QTableWidgetItem(last_run.strftime("%m-%d %H:%M"))
             self.task_table.setItem(row, 5, last_run_item)
             
@@ -685,12 +729,14 @@ class TaskListWidget(QWidget):
         except Exception as e:
             logger.error(f"更新任务进度失败: {e}")
     
-    def _update_task_details_progress(self, task_id: str, progress: int, message: str):
+
+    
+    def _update_task_details_progress(self, task_id: str, progress: int, message: str = ""):
         """更新任务详情中的进度信息
         
         Args:
             task_id: 任务ID
-            progress: 进度百分比
+            progress: 进度百分比，-1表示不更新进度
             message: 进度消息
         """
         try:
@@ -698,21 +744,27 @@ class TaskListWidget(QWidget):
             current_html = self.detail_text.toHtml()
             
             # 添加或更新进度信息
-            progress_info = f"<b>执行进度:</b> {progress}%"
+            progress_info = ""
+            if progress >= 0:
+                progress_info = f"<b>执行进度:</b> {progress}%"
             if message:
-                progress_info += f"<br><b>当前状态:</b> {message}"
+                if progress_info:
+                    progress_info += f"<br><b>当前状态:</b> {message}"
+                else:
+                    progress_info = f"<b>当前状态:</b> {message}"
             
-            # 如果已有进度信息，替换它
-            import re
-            pattern = r'<b>执行进度:</b>.*?(?=<b>|</div>|$)'
-            if re.search(pattern, current_html, re.DOTALL):
-                updated_html = re.sub(pattern, progress_info, current_html, flags=re.DOTALL)
-            else:
-                # 在状态信息后添加进度信息
-                status_pattern = r'(<b>状态:</b>.*?)(<br>)'
-                updated_html = re.sub(status_pattern, f'\\1\\2{progress_info}<br>', current_html)
-            
-            self.detail_text.setHtml(updated_html)
+            if progress_info:
+                # 如果已有进度信息，替换它
+                import re
+                pattern = r'<b>执行进度:</b>.*?(?=<b>|</div>|$)'
+                if re.search(pattern, current_html, re.DOTALL):
+                    updated_html = re.sub(pattern, progress_info, current_html, flags=re.DOTALL)
+                else:
+                    # 在状态信息后添加进度信息
+                    status_pattern = r'(<b>状态:</b>.*?)(<br>)'
+                    updated_html = re.sub(status_pattern, f'\\1\\2{progress_info}<br>', current_html)
+                
+                self.detail_text.setHtml(updated_html)
             
         except Exception as e:
             logger.error(f"更新任务详情进度失败: {e}")
@@ -752,3 +804,25 @@ class TaskListWidget(QWidget):
                     
         except Exception as e:
             logger.error(f"更新任务状态失败: {e}")
+    
+    def get_task_progress(self, task_id: str) -> int:
+        """获取任务进度
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            进度百分比，如果任务不存在返回-1
+        """
+        try:
+            for row in range(self.task_table.rowCount()):
+                item = self.task_table.item(row, 0)
+                if item and item.data(Qt.ItemDataRole.UserRole) == task_id:
+                    progress_item = self.task_table.item(row, 6)
+                    if progress_item:
+                        progress_text = progress_item.text().replace('%', '')
+                        return int(progress_text)
+            return -1
+        except Exception as e:
+            logger.error(f"获取任务进度失败: {e}")
+            return -1

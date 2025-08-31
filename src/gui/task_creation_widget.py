@@ -19,7 +19,8 @@ from PyQt6.QtGui import QFont, QIcon
 from loguru import logger
 from ..core.task_manager import TaskManager, TaskType, TaskPriority, TaskConfig
 from ..core.task_validator import TaskValidator, ValidationLevel
-from ..automation.automation_controller import ActionType
+from ..core.enums import ActionType
+from ..models.task_model import Task
 
 
 class TaskCreationWidget(QWidget):
@@ -63,49 +64,59 @@ class TaskCreationWidget(QWidget):
             self.create_btn.setText("更新任务")
             
             # 加载基本信息
-            self.name_edit.setText(task.config.name)
-            self.description_edit.setPlainText(task.config.description or "")
+            self.name_edit.setText(task.name)
+            self.description_edit.setPlainText(task.description or "")
             
             # 设置类型
-            type_index = self.type_combo.findData(task.config.task_type)
+            type_index = self.type_combo.findData(task.task_type)
             if type_index >= 0:
                 self.type_combo.setCurrentIndex(type_index)
             
             # 设置优先级
-            priority_index = self.priority_combo.findData(task.config.priority)
+            priority_index = self.priority_combo.findData(task.priority)
             if priority_index >= 0:
                 self.priority_combo.setCurrentIndex(priority_index)
             
-            # 加载执行设置
-            self.max_duration_spin.setValue(task.config.max_duration)
-            self.retry_count_spin.setValue(task.config.retry_count)
-            self.retry_interval_spin.setValue(task.config.retry_interval)
-            self.safe_mode_check.setChecked(task.config.safe_mode)
+            # 加载执行设置（从config字典中获取）
+            config = task.config or {}
+            self.max_duration_spin.setValue(config.get('max_duration', 300))
+            self.retry_count_spin.setValue(config.get('retry_count', 3))
+            self.retry_interval_spin.setValue(config.get('retry_interval', 5))
+            self.safe_mode_check.setChecked(config.get('safe_mode', True))
             
             # 加载调度设置
-            if task.config.scheduled_time:
+            scheduled_time = config.get('scheduled_time')
+            if scheduled_time:
                 self.schedule_radio.setChecked(True)
-                self.schedule_datetime.setDateTime(task.config.scheduled_time)
+                if isinstance(scheduled_time, str):
+                    from datetime import datetime
+                    scheduled_time = datetime.fromisoformat(scheduled_time)
+                self.schedule_datetime.setDateTime(scheduled_time)
             else:
                 self.immediate_radio.setChecked(True)
             
-            if task.config.repeat_interval:
+            repeat_interval = config.get('repeat_interval')
+            if repeat_interval:
                 self.repeat_check.setChecked(True)
-                self.repeat_interval_spin.setValue(task.config.repeat_interval)
+                self.repeat_interval_spin.setValue(repeat_interval)
             
             # 加载动作序列
-            if task.config.actions:
-                actions_text = "\n".join([str(action) for action in task.config.actions])
+            actions = config.get('actions')
+            if actions:
+                actions_text = "\n".join([str(action) for action in actions])
                 self.actions_edit.setPlainText(actions_text)
             
             # 加载自定义参数
-            if task.config.custom_params:
-                self.custom_params_edit.setPlainText(str(task.config.custom_params))
+            custom_params = config.get('custom_params')
+            if custom_params:
+                self.custom_params_edit.setPlainText(str(custom_params))
             
             # 设置验证级别
-            validation_index = self.validation_combo.findData(task.config.validation_level)
-            if validation_index >= 0:
-                self.validation_combo.setCurrentIndex(validation_index)
+            validation_level = config.get('validation_level')
+            if validation_level:
+                validation_index = self.validation_combo.findData(validation_level)
+                if validation_index >= 0:
+                    self.validation_combo.setCurrentIndex(validation_index)
             
             logger.info(f"任务编辑数据加载完成: {task.task_id}")
             
@@ -340,11 +351,11 @@ class TaskCreationWidget(QWidget):
         layout.addRow("自定义参数:", self.custom_params_edit)
         
         # 验证级别
-        self.validation_level_combo = QComboBox()
+        self.validation_combo = QComboBox()
         for level in ValidationLevel:
-            self.validation_level_combo.addItem(level.value, level)
-        self.validation_level_combo.setCurrentText(ValidationLevel.STANDARD.value)
-        layout.addRow("验证级别:", self.validation_level_combo)
+            self.validation_combo.addItem(level.value, level)
+        self.validation_combo.setCurrentText(ValidationLevel.WARNING.value)
+        layout.addRow("验证级别:", self.validation_combo)
         
         return group
     
@@ -446,7 +457,7 @@ class TaskCreationWidget(QWidget):
         """验证配置"""
         try:
             config = self._build_task_config()
-            validation_level = self.validation_level_combo.currentData()
+            validation_level = self.validation_combo.currentData()
             
             result = self.validator.validate_task_config(config, validation_level)
             
@@ -467,7 +478,7 @@ class TaskCreationWidget(QWidget):
             config = self._build_task_config()
             
             # 验证配置
-            validation_level = self.validation_level_combo.currentData()
+            validation_level = self.validation_combo.currentData()
             result = self.validator.validate_task_config(config, validation_level)
             
             if not result.is_valid:
@@ -602,7 +613,7 @@ class TaskCreationWidget(QWidget):
         
         # 重置高级设置
         self.custom_params_edit.clear()
-        self.validation_level_combo.setCurrentText(ValidationLevel.STANDARD.value)
+        self.validation_combo.setCurrentText(ValidationLevel.WARNING.value)
         
         logger.info("表单已重置")
     
@@ -613,7 +624,7 @@ class TaskCreationWidget(QWidget):
             config: 要加载的任务配置
         """
         # 加载基本信息
-        self.name_edit.setText(config.name)
+        self.name_edit.setText(config.task_name)
         self.description_edit.setPlainText(config.description or "")
         
         # 设置任务类型
@@ -661,4 +672,4 @@ class TaskCreationWidget(QWidget):
             self.custom_params_edit.setPlainText(json.dumps(config.custom_params, indent=2, ensure_ascii=False))
         
         self.current_config = config
-        logger.info(f"已加载任务配置: {config.name}")
+        logger.info(f"已加载任务配置: {config.task_name}")
