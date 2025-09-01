@@ -18,7 +18,7 @@ sys.path.insert(0, src_path)
 
 from adapters.task_manager_adapter import TaskManagerAdapter
 from database.db_manager import DatabaseManager
-from models.task_models import Task, TaskConfig, TaskStatus, TaskType, TaskPriority
+from src.models.task_models import Task, TaskConfig, TaskStatus, TaskType, TaskPriority
 
 
 class TestTaskManager(unittest.TestCase):

@@ -11,36 +11,19 @@ from datetime import datetime
 from dataclasses import dataclass
 
 from src.services.base_async_service import BaseAsyncService
-from src.services.event_bus import EventBus, BaseEvent
+from src.services.event_bus import EventBus, AutomationEvent, AutomationEventType
 from src.automation.game_detector import GameDetector, GameWindow, DetectionResult
 from src.automation.automation_controller import AutomationController, AutomationAction, ActionType, TaskResult
 from src.models.task_models import TaskStatus
 from src.core.logger import get_logger
+from src.exceptions import AutomationError, ServiceError
 
 logger = get_logger(__name__)
 
 
 # ==================== 异常定义 ====================
 
-class AutomationApplicationServiceError(Exception):
-    """自动化应用服务异常基类"""
-    def __init__(self, message: str, error_code: str = "AUTOMATION_APP_SERVICE_ERROR", original_error: Exception = None):
-        super().__init__(message)
-        self.message = message
-        self.error_code = error_code
-        self.original_error = original_error
 
-
-class GameDetectionError(AutomationApplicationServiceError):
-    """游戏检测错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "GAME_DETECTION_ERROR", original_error)
-
-
-class AutomationExecutionError(AutomationApplicationServiceError):
-    """自动化执行错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "AUTOMATION_EXECUTION_ERROR", original_error)
 
 
 # ==================== 请求数据类 ====================
@@ -123,36 +106,6 @@ class AutomationExecutionResponse:
     execution_time: float = 0.0
 
 
-# ==================== 事件定义 ====================
-
-class AutomationEvent(BaseEvent):
-    """自动化事件基类"""
-    def __init__(self, event_type: str, automation_id: str, data: Dict[str, Any] = None):
-        super().__init__(event_type, data or {})
-        self.automation_id = automation_id
-
-
-class GameDetectedEvent(AutomationEvent):
-    """游戏检测到事件"""
-    def __init__(self, automation_id: str, game_window: GameWindow):
-        super().__init__("game_detected", automation_id, {"game_window": game_window})
-        self.game_window = game_window
-
-
-class AutomationStartedEvent(AutomationEvent):
-    """自动化开始事件"""
-    def __init__(self, automation_id: str, task_name: str):
-        super().__init__("automation_started", automation_id, {"task_name": task_name})
-        self.task_name = task_name
-
-
-class AutomationCompletedEvent(AutomationEvent):
-    """自动化完成事件"""
-    def __init__(self, automation_id: str, result: TaskResult):
-        super().__init__("automation_completed", automation_id, {"result": result})
-        self.result = result
-
-
 # ==================== 主服务类 ====================
 
 class AutomationApplicationService(BaseAsyncService):
@@ -207,7 +160,7 @@ class AutomationApplicationService(BaseAsyncService):
             
         except Exception as e:
             logger.error(f"AutomationApplicationService初始化失败: {e}")
-            raise AutomationApplicationServiceError(f"初始化失败: {e}", original_error=e)
+            raise ServiceError(f"初始化失败: {e}", original_error=e)
     
     async def close(self) -> None:
         """关闭服务"""
@@ -226,7 +179,7 @@ class AutomationApplicationService(BaseAsyncService):
             
         except Exception as e:
             logger.error(f"AutomationApplicationService关闭失败: {e}")
-            raise AutomationApplicationServiceError(f"关闭失败: {e}", original_error=e)
+            raise ServiceError(f"关闭失败: {e}", original_error=e)
     
     # ==================== 游戏检测操作 ====================
     
@@ -263,7 +216,11 @@ class AutomationApplicationService(BaseAsyncService):
             game_window = game_windows[0]
             
             # 发布游戏检测事件
-            event = GameDetectedEvent(str(uuid.uuid4()), game_window)
+            event = AutomationEvent(
+                event_type=AutomationEventType.GAME_DETECTED,
+                automation_id=str(uuid.uuid4()),
+                data={"game_window": game_window}
+            )
             await self.event_bus.publish(event)
             
             logger.info(f"成功检测到游戏窗口: {game_window.title}")
@@ -554,7 +511,12 @@ class AutomationApplicationService(BaseAsyncService):
                 actions.append(action)
             
             # 发布自动化开始事件
-            start_event = AutomationStartedEvent(task_id, request.task_name)
+            start_event = AutomationEvent(
+                event_type=AutomationEventType.AUTOMATION_STARTED,
+                automation_id=task_id,
+                task_name=request.task_name,
+                data={"task_name": request.task_name}
+            )
             await self.event_bus.publish(start_event)
             
             # 启动自动化任务
@@ -586,7 +548,11 @@ class AutomationApplicationService(BaseAsyncService):
             )
             
             # 发布自动化完成事件
-            complete_event = AutomationCompletedEvent(task_id, result)
+            complete_event = AutomationEvent(
+                event_type=AutomationEventType.AUTOMATION_COMPLETED,
+                automation_id=task_id,
+                data={"result": result}
+            )
             await self.event_bus.publish(complete_event)
             
             logger.info(f"自动化序列执行完成: {result.message}")

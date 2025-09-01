@@ -9,8 +9,12 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 
-from models.task_models import Task, TaskConfig
-from core.enums import TaskStatus, TaskType, TaskPriority
+from src.models.task_models import Task, TaskConfig
+from src.core.enums import TaskStatus, TaskType, TaskPriority
+from src.exceptions import (
+    RepositoryError, TaskNotFoundError, DuplicateTaskError,
+    DatabaseConnectionError, QueryExecutionError, ValidationError
+)
 
 
 class TaskRepository(ABC):
@@ -293,57 +297,3 @@ class TaskRepository(ABC):
             Dict[str, Any]: 健康状态信息
         """
         pass
-
-
-class RepositoryError(Exception):
-    """数据访问层异常"""
-    
-    def __init__(self, message: str, error_code: str = None, original_error: Exception = None):
-        super().__init__(message)
-        self.message = message
-        self.error_code = error_code
-        self.original_error = original_error
-    
-    def __str__(self):
-        if self.error_code:
-            return f"[{self.error_code}] {self.message}"
-        return self.message
-
-
-class TaskNotFoundError(RepositoryError):
-    """任务未找到异常"""
-    
-    def __init__(self, task_id: str):
-        super().__init__(f"Task not found: {task_id}", "TASK_NOT_FOUND")
-        self.task_id = task_id
-
-
-class DuplicateTaskError(RepositoryError):
-    """重复任务异常"""
-    
-    def __init__(self, task_id: str):
-        super().__init__(f"Task already exists: {task_id}", "DUPLICATE_TASK")
-        self.task_id = task_id
-
-
-class DatabaseConnectionError(RepositoryError):
-    """数据库连接异常"""
-    
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(f"Database connection error: {message}", "DB_CONNECTION_ERROR", original_error)
-
-
-class QueryExecutionError(RepositoryError):
-    """查询执行异常"""
-    
-    def __init__(self, query: str, message: str, original_error: Exception = None):
-        super().__init__(f"Query execution error: {message}", "QUERY_EXECUTION_ERROR", original_error)
-        self.query = query
-
-
-class ValidationError(RepositoryError):
-    """数据验证异常"""
-    
-    def __init__(self, field: str, message: str):
-        super().__init__(f"Validation error for field '{field}': {message}", "VALIDATION_ERROR")
-        self.field = field

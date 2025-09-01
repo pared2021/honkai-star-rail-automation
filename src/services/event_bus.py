@@ -13,6 +13,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 
 from loguru import logger
+from src.exceptions import EventError
 
 
 class EventPriority(Enum):
@@ -52,11 +53,23 @@ class SystemEventType(Enum):
     RESOURCE_EXHAUSTED = "resource_exhausted"
 
 
+class AutomationEventType(Enum):
+    """自动化事件类型"""
+    GAME_DETECTED = "game_detected"
+    AUTOMATION_STARTED = "automation_started"
+    AUTOMATION_COMPLETED = "automation_completed"
+    AUTOMATION_PAUSED = "automation_paused"
+    AUTOMATION_RESUMED = "automation_resumed"
+    AUTOMATION_STOPPED = "automation_stopped"
+    AUTOMATION_ERROR = "automation_error"
+    AUTOMATION_PROGRESS = "automation_progress"
+
+
 @dataclass
 class BaseEvent:
     """基础事件类"""
     event_id: str = field(default_factory=lambda: str(uuid.uuid4()))
-    event_type: Union[TaskEventType, SystemEventType, str] = field(default="unknown")
+    event_type: Union[TaskEventType, SystemEventType, AutomationEventType, str] = field(default="unknown")
     timestamp: datetime = field(default_factory=datetime.now)
     source: Optional[str] = None
     priority: EventPriority = EventPriority.NORMAL
@@ -171,6 +184,47 @@ class SystemEvent(BaseEvent):
         return event
 
 
+@dataclass
+class AutomationEvent(BaseEvent):
+    """自动化事件"""
+    automation_id: Optional[str] = None
+    task_name: Optional[str] = None
+    
+    def __post_init__(self):
+        if self.source is None:
+            self.source = "automation_service"
+        
+        # 添加自动化相关的元数据
+        if self.automation_id:
+            self.metadata['automation_id'] = self.automation_id
+        if self.task_name:
+            self.metadata['task_name'] = self.task_name
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """转换为字典"""
+        result = super().to_dict()
+        result.update({
+            'automation_id': self.automation_id,
+            'task_name': self.task_name
+        })
+        return result
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'AutomationEvent':
+        """从字典创建自动化事件"""
+        event = cls()
+        event.event_id = data.get('event_id', str(uuid.uuid4()))
+        event.event_type = data.get('event_type', 'unknown')
+        event.timestamp = datetime.fromisoformat(data.get('timestamp', datetime.now().isoformat()))
+        event.source = data.get('source')
+        event.priority = EventPriority(data.get('priority', 'normal'))
+        event.data = data.get('data', {})
+        event.metadata = data.get('metadata', {})
+        event.automation_id = data.get('automation_id')
+        event.task_name = data.get('task_name')
+        return event
+
+
 class EventHandler(ABC):
     """事件处理器抽象基类"""
     
@@ -189,7 +243,7 @@ class EventHandler(ABC):
     
     @property
     @abstractmethod
-    def supported_events(self) -> List[Union[TaskEventType, SystemEventType, str]]:
+    def supported_events(self) -> List[Union[TaskEventType, SystemEventType, AutomationEventType, str]]:
         """
         支持的事件类型列表
         
@@ -208,7 +262,7 @@ class EventHandler(ABC):
 class EventSubscription:
     """事件订阅信息"""
     subscription_id: str
-    event_type: Union[TaskEventType, SystemEventType, str]
+    event_type: Union[TaskEventType, SystemEventType, AutomationEventType, str]
     handler: Union[Callable, EventHandler]
     priority: EventPriority = EventPriority.NORMAL
     filter_func: Optional[Callable[[BaseEvent], bool]] = None
@@ -218,25 +272,7 @@ class EventSubscription:
     active: bool = True
 
 
-class EventBusError(Exception):
-    """事件总线异常"""
-    def __init__(self, message: str, error_code: str = "EVENT_BUS_ERROR", original_error: Exception = None):
-        super().__init__(message)
-        self.message = message
-        self.error_code = error_code
-        self.original_error = original_error
 
-
-class EventPublishError(EventBusError):
-    """事件发布错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "PUBLISH_ERROR", original_error)
-
-
-class EventHandlerError(EventBusError):
-    """事件处理器错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "HANDLER_ERROR", original_error)
 
 
 class EventBus:
@@ -399,7 +435,7 @@ class EventBus:
                     logger.debug(f"事件处理器执行成功: {subscription.subscription_id}")
                     return
                 else:
-                    raise EventHandlerError("Handler returned False")
+                    raise EventError("Handler returned False")
                 
             except Exception as e:
                 retries += 1
@@ -429,11 +465,11 @@ class EventBus:
             bool: 发布是否成功
             
         Raises:
-            EventPublishError: 发布失败
+            EventError: 发布失败
         """
         try:
             if not self._running:
-                raise EventPublishError("Event bus is not running")
+                raise EventError("Event bus is not running")
             
             # 检查队列是否已满
             if self._event_queue.full():
@@ -449,7 +485,7 @@ class EventBus:
             
         except Exception as e:
             logger.error(f"发布事件失败: {e}")
-            raise EventPublishError(f"Failed to publish event: {e}", e)
+            raise EventError(f"Failed to publish event: {e}", original_error=e)
     
     def publish_sync(self, event: BaseEvent) -> bool:
         """

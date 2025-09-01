@@ -15,8 +15,8 @@ from loguru import logger
 from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
 
 from .task_actions import ActionFactory, BaseAction, ActionResult, ActionStatus
-from models.task_models import Task, TaskStatus
-from database.db_manager import DatabaseManager
+from src.models.task_models import Task, TaskStatus
+from src.database.db_manager import DatabaseManager
 
 
 class ExecutionStatus(Enum):

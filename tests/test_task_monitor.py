@@ -18,8 +18,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 from src.monitoring.task_monitor import TaskMonitor
 from src.automation.automation_controller import AutomationController
 from src.automation.game_detector import GameDetector
-from src.models.task_model import Task, TaskStatus, TaskPriority
-from src.core.enums import TaskType
+from src.models.task_models import Task, TaskStatus, TaskPriority, TaskType
 from src.core.task_manager import TaskManager, TaskConfig
 from src.database.db_manager import DatabaseManager
 from src.core.config_manager import ConfigManager, ConfigType

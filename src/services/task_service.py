@@ -24,33 +24,13 @@ from core.enums import TaskStatus, TaskType, TaskPriority
 from repositories.task_repository import TaskRepository, TaskNotFoundError, DuplicateTaskError
 from services.event_bus import EventBus, TaskEvent, TaskEventType
 from services.base_async_service import BaseAsyncService
+from src.exceptions import (
+    TaskValidationError, TaskStateError, TaskExecutionError,
+    ServiceError, TaskNotFoundError
+)
 
 
-class TaskServiceError(Exception):
-    """任务服务异常基类"""
-    def __init__(self, message: str, error_code: str = "TASK_SERVICE_ERROR", original_error: Exception = None):
-        super().__init__(message)
-        self.message = message
-        self.error_code = error_code
-        self.original_error = original_error
-
-
-class TaskValidationError(TaskServiceError):
-    """任务验证错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "VALIDATION_ERROR", original_error)
-
-
-class TaskStateError(TaskServiceError):
-    """任务状态错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "STATE_ERROR", original_error)
-
-
-class TaskExecutionError(TaskServiceError):
-    """任务执行错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "EXECUTION_ERROR", original_error)
+# 异常类已移至统一的exceptions模块
 
 
 @dataclass
@@ -84,8 +64,10 @@ class TaskExecutionResult:
     output_data: Optional[Dict[str, Any]] = None
 
 
-class TaskService(BaseAsyncService):
-    """任务业务逻辑服务"""
+class TaskService:
+    """任务领域服务 - 核心业务逻辑
+    负责任务的领域逻辑处理，不包含应用层关注点
+    """
     
     def __init__(
         self,
@@ -101,13 +83,6 @@ class TaskService(BaseAsyncService):
             event_bus: 事件总线
             default_user_id: 默认用户ID
         """
-        from services.base_async_service import ServiceConfig
-        config = ServiceConfig(
-            name="TaskService",
-            description="任务管理服务",
-            health_check_interval=60.0
-        )
-        super().__init__(config)
         self.task_repository = task_repository
         self.event_bus = event_bus
         self.default_user_id = default_user_id
@@ -134,7 +109,7 @@ class TaskService(BaseAsyncService):
         logger.info("任务服务初始化完成")
     
     async def initialize(self) -> bool:
-        """初始化服务"""
+        """初始化领域服务"""
         try:
             # 初始化数据访问层
             await self.task_repository.initialize()
@@ -143,12 +118,12 @@ class TaskService(BaseAsyncService):
             self._register_event_listeners()
             
             self._initialized = True
-            logger.info("任务服务初始化成功")
+            logger.info("任务领域服务初始化成功")
             return True
             
         except Exception as e:
-            logger.error(f"任务服务初始化失败: {e}")
-            raise TaskServiceError(f"Failed to initialize task service: {e}", "INITIALIZATION_ERROR", e)
+            logger.error(f"任务领域服务初始化失败: {e}")
+            raise ServiceError(f"Failed to initialize task service: {e}", "INITIALIZATION_ERROR", "TaskService", e)
     
     def _register_event_listeners(self):
         """注册事件监听器"""
@@ -175,28 +150,34 @@ class TaskService(BaseAsyncService):
         user_id: Optional[str] = None
     ) -> str:
         """
-        创建新任务
+        创建任务 - 领域逻辑
         
         Args:
-            config: 任务配置
+            config: 任务配置（已验证）
             user_id: 用户ID，如果为None则使用默认用户
             
         Returns:
             str: 任务ID
             
         Raises:
-            TaskValidationError: 配置验证失败
             DuplicateTaskError: 任务已存在
         """
         await self._ensure_initialized()
         
         try:
-            # 验证任务配置
-            config.validate()
-            
             # 使用默认用户ID
             if user_id is None:
                 user_id = self.default_user_id
+            
+            # 检查任务名称是否重复（领域规则）
+            existing_tasks = await self.task_repository.list_tasks(
+                user_id=user_id,
+                limit=1
+            )
+            
+            for task in existing_tasks:
+                if task.config.name == config.name:
+                    raise DuplicateTaskError(f"Task with name '{config.name}' already exists")
             
             # 生成任务ID
             task_id = str(uuid.uuid4())
@@ -214,7 +195,7 @@ class TaskService(BaseAsyncService):
             # 保存到数据库
             await self.task_repository.create_task(task)
             
-            # 发布事件
+            # 发布领域事件
             await self.event_bus.publish(TaskEvent(
                 event_type=TaskEventType.TASK_CREATED,
                 task_id=task_id,
@@ -226,10 +207,10 @@ class TaskService(BaseAsyncService):
             return task_id
             
         except Exception as e:
-            if isinstance(e, (TaskValidationError, DuplicateTaskError)):
+            if isinstance(e, DuplicateTaskError):
                 raise
             logger.error(f"创建任务失败: {e}")
-            raise TaskServiceError(f"Failed to create task: {e}", "CREATE_ERROR", e)
+            raise ServiceError(f"Failed to create task: {e}", "CREATE_ERROR", "TaskService", e)
     
     async def get_task(self, task_id: str) -> Optional[Task]:
         """
@@ -247,29 +228,25 @@ class TaskService(BaseAsyncService):
             return await self.task_repository.get_task(task_id)
         except Exception as e:
             logger.error(f"获取任务失败: {e}")
-            raise TaskServiceError(f"Failed to get task: {e}", "GET_ERROR", e)
+            raise ServiceError(f"Failed to get task: {e}", "GET_ERROR", "TaskService", e)
     
     async def update_task(self, task: Task) -> bool:
         """
-        更新任务
+        更新任务 - 领域逻辑
         
         Args:
-            task: 任务对象
+            task: 任务对象（已验证）
             
         Returns:
             bool: 更新是否成功
             
         Raises:
-            TaskValidationError: 任务验证失败
             TaskNotFoundError: 任务不存在
         """
         await self._ensure_initialized()
         
         try:
-            # 验证任务
-            task.validate()
-            
-            # 检查任务是否存在
+            # 检查任务是否存在（领域规则）
             existing_task = await self.task_repository.get_task(task.task_id)
             if not existing_task:
                 raise TaskNotFoundError(task.task_id)
@@ -281,7 +258,7 @@ class TaskService(BaseAsyncService):
             success = await self.task_repository.update_task(task)
             
             if success:
-                # 发布事件
+                # 发布领域事件
                 await self.event_bus.publish(TaskEvent(
                     event_type=TaskEventType.TASK_UPDATED,
                     task_id=task.task_id,
@@ -294,30 +271,33 @@ class TaskService(BaseAsyncService):
             return success
             
         except Exception as e:
-            if isinstance(e, (TaskValidationError, TaskNotFoundError)):
+            if isinstance(e, TaskNotFoundError):
                 raise
             logger.error(f"更新任务失败: {e}")
-            raise TaskServiceError(f"Failed to update task: {e}", "UPDATE_ERROR", e)
+            raise ServiceError(f"Failed to update task: {e}", "UPDATE_ERROR", "TaskService", e)
     
     async def delete_task(self, task_id: str) -> bool:
         """
-        删除任务
+        删除任务 - 领域逻辑
         
         Args:
             task_id: 任务ID
             
         Returns:
             bool: 删除是否成功
+            
+        Raises:
+            TaskNotFoundError: 任务不存在
         """
         await self._ensure_initialized()
         
         try:
-            # 获取任务信息（用于事件发布）
+            # 检查任务是否存在（领域规则）
             task = await self.task_repository.get_task(task_id)
             if not task:
-                return False
+                raise TaskNotFoundError(task_id)
             
-            # 停止正在运行的任务
+            # 如果任务正在运行，先停止（领域规则）
             if task_id in self._running_tasks:
                 await self._stop_task_execution(task_id)
             
@@ -325,7 +305,7 @@ class TaskService(BaseAsyncService):
             success = await self.task_repository.delete_task(task_id)
             
             if success:
-                # 发布事件
+                # 发布领域事件
                 await self.event_bus.publish(TaskEvent(
                     event_type=TaskEventType.TASK_DELETED,
                     task_id=task_id,
@@ -338,17 +318,19 @@ class TaskService(BaseAsyncService):
             return success
             
         except Exception as e:
+            if isinstance(e, TaskNotFoundError):
+                raise
             logger.error(f"删除任务失败: {e}")
-            raise TaskServiceError(f"Failed to delete task: {e}", "DELETE_ERROR", e)
+            raise ServiceError(f"Failed to delete task: {e}", "DELETE_ERROR", "TaskService", e)
     
     # ==================== 任务查询操作 ====================
     
     async def list_tasks(self, criteria: TaskSearchCriteria) -> List[Task]:
         """
-        查询任务列表
+        查询任务列表 - 领域逻辑
         
         Args:
-            criteria: 搜索条件
+            criteria: 搜索条件（已验证）
             
         Returns:
             List[Task]: 任务列表
@@ -369,7 +351,7 @@ class TaskService(BaseAsyncService):
             )
         except Exception as e:
             logger.error(f"查询任务列表失败: {e}")
-            raise TaskServiceError(f"Failed to list tasks: {e}", "LIST_ERROR", e)
+            raise ServiceError(f"Failed to list tasks: {e}", "LIST_ERROR", "TaskService", e)
     
     async def count_tasks(self, criteria: TaskSearchCriteria) -> int:
         """
@@ -393,7 +375,7 @@ class TaskService(BaseAsyncService):
             )
         except Exception as e:
             logger.error(f"统计任务数量失败: {e}")
-            raise TaskServiceError(f"Failed to count tasks: {e}", "COUNT_ERROR", e)
+            raise ServiceError(f"Failed to count tasks: {e}", "COUNT_ERROR", "TaskService", e)
     
     async def search_tasks(
         self,
@@ -425,7 +407,7 @@ class TaskService(BaseAsyncService):
             )
         except Exception as e:
             logger.error(f"搜索任务失败: {e}")
-            raise TaskServiceError(f"Failed to search tasks: {e}", "SEARCH_ERROR", e)
+            raise ServiceError(f"Failed to search tasks: {e}", "SEARCH_ERROR", "TaskService", e)
     
     # ==================== 任务状态管理 ====================
     
@@ -490,7 +472,7 @@ class TaskService(BaseAsyncService):
             if isinstance(e, (TaskNotFoundError, TaskStateError)):
                 raise
             logger.error(f"更新任务状态失败: {e}")
-            raise TaskServiceError(f"Failed to update task status: {e}", "STATUS_UPDATE_ERROR", e)
+            raise ServiceError(f"Failed to update task status: {e}", "STATUS_UPDATE_ERROR", "TaskService", e)
     
     def _validate_status_transition(self, current_status: TaskStatus, new_status: TaskStatus):
         """
@@ -809,7 +791,7 @@ class TaskService(BaseAsyncService):
             )
         except Exception as e:
             logger.error(f"获取任务统计失败: {e}")
-            raise TaskServiceError(f"Failed to get task statistics: {e}", "STATISTICS_ERROR", e)
+            raise ServiceError(f"Failed to get task statistics: {e}", "STATISTICS_ERROR", "TaskService", e)
     
     async def get_running_tasks(self) -> List[str]:
         """
@@ -846,7 +828,7 @@ class TaskService(BaseAsyncService):
             )
         except Exception as e:
             logger.error(f"备份任务失败: {e}")
-            raise TaskServiceError(f"Failed to backup tasks: {e}", "BACKUP_ERROR", e)
+            raise ServiceError(f"Failed to backup tasks: {e}", "BACKUP_ERROR", "TaskService", e)
     
     async def restore_tasks(
         self,
@@ -872,7 +854,7 @@ class TaskService(BaseAsyncService):
             )
         except Exception as e:
             logger.error(f"恢复任务失败: {e}")
-            raise TaskServiceError(f"Failed to restore tasks: {e}", "RESTORE_ERROR", e)
+            raise ServiceError(f"Failed to restore tasks: {e}", "RESTORE_ERROR", "TaskService", e)
     
     async def cleanup_old_tasks(
         self,
@@ -898,7 +880,7 @@ class TaskService(BaseAsyncService):
             )
         except Exception as e:
             logger.error(f"清理旧任务失败: {e}")
-            raise TaskServiceError(f"Failed to cleanup old tasks: {e}", "CLEANUP_ERROR", e)
+            raise ServiceError(f"Failed to cleanup old tasks: {e}", "CLEANUP_ERROR", "TaskService", e)
     
     # ==================== 事件处理器 ====================
     

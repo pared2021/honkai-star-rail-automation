@@ -14,6 +14,7 @@ from enum import Enum
 from contextlib import asynccontextmanager
 
 from loguru import logger
+from src.exceptions import ServiceError
 
 T = TypeVar('T')
 
@@ -179,49 +180,7 @@ class HealthCheckResult:
         }
 
 
-class BaseAsyncServiceError(Exception):
-    """异步服务基础异常"""
-    def __init__(self, message: str, error_code: str = "SERVICE_ERROR", service_name: str = "", original_error: Exception = None):
-        super().__init__(message)
-        self.message = message
-        self.error_code = error_code
-        self.service_name = service_name
-        self.original_error = original_error
-        self.timestamp = time.time()
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            'message': self.message,
-            'error_code': self.error_code,
-            'service_name': self.service_name,
-            'timestamp': self.timestamp,
-            'original_error': str(self.original_error) if self.original_error else None
-        }
 
-
-class ServiceStartupError(BaseAsyncServiceError):
-    """服务启动错误"""
-    def __init__(self, message: str, service_name: str = "", original_error: Exception = None):
-        super().__init__(message, "SERVICE_STARTUP_ERROR", service_name, original_error)
-
-
-class ServiceShutdownError(BaseAsyncServiceError):
-    """服务关闭错误"""
-    def __init__(self, message: str, service_name: str = "", original_error: Exception = None):
-        super().__init__(message, "SERVICE_SHUTDOWN_ERROR", service_name, original_error)
-
-
-class ServiceOperationError(BaseAsyncServiceError):
-    """服务操作错误"""
-    def __init__(self, message: str, service_name: str = "", original_error: Exception = None):
-        super().__init__(message, "SERVICE_OPERATION_ERROR", service_name, original_error)
-
-
-class ServiceTimeoutError(BaseAsyncServiceError):
-    """服务超时错误"""
-    def __init__(self, message: str, service_name: str = "", original_error: Exception = None):
-        super().__init__(message, "SERVICE_TIMEOUT_ERROR", service_name, original_error)
 
 
 class BaseAsyncService(ABC):
@@ -267,7 +226,7 @@ class BaseAsyncService(ABC):
         
         # 事件回调
         self._status_change_callbacks: List[Callable[[ServiceStatus, ServiceStatus], None]] = []
-        self._error_callbacks: List[Callable[[BaseAsyncServiceError], None]] = []
+        self._error_callbacks: List[Callable[[ServiceError], None]] = []
         
         # 响应时间统计
         self._response_times: List[float] = []
@@ -283,7 +242,7 @@ class BaseAsyncService(ABC):
         服务启动逻辑（子类实现）
         
         Raises:
-            ServiceStartupError: 启动失败
+            ServiceError: 启动失败
         """
         pass
     
@@ -293,7 +252,7 @@ class BaseAsyncService(ABC):
         服务关闭逻辑（子类实现）
         
         Raises:
-            ServiceShutdownError: 关闭失败
+            ServiceError: 关闭失败
         """
         pass
     
@@ -345,7 +304,7 @@ class BaseAsyncService(ABC):
                 
             except Exception as e:
                 await self._change_status(ServiceStatus.ERROR)
-                error = ServiceStartupError(f"服务启动失败: {e}", self.config.name, e)
+                error = ServiceError(f"服务启动失败: {e}", original_error=e)
                 await self._handle_error(error)
                 return False
     
@@ -389,7 +348,7 @@ class BaseAsyncService(ABC):
                 
             except Exception as e:
                 await self._change_status(ServiceStatus.ERROR)
-                error = ServiceShutdownError(f"服务停止失败: {e}", self.config.name, e)
+                error = ServiceError(f"服务停止失败: {e}", original_error=e)
                 await self._handle_error(error)
                 return False
     
@@ -541,11 +500,10 @@ class BaseAsyncService(ABC):
             T: 操作结果
             
         Raises:
-            ServiceOperationError: 操作失败
-            ServiceTimeoutError: 操作超时
+            ServiceError: 操作失败或超时
         """
         if self._status != ServiceStatus.RUNNING:
-            raise ServiceOperationError(f"服务未运行: {self.config.name}")
+            raise ServiceError(f"服务未运行: {self.config.name}")
         
         async with self._acquire_operation_slot():
             start_time = time.time()
@@ -572,7 +530,7 @@ class BaseAsyncService(ABC):
                 self._metrics.last_error_time = time.time()
                 self._metrics.last_error_message = f"操作超时: {operation_name}"
                 
-                error = ServiceTimeoutError(f"操作超时: {operation_name}", self.config.name, e)
+                error = ServiceError(f"操作超时: {operation_name}", original_error=e)
                 await self._handle_error(error)
                 raise error
                 
@@ -582,7 +540,7 @@ class BaseAsyncService(ABC):
                 self._metrics.last_error_time = time.time()
                 self._metrics.last_error_message = str(e)
                 
-                error = ServiceOperationError(f"操作失败: {operation_name}, {e}", self.config.name, e)
+                error = ServiceError(f"操作失败: {operation_name}, {e}", original_error=e)
                 await self._handle_error(error)
                 raise error
     
@@ -627,7 +585,7 @@ class BaseAsyncService(ABC):
     
     # ==================== 错误处理 ====================
     
-    async def _handle_error(self, error: BaseAsyncServiceError):
+    async def _handle_error(self, error: ServiceError):
         """处理错误"""
         if self.config.enable_logging:
             logger.error(f"服务错误: {self.config.name}, {error.message}")
@@ -650,11 +608,11 @@ class BaseAsyncService(ABC):
         if callback in self._status_change_callbacks:
             self._status_change_callbacks.remove(callback)
     
-    def add_error_callback(self, callback: Callable[[BaseAsyncServiceError], None]):
+    def add_error_callback(self, callback: Callable[[ServiceError], None]):
         """添加错误回调"""
         self._error_callbacks.append(callback)
     
-    def remove_error_callback(self, callback: Callable[[BaseAsyncServiceError], None]):
+    def remove_error_callback(self, callback: Callable[[ServiceError], None]):
         """移除错误回调"""
         if callback in self._error_callbacks:
             self._error_callbacks.remove(callback)

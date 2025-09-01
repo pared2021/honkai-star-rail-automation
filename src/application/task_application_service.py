@@ -6,6 +6,7 @@
 
 import uuid
 import asyncio
+import time
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime, timedelta
 from dataclasses import dataclass
@@ -13,6 +14,7 @@ from dataclasses import dataclass
 from loguru import logger
 import os
 import sys
+from PyQt6.QtCore import QObject, pyqtSignal
 
 # 添加父目录到Python路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -25,34 +27,17 @@ from services.task_service import TaskService, TaskSearchCriteria, TaskExecution
 from services.event_bus import EventBus
 from services.base_async_service import BaseAsyncService
 from repositories.task_repository import TaskRepository
+from core.task_executor import TaskExecutor, ExecutionStatus, ExecutionContext
+from automation.automation_controller import AutomationController
+from automation.game_detector import GameDetector
+from database.db_manager import DatabaseManager
+from src.exceptions import (
+    TaskValidationError, TaskNotFoundError, TaskPermissionError,
+    TaskStateError, TaskExecutionError, ServiceError
+)
 
 
-class TaskApplicationServiceError(Exception):
-    """任务应用服务异常基类"""
-    def __init__(self, message: str, error_code: str = "TASK_APP_SERVICE_ERROR", original_error: Exception = None):
-        super().__init__(message)
-        self.message = message
-        self.error_code = error_code
-        self.original_error = original_error
-
-
-class TaskValidationError(TaskApplicationServiceError):
-    """任务验证错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "VALIDATION_ERROR", original_error)
-
-
-class TaskNotFoundError(TaskApplicationServiceError):
-    """任务不存在错误"""
-    def __init__(self, task_id: str, original_error: Exception = None):
-        super().__init__(f"Task not found: {task_id}", "TASK_NOT_FOUND", original_error)
-        self.task_id = task_id
-
-
-class TaskPermissionError(TaskApplicationServiceError):
-    """任务权限错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "PERMISSION_ERROR", original_error)
+# 异常类已移至统一的exceptions模块
 
 
 @dataclass
@@ -123,13 +108,31 @@ class TaskStatisticsRequest:
     end_date: Optional[datetime] = None
 
 
-class TaskApplicationService(BaseAsyncService):
-    """任务应用服务"""
+class TaskApplicationService(BaseAsyncService, QObject):
+    """任务应用服务
+    
+    负责任务管理的业务逻辑，协调领域服务和基础设施服务。
+    提供应用层的任务操作接口，包括权限检查、请求验证等。
+    同时负责任务执行的协调、状态管理和错误处理。
+    """
+    
+    # 执行信号
+    execution_started = pyqtSignal(str)  # task_id
+    execution_progress = pyqtSignal(str, int)  # task_id, progress
+    execution_completed = pyqtSignal(str, dict)  # task_id, result
+    execution_paused = pyqtSignal(str)  # task_id
+    execution_resumed = pyqtSignal(str)  # task_id
+    execution_stopped = pyqtSignal(str)  # task_id
+    execution_error = pyqtSignal(str, str)  # task_id, error
     
     def __init__(
         self,
         task_service: TaskService,
-        event_bus: EventBus
+        event_bus: EventBus,
+        task_executor: TaskExecutor = None,
+        automation_controller: AutomationController = None,
+        game_detector: GameDetector = None,
+        database_manager: DatabaseManager = None
     ):
         from src.services.base_async_service import ServiceConfig
         
@@ -141,10 +144,21 @@ class TaskApplicationService(BaseAsyncService):
             auto_start=True
         )
         
-        super().__init__(config)
+        BaseAsyncService.__init__(self, config)
+        QObject.__init__(self)
         self.task_service = task_service
         self.event_bus = event_bus
+        self.task_executor = task_executor
+        self.automation_controller = automation_controller
+        self.game_detector = game_detector
+        self.database_manager = database_manager
         self._initialized = False
+        
+        # 执行状态管理
+        self._execution_queue = asyncio.Queue()
+        self._running_tasks = {}
+        self._execution_lock = asyncio.Lock()
+        self._queue_processor_task = None
         
         # 注册事件监听器
         self._register_event_handlers()
@@ -165,6 +179,30 @@ class TaskApplicationService(BaseAsyncService):
             if not self._initialized:
                 # 确保任务服务已初始化
                 await self.task_service.initialize()
+                
+                # 初始化执行相关组件
+                if self.task_executor:
+                    await self.task_executor.initialize()
+                    # 连接执行器信号
+                    self.task_executor.execution_started.connect(self._on_execution_started)
+                    self.task_executor.execution_progress.connect(self._on_execution_progress)
+                    self.task_executor.execution_completed.connect(self._on_execution_completed)
+                    self.task_executor.execution_paused.connect(self._on_execution_paused)
+                    self.task_executor.execution_resumed.connect(self._on_execution_resumed)
+                    self.task_executor.execution_stopped.connect(self._on_execution_stopped)
+                    self.task_executor.execution_error.connect(self._on_execution_error)
+                
+                if self.automation_controller:
+                    await self.automation_controller.initialize()
+                
+                if self.game_detector:
+                    await self.game_detector.initialize()
+                
+                if self.database_manager:
+                    await self.database_manager.initialize()
+                
+                # 启动队列处理器
+                self._queue_processor_task = asyncio.create_task(self._process_execution_queue())
                 
                 self._initialized = True
                 logger.info("任务应用服务初始化完成")
@@ -847,9 +885,520 @@ class TaskApplicationService(BaseAsyncService):
         """任务执行失败事件处理器"""
         logger.debug(f"应用服务处理任务执行失败事件: {event.task_id}")
     
-    # ==================== 服务生命周期 ====================
+    # ==================== 任务执行方法 ====================
     
-    async def close(self) -> bool:
+    async def start_task(self, task_id: str, user_id: str = "default") -> bool:
+        """
+        启动任务执行
+        
+        Args:
+            task_id: 任务ID
+            user_id: 用户ID
+            
+        Returns:
+            bool: 启动是否成功
+        """
+        await self._ensure_initialized()
+        
+        try:
+            # 获取任务
+            task = await self.get_task(task_id, user_id)
+            if not task:
+                raise TaskNotFoundError(task_id)
+            
+            # 验证执行请求
+            self._validate_execution_request(task)
+            
+            # 检查游戏状态
+            if self.game_detector and not await self._check_game_status():
+                raise TaskExecutionError("Game not detected or not ready")
+            
+            # 添加到执行队列
+            await self._execution_queue.put({
+                'action': 'start',
+                'task_id': task_id,
+                'task': task,
+                'timestamp': time.time()
+            })
+            
+            logger.info(f"任务 {task_id} 已添加到执行队列")
+            return True
+            
+        except Exception as e:
+            logger.error(f"启动任务执行失败: {e}")
+            if isinstance(e, (TaskNotFoundError, TaskPermissionError, TaskExecutionError)):
+                raise
+            raise TaskApplicationServiceError(f"Failed to start task: {e}", "START_ERROR", e)
+    
+    async def pause_task(self, task_id: str, user_id: str = "default") -> bool:
+        """
+        暂停任务执行
+        
+        Args:
+            task_id: 任务ID
+            user_id: 用户ID
+            
+        Returns:
+            bool: 暂停是否成功
+        """
+        await self._ensure_initialized()
+        
+        try:
+            # 检查任务是否在运行
+            if task_id not in self._running_tasks:
+                raise TaskExecutionError(f"Task {task_id} is not running")
+            
+            # 获取任务
+            task = await self.get_task(task_id, user_id)
+            if not task:
+                raise TaskNotFoundError(task_id)
+            
+            # 暂停执行
+            if self.task_executor:
+                success = await self.task_executor.pause_task(task_id)
+                if success:
+                    # 更新任务状态
+                    await self.task_service.update_task_status(task_id, TaskStatus.PAUSED)
+                    logger.info(f"任务 {task_id} 已暂停")
+                return success
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"暂停任务执行失败: {e}")
+            if isinstance(e, (TaskNotFoundError, TaskPermissionError, TaskExecutionError)):
+                raise
+            raise TaskApplicationServiceError(f"Failed to pause task: {e}", "PAUSE_ERROR", e)
+    
+    async def resume_task(self, task_id: str, user_id: str = "default") -> bool:
+        """
+        恢复任务执行
+        
+        Args:
+            task_id: 任务ID
+            user_id: 用户ID
+            
+        Returns:
+            bool: 恢复是否成功
+        """
+        await self._ensure_initialized()
+        
+        try:
+            # 获取任务
+            task = await self.get_task(task_id, user_id)
+            if not task:
+                raise TaskNotFoundError(task_id)
+            
+            # 检查任务状态
+            if task.status != TaskStatus.PAUSED:
+                raise TaskExecutionError(f"Task {task_id} is not paused")
+            
+            # 恢复执行
+            if self.task_executor:
+                success = await self.task_executor.resume_task(task_id)
+                if success:
+                    # 更新任务状态
+                    await self.task_service.update_task_status(task_id, TaskStatus.RUNNING)
+                    logger.info(f"任务 {task_id} 已恢复")
+                return success
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"恢复任务执行失败: {e}")
+            if isinstance(e, (TaskNotFoundError, TaskPermissionError, TaskExecutionError)):
+                raise
+            raise TaskApplicationServiceError(f"Failed to resume task: {e}", "RESUME_ERROR", e)
+    
+    async def stop_task(self, task_id: str, user_id: str = "default") -> bool:
+        """
+        停止任务执行
+        
+        Args:
+            task_id: 任务ID
+            user_id: 用户ID
+            
+        Returns:
+            bool: 停止是否成功
+        """
+        await self._ensure_initialized()
+        
+        try:
+            # 获取任务
+            task = await self.get_task(task_id, user_id)
+            if not task:
+                raise TaskNotFoundError(task_id)
+            
+            # 停止执行
+            if self.task_executor:
+                success = await self.task_executor.stop_task(task_id)
+                if success:
+                    # 更新任务状态
+                    await self.task_service.update_task_status(task_id, TaskStatus.STOPPED)
+                    # 从运行任务列表中移除
+                    self._running_tasks.pop(task_id, None)
+                    logger.info(f"任务 {task_id} 已停止")
+                return success
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"停止任务执行失败: {e}")
+            if isinstance(e, (TaskNotFoundError, TaskPermissionError, TaskExecutionError)):
+                raise
+            raise TaskApplicationServiceError(f"Failed to stop task: {e}", "STOP_ERROR", e)
+    
+    async def get_task_status(self, task_id: str, user_id: str = "default") -> Dict[str, Any]:
+        """
+        获取任务执行状态
+        
+        Args:
+            task_id: 任务ID
+            user_id: 用户ID
+            
+        Returns:
+            Dict[str, Any]: 任务状态信息
+        """
+        await self._ensure_initialized()
+        
+        try:
+            # 获取任务
+            task = await self.get_task(task_id, user_id)
+            if not task:
+                raise TaskNotFoundError(task_id)
+            
+            # 获取执行状态
+            execution_status = None
+            if self.task_executor and task_id in self._running_tasks:
+                execution_status = await self.task_executor.get_task_status(task_id)
+            
+            return {
+                'task_id': task_id,
+                'status': task.status.value,
+                'progress': execution_status.get('progress', 0) if execution_status else 0,
+                'is_running': task_id in self._running_tasks,
+                'execution_details': execution_status
+            }
+            
+        except Exception as e:
+            logger.error(f"获取任务状态失败: {e}")
+            if isinstance(e, (TaskNotFoundError, TaskPermissionError)):
+                raise
+            raise TaskApplicationServiceError(f"Failed to get task status: {e}", "STATUS_ERROR", e)
+    
+    async def get_execution_queue_status(self) -> Dict[str, Any]:
+        """
+        获取执行队列状态
+        
+        Returns:
+            Dict[str, Any]: 队列状态信息
+        """
+        await self._ensure_initialized()
+        
+        return {
+             'queue_size': self._execution_queue.qsize(),
+             'running_tasks': list(self._running_tasks.keys()),
+             'running_count': len(self._running_tasks)
+         }
+    
+    # ==================== 执行辅助方法 ====================
+    
+    def _validate_execution_request(self, task: Task):
+        """验证执行请求"""
+        if task.status in [TaskStatus.RUNNING, TaskStatus.PAUSED]:
+            raise TaskExecutionError(f"Task {task.task_id} is already running or paused")
+        
+        if task.status == TaskStatus.COMPLETED:
+            raise TaskExecutionError(f"Task {task.task_id} is already completed")
+    
+    async def _check_game_status(self) -> bool:
+        """检查游戏状态"""
+        try:
+            if self.game_detector:
+                return await self.game_detector.is_game_running()
+            return True
+        except Exception as e:
+            logger.warning(f"检查游戏状态失败: {e}")
+            return False
+    
+    async def _process_execution_queue(self):
+        """处理执行队列"""
+        logger.info("执行队列处理器已启动")
+        
+        while True:
+            try:
+                # 从队列获取任务
+                queue_item = await self._execution_queue.get()
+                
+                if queue_item['action'] == 'start':
+                    await self._execute_task(queue_item['task'])
+                
+                # 标记队列项已处理
+                self._execution_queue.task_done()
+                
+            except asyncio.CancelledError:
+                logger.info("执行队列处理器已取消")
+                break
+            except Exception as e:
+                logger.error(f"处理执行队列项失败: {e}")
+    
+    async def _execute_task(self, task: Task):
+        """执行任务"""
+        task_id = task.task_id
+        
+        try:
+            async with self._execution_lock:
+                # 添加到运行任务列表
+                self._running_tasks[task_id] = {
+                    'task': task,
+                    'start_time': time.time(),
+                    'status': ExecutionStatus.RUNNING
+                }
+            
+            # 更新任务状态
+            await self.task_service.update_task_status(task_id, TaskStatus.RUNNING)
+            
+            # 创建执行上下文
+            context = ExecutionContext(
+                task_id=task_id,
+                task_config=task.config,
+                automation_controller=self.automation_controller,
+                game_detector=self.game_detector,
+                database_manager=self.database_manager
+            )
+            
+            # 执行任务
+            if self.task_executor:
+                result = await self.task_executor.execute_task(task, context)
+                
+                # 处理执行结果
+                await self._handle_execution_result(task_id, result)
+            
+        except Exception as e:
+            logger.error(f"执行任务 {task_id} 失败: {e}")
+            await self._handle_execution_error(task_id, str(e))
+        finally:
+            # 从运行任务列表中移除
+            async with self._execution_lock:
+                self._running_tasks.pop(task_id, None)
+    
+    async def _handle_execution_result(self, task_id: str, result: TaskExecutionResult):
+        """处理执行结果"""
+        try:
+            if result.success:
+                # 更新任务状态为完成
+                await self.task_service.update_task_status(task_id, TaskStatus.COMPLETED)
+                await self.task_service.update_execution_result(task_id, result)
+                
+                # 发布完成事件
+                await self.event_bus.publish(TaskEvent(
+                    event_type=TaskEventType.TASK_EXECUTION_COMPLETED,
+                    task_id=task_id,
+                    data={'result': result.to_dict()}
+                ))
+                
+                logger.info(f"任务 {task_id} 执行完成")
+            else:
+                # 处理执行失败
+                await self._handle_execution_error(task_id, result.error_message)
+                
+        except Exception as e:
+            logger.error(f"处理执行结果失败: {e}")
+    
+    async def _handle_execution_error(self, task_id: str, error_message: str):
+        """处理执行错误"""
+        try:
+            # 更新任务状态为失败
+            await self.task_service.update_task_status(task_id, TaskStatus.FAILED)
+            await self.task_service.update_task_error(task_id, error_message)
+            
+            # 发布失败事件
+            await self.event_bus.publish(TaskEvent(
+                event_type=TaskEventType.TASK_EXECUTION_FAILED,
+                task_id=task_id,
+                data={'error': error_message}
+            ))
+            
+            logger.error(f"任务 {task_id} 执行失败: {error_message}")
+            
+        except Exception as e:
+            logger.error(f"处理执行错误失败: {e}")
+    
+    # ==================== 执行信号处理器 ====================
+    
+    def _on_execution_started(self, task_id: str):
+        """执行开始信号处理器"""
+        self.execution_started.emit(task_id)
+        logger.debug(f"任务 {task_id} 执行开始")
+    
+    def _on_execution_progress(self, task_id: str, progress: int):
+        """执行进度信号处理器"""
+        self.execution_progress.emit(task_id, progress)
+        logger.debug(f"任务 {task_id} 执行进度: {progress}%")
+    
+    def _on_execution_completed(self, task_id: str, result: dict):
+        """执行完成信号处理器"""
+        self.execution_completed.emit(task_id, result)
+        logger.debug(f"任务 {task_id} 执行完成")
+    
+    def _on_execution_paused(self, task_id: str):
+        """执行暂停信号处理器"""
+        self.execution_paused.emit(task_id)
+        logger.debug(f"任务 {task_id} 执行暂停")
+    
+    def _on_execution_resumed(self, task_id: str):
+        """执行恢复信号处理器"""
+        self.execution_resumed.emit(task_id)
+        logger.debug(f"任务 {task_id} 执行恢复")
+    
+    def _on_execution_stopped(self, task_id: str):
+        """执行停止信号处理器"""
+        self.execution_stopped.emit(task_id)
+        logger.debug(f"任务 {task_id} 执行停止")
+    
+    def _on_execution_error(self, task_id: str, error: str):
+        """执行错误信号处理器"""
+        self.execution_error.emit(task_id, error)
+        logger.debug(f"任务 {task_id} 执行错误: {error}")
+     
+     # ==================== 服务生命周期 ====================
+     
+     async def start(self) -> bool:
+         """启动服务"""
+         try:
+             logger.info("启动任务应用服务...")
+             
+             # 启动任务执行器
+             if self.task_executor:
+                 await self.task_executor.start()
+             
+             # 启动自动化控制器
+             if self.automation_controller:
+                 await self.automation_controller.start()
+             
+             # 启动游戏检测器
+             if self.game_detector:
+                 await self.game_detector.start()
+             
+             # 启动队列处理器
+             if not self._queue_processor_task or self._queue_processor_task.done():
+                 self._queue_processor_task = asyncio.create_task(self._process_execution_queue())
+             
+             logger.info("任务应用服务启动成功")
+             return True
+             
+         except Exception as e:
+             logger.error(f"启动任务应用服务失败: {e}")
+             return False
+     
+     async def stop(self) -> bool:
+         """停止服务"""
+         try:
+             logger.info("停止任务应用服务...")
+             
+             # 停止队列处理器
+             if self._queue_processor_task and not self._queue_processor_task.done():
+                 self._queue_processor_task.cancel()
+                 try:
+                     await self._queue_processor_task
+                 except asyncio.CancelledError:
+                     pass
+             
+             # 停止所有运行中的任务
+             running_task_ids = list(self._running_tasks.keys())
+             for task_id in running_task_ids:
+                 await self.stop_task(task_id)
+             
+             # 停止任务执行器
+             if self.task_executor:
+                 await self.task_executor.stop()
+             
+             # 停止自动化控制器
+             if self.automation_controller:
+                 await self.automation_controller.stop()
+             
+             # 停止游戏检测器
+             if self.game_detector:
+                 await self.game_detector.stop()
+             
+             logger.info("任务应用服务停止成功")
+             return True
+             
+         except Exception as e:
+             logger.error(f"停止任务应用服务失败: {e}")
+             return False
+     
+     def get_service_status(self) -> dict:
+         """获取服务状态"""
+         return {
+             'service_name': 'TaskApplicationService',
+             'status': 'running' if self._queue_processor_task and not self._queue_processor_task.done() else 'stopped',
+             'running_tasks': len(self._running_tasks),
+             'queue_size': self._execution_queue.qsize(),
+             'components': {
+                 'task_executor': self.task_executor is not None,
+                 'automation_controller': self.automation_controller is not None,
+                 'game_detector': self.game_detector is not None,
+                 'database_manager': self.database_manager is not None
+             }
+         }
+     
+     async def health_check(self) -> dict:
+         """健康检查"""
+         health_status = {
+             'service': 'healthy',
+             'components': {},
+             'errors': []
+         }
+         
+         try:
+             # 检查任务执行器
+             if self.task_executor:
+                 try:
+                     executor_status = await self.task_executor.health_check()
+                     health_status['components']['task_executor'] = executor_status
+                 except Exception as e:
+                     health_status['components']['task_executor'] = 'unhealthy'
+                     health_status['errors'].append(f"TaskExecutor: {str(e)}")
+             
+             # 检查自动化控制器
+             if self.automation_controller:
+                 try:
+                     controller_status = await self.automation_controller.health_check()
+                     health_status['components']['automation_controller'] = controller_status
+                 except Exception as e:
+                     health_status['components']['automation_controller'] = 'unhealthy'
+                     health_status['errors'].append(f"AutomationController: {str(e)}")
+             
+             # 检查游戏检测器
+             if self.game_detector:
+                 try:
+                     detector_status = await self.game_detector.health_check()
+                     health_status['components']['game_detector'] = detector_status
+                 except Exception as e:
+                     health_status['components']['game_detector'] = 'unhealthy'
+                     health_status['errors'].append(f"GameDetector: {str(e)}")
+             
+             # 检查数据库管理器
+             if self.database_manager:
+                 try:
+                     db_status = await self.database_manager.health_check()
+                     health_status['components']['database_manager'] = db_status
+                 except Exception as e:
+                     health_status['components']['database_manager'] = 'unhealthy'
+                     health_status['errors'].append(f"DatabaseManager: {str(e)}")
+             
+             # 如果有错误，标记服务为不健康
+             if health_status['errors']:
+                 health_status['service'] = 'unhealthy'
+             
+         except Exception as e:
+             health_status['service'] = 'unhealthy'
+             health_status['errors'].append(f"Health check failed: {str(e)}")
+         
+         return health_status
+     
+     async def close(self) -> bool:
         """
         关闭服务
         
@@ -857,8 +1406,18 @@ class TaskApplicationService(BaseAsyncService):
             bool: 关闭是否成功
         """
         try:
+            logger.info("关闭任务应用服务...")
+            
+            # 停止服务
+            await self.stop()
+            
             # 关闭任务服务
-            await self.task_service.close()
+            if self.task_service:
+                await self.task_service.close()
+            
+            # 关闭事件总线
+            if self.event_bus:
+                await self.event_bus.close()
             
             self._initialized = False
             logger.info("任务应用服务已关闭")
@@ -867,43 +1426,6 @@ class TaskApplicationService(BaseAsyncService):
         except Exception as e:
             logger.error(f"关闭任务应用服务失败: {e}")
             return False
-    
-    async def health_check(self) -> Dict[str, Any]:
-        """
-        健康检查
-        
-        Returns:
-            Dict[str, Any]: 健康状态信息
-        """
-        try:
-            # 检查任务服务健康状态
-            task_service_health = await self.task_service.health_check()
-            
-            # 检查应用服务状态
-            app_service_status = {
-                'initialized': self._initialized
-            }
-            
-            overall_status = 'healthy' if (self._initialized and task_service_health['status'] == 'healthy') else 'unhealthy'
-            
-            return {
-                'status': overall_status,
-                'message': 'Task application service health check',
-                'details': {
-                    'application_service': app_service_status,
-                    'task_service': task_service_health
-                }
-            }
-            
-        except Exception as e:
-            return {
-                'status': 'unhealthy',
-                'message': f'Health check failed: {e}',
-                'details': {
-                    'error': str(e),
-                    'initialized': self._initialized
-                }
-            }
     
     # ==================== BaseAsyncService抽象方法实现 ====================
     

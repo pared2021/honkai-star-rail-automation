@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.automation.automation_controller import AutomationController
-from src.models.task_model import Task, TaskStatus, TaskType, TaskPriority
+from src.models.task_models import Task, TaskStatus, TaskType, TaskPriority
 from src.core.task_manager import TaskManager, TaskConfig
 from src.database.db_manager import DatabaseManager
 from src.config.config_manager import ConfigManager

@@ -22,7 +22,7 @@ sys.path.insert(0, str(project_root))
 
 # 导入需要测试的模块
 from src.adapters.task_manager_adapter import TaskManagerAdapter
-from src.models.unified_models import Task, TaskConfig, TaskType, TaskStatus, TaskPriority
+from src.models.task_models import Task, TaskConfig, TaskType, TaskStatus, TaskPriority
 
 # 创建简单的DatabaseManager模拟类
 class MockDatabaseManager:
@@ -162,7 +162,7 @@ class TestTaskManagerImprovements:
         print("\n=== 测试异步CRUD操作 ===")
         
         # 测试创建任务
-        from src.models.task_models import TaskType, TaskPriority
+
         task_config = TaskConfig(
             task_name="测试任务",
             task_type=TaskType.CUSTOM,

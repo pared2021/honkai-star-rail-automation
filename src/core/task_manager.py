@@ -16,8 +16,9 @@ import weakref
 import time
 
 from loguru import logger
-from database.db_manager import DatabaseManager
-from models.task_models import Task, TaskStatus, TaskType, TaskPriority
+from src.exceptions import TaskValidationError, TaskStateError
+from src.database.db_manager import DatabaseManager
+from src.models.task_models import Task, TaskStatus, TaskType, TaskPriority
 from .task_executor import TaskExecutor
 from .task_actions import ActionFactory
 from .enums import ActionType
@@ -71,13 +72,7 @@ class TaskConfig:
 # Task类已从models.task_model导入
 
 
-class TaskValidationError(Exception):
-    """任务验证错误"""
-    pass
 
-class TaskStateError(Exception):
-    """任务状态错误"""
-    pass
 
 class TaskManager:
     """异步任务管理器 - 负责任务的创建、管理和执行"""

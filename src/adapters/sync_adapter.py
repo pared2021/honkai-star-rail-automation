@@ -15,6 +15,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 
 from loguru import logger
+from src.exceptions import SyncAdapterError, AsyncTaskError, CallbackError
 
 T = TypeVar('T')
 
@@ -74,25 +75,7 @@ class CallbackInfo:
     active: bool = True
 
 
-class SyncAdapterError(Exception):
-    """同步适配器异常"""
-    def __init__(self, message: str, error_code: str = "SYNC_ADAPTER_ERROR", original_error: Exception = None):
-        super().__init__(message)
-        self.message = message
-        self.error_code = error_code
-        self.original_error = original_error
 
-
-class AsyncTaskError(SyncAdapterError):
-    """异步任务错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "ASYNC_TASK_ERROR", original_error)
-
-
-class CallbackError(SyncAdapterError):
-    """回调错误"""
-    def __init__(self, message: str, original_error: Exception = None):
-        super().__init__(message, "CALLBACK_ERROR", original_error)
 
 
 class SyncAdapter:
