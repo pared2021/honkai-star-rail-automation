@@ -14,16 +14,16 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 print("=== TaskManager调试信息 ===")
 
 try:
-    # 导入TaskManager
-    from core.task_manager import TaskManager
-    print("✓ 成功导入TaskManager")
+    # 导入TaskManagerAdapter
+    from adapters.task_manager_adapter import TaskManagerAdapter
+    print("✓ 成功导入TaskManagerAdapter")
     
     # 检查类的源文件
-    source_file = inspect.getfile(TaskManager)
+    source_file = inspect.getfile(TaskManagerAdapter)
     print(f"源文件: {source_file}")
     
     # 检查类的所有方法
-    methods = inspect.getmembers(TaskManager, predicate=inspect.isfunction)
+    methods = inspect.getmembers(TaskManagerAdapter, predicate=inspect.isfunction)
     print(f"\n类方法总数: {len(methods)}")
     
     # 查找包含'get_task'的方法
@@ -31,9 +31,9 @@ try:
     print(f"包含'get_task'的方法: {get_task_methods}")
     
     # 检查get_task_sync方法
-    if hasattr(TaskManager, 'get_task_sync'):
+    if hasattr(TaskManagerAdapter, 'get_task_sync'):
         print("✓ get_task_sync方法存在于类中")
-        method = getattr(TaskManager, 'get_task_sync')
+        method = getattr(TaskManagerAdapter, 'get_task_sync')
         print(f"方法类型: {type(method)}")
         print(f"方法签名: {inspect.signature(method)}")
         
@@ -50,10 +50,10 @@ try:
     # 尝试创建实例
     print("\n=== 实例测试 ===")
     try:
-        from core.database_manager import DatabaseManager
+        from database.db_manager import DatabaseManager
         db_manager = DatabaseManager()
-        task_manager = TaskManager(db_manager)
-        print("✓ 成功创建TaskManager实例")
+        task_manager = TaskManagerAdapter(db_manager)
+        print("✓ 成功创建TaskManagerAdapter实例")
         
         # 检查实例方法
         if hasattr(task_manager, 'get_task_sync'):

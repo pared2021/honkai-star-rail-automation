@@ -15,14 +15,14 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, pyqtSignal, QDate, QTimer
 from PyQt6.QtGui import QFont, QColor, QBrush, QIcon
 
-from core.task_manager import TaskManager
+from adapters.task_manager_adapter import TaskManagerAdapter
 from loguru import logger
 
 
 class TaskExecutionHistoryDialog(QDialog):
     """任务执行历史记录对话框"""
     
-    def __init__(self, task_manager: TaskManager, task_id: str = None, parent=None):
+    def __init__(self, task_manager: TaskManagerAdapter, task_id: str = None, parent=None):
         """初始化对话框
         
         Args:

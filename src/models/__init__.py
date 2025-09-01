@@ -4,5 +4,6 @@
 """
 
 from .task_model import Task, TaskStatus, TaskType, TaskPriority
+from .unified_models import TaskConfig
 
-__all__ = ['Task', 'TaskStatus', 'TaskType', 'TaskPriority']
+__all__ = ['Task', 'TaskStatus', 'TaskType', 'TaskPriority', 'TaskConfig']

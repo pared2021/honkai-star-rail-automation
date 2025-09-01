@@ -10,18 +10,18 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 try:
     print("=== 最终测试开始 ===")
     
-    # 测试 1: 导入 TaskManager
-    print("\n1. 测试 TaskManager 导入...")
-    from core.task_manager import TaskManager
-    print("✓ TaskManager 导入成功")
+    # 测试 1: 导入 TaskManagerAdapter
+    print("\n1. 测试 TaskManagerAdapter 导入...")
+    from adapters.task_manager_adapter import TaskManagerAdapter
+    print("✓ TaskManagerAdapter 导入成功")
     
     # 测试 2: 检查 get_task_sync 方法
     print("\n2. 检查 get_task_sync 方法...")
-    has_method = hasattr(TaskManager, 'get_task_sync')
+    has_method = hasattr(TaskManagerAdapter, 'get_task_sync')
     print(f"✓ get_task_sync 方法存在: {has_method}")
     
     if has_method:
-        method = getattr(TaskManager, 'get_task_sync')
+        method = getattr(TaskManagerAdapter, 'get_task_sync')
         is_callable = callable(method)
         print(f"✓ get_task_sync 方法可调用: {is_callable}")
     
@@ -35,8 +35,8 @@ try:
     db_manager = DatabaseManager()
     print("✓ DatabaseManager 实例创建成功")
     
-    task_manager = TaskManager(db_manager)
-    print("✓ TaskManager 实例创建成功")
+    task_manager = TaskManagerAdapter(db_manager)
+    print("✓ TaskManagerAdapter 实例创建成功")
     
     # 测试 5: 检查实例方法
     print("\n5. 检查实例方法...")
@@ -49,7 +49,7 @@ try:
         print(f"✓ 实例方法可调用: {instance_is_callable}")
     
     print("\n=== 所有测试通过! ===")
-    print("TaskManager 的 get_task_sync 方法问题已解决")
+    print("TaskManagerAdapter 的 get_task_sync 方法问题已解决")
     
 except Exception as e:
     print(f"\n❌ 测试失败: {e}")

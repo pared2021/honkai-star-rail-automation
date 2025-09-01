@@ -662,10 +662,66 @@ class ConfigManager:
                     return default_value
             
             return value
-            
         except Exception as e:
-            logger.error(f"获取配置项失败 {config_type.value}.{key}: {e}")
+            logger.error(f"获取配置项失败: {config_type.value}.{key}, 错误: {e}")
             return default_value
+    
+    def get_ui_config(self) -> Dict[str, Any]:
+        """获取UI相关配置
+        
+        Returns:
+            Dict[str, Any]: UI配置字典
+        """
+        ui_config = self.get_config(ConfigType.UI_PREFERENCES)
+        if ui_config is None:
+            # 返回默认UI配置
+            return {
+                'theme': 'dark',
+                'language': 'zh_CN',
+                'window_width': 1200,
+                'window_height': 800,
+                'remember_window_state': True,
+                'auto_save': True,
+                'show_tooltips': True
+            }
+        return ui_config
+    
+    def get_log_config(self) -> Dict[str, Any]:
+        """获取日志配置
+        
+        Returns:
+            Dict[str, Any]: 日志配置字典
+        """
+        try:
+            log_config = self.get_config(ConfigType.SYSTEM_CONFIG)
+            if log_config is None:
+                # 返回默认日志配置
+                return {
+                    'level': 'INFO',
+                    'format': '%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s',
+                    'file_enabled': True,
+                    'console_enabled': True,
+                    'max_file_size': '10MB',
+                    'backup_count': 5
+                }
+            return log_config.get('logging', {
+                'level': 'INFO',
+                'format': '%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s',
+                'file_enabled': True,
+                'console_enabled': True,
+                'max_file_size': '10MB',
+                'backup_count': 5
+            })
+        except Exception as e:
+            logger.error(f"获取日志配置失败: {e}")
+            return {
+                'level': 'INFO',
+                'format': '%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s',
+                'file_enabled': True,
+                'console_enabled': True,
+                'max_file_size': '10MB',
+                'backup_count': 5
+            }
     
     def set_setting(self, config_type: ConfigType, key: str, value: Any, auto_save: bool = True) -> bool:
         """设置特定配置项的值"""

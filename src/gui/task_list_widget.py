@@ -16,8 +16,8 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDate, QThread, pyqtSlot
 from PyQt6.QtGui import QFont, QColor, QBrush, QAction, QIcon
 
 from loguru import logger
-from core.task_manager import TaskManager, TaskType, TaskPriority, Task
-from automation.automation_controller import TaskStatus
+from adapters.task_manager_adapter import TaskManagerAdapter
+from models.task_models import TaskType, TaskPriority, Task, TaskStatus
 
 
 class TaskListWidget(QWidget):
@@ -30,7 +30,7 @@ class TaskListWidget(QWidget):
     task_start_requested = pyqtSignal(str)  # 任务启动请求信号
     task_stop_requested = pyqtSignal(str)  # 任务停止请求信号
     
-    def __init__(self, task_manager: TaskManager, task_monitor=None, parent=None):
+    def __init__(self, task_manager: TaskManagerAdapter, task_monitor=None, parent=None):
         """初始化任务列表界面
         
         Args:
@@ -502,7 +502,7 @@ class TaskListWidget(QWidget):
                 task = self.task_manager.get_task_sync(self.selected_task_id)
                 if task:
                     # 创建新的任务配置（复制原配置）
-                    from core.task_manager import TaskConfig
+                    from ..core.task_manager import TaskConfig
                     new_config = TaskConfig(
                         task_name=f"{task.name} (副本)",
                         description=task.description,

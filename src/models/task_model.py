@@ -7,6 +7,13 @@ from dataclasses import dataclass
 from typing import Dict, Any, Optional
 from datetime import datetime
 
+import os
+import sys
+
+# 添加父目录到Python路径
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, parent_dir)
+
 from core.enums import TaskStatus, TaskType, TaskPriority
 
 

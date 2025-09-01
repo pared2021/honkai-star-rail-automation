@@ -9,13 +9,16 @@ import os
 from datetime import datetime, timedelta
 from unittest.mock import Mock, patch
 
-# 添加项目根目录到路径
+# 添加项目根目录和src目录到 Python 路径
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+project_root = os.path.join(os.path.dirname(__file__), '..')
+src_path = os.path.join(project_root, 'src')
+sys.path.insert(0, project_root)
+sys.path.insert(0, src_path)
 
-from src.core.task_manager import TaskManager, TaskConfig
-from src.database.db_manager import DatabaseManager
-from src.models.task_model import Task, TaskStatus, TaskType, TaskPriority
+from adapters.task_manager_adapter import TaskManagerAdapter
+from database.db_manager import DatabaseManager
+from models.task_models import Task, TaskConfig, TaskStatus, TaskType, TaskPriority
 
 
 class TestTaskManager(unittest.TestCase):
@@ -31,8 +34,8 @@ class TestTaskManager(unittest.TestCase):
         self.db_manager = DatabaseManager(db_path=self.temp_db.name)
         self.db_manager.initialize_database()
         
-        # 初始化任务管理器
-        self.task_manager = TaskManager(self.db_manager)
+        # 初始化任务管理器适配器
+        self.task_manager = TaskManagerAdapter(self.db_manager)
         
         # 创建测试用户
         self.test_user_id = self.db_manager.create_user("测试用户")

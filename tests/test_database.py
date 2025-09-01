@@ -129,7 +129,7 @@ class TestDatabaseManager(unittest.TestCase):
         # 创建任务配置
         config = TaskConfig(
             name="数据库测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="这是一个数据库测试任务",
             max_duration=300,

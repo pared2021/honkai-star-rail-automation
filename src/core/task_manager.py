@@ -1311,7 +1311,7 @@ class TaskManager:
                         user_id=task_data['user_id'],
                         name=task_data['task_name'],
                         description=task_data.get('description', ''),
-                        task_type=TaskType(task_data.get('task_type', 'custom')),
+                        task_type=TaskType(task_data.get('task_type', TaskType.CUSTOM.value)),
                         priority=TaskPriority(task_data.get('priority', 'medium')),
                         status=TaskStatus(task_data['status']),
                         config=config_data or {},  # 使用字典而不是TaskConfig对象
@@ -1613,3 +1613,65 @@ class TaskManager:
             List[Dict[str, Any]]: 执行历史列表
         """
         return self.db_manager.get_task_executions(task_id)
+    
+    def create_task_sync(self, config: TaskConfig, user_id: Optional[str] = None) -> str:
+        """同步创建新任务（用于GUI调用）
+        
+        Args:
+            config: 任务配置
+            user_id: 用户ID，如果为None则使用默认用户
+            
+        Returns:
+            str: 任务ID
+            
+        Raises:
+            TaskValidationError: 配置验证失败
+        """
+        # 验证任务配置
+        self._validate_task_config(config)
+        
+        if user_id is None:
+            user_id = self.default_user_id
+        
+        # 生成任务ID
+        task_id = str(uuid.uuid4())
+        
+        # 创建任务对象
+        task = Task(
+            task_id=task_id,
+            user_id=user_id,
+            config=config,
+            status=TaskStatus.PENDING,
+            created_at=datetime.now(),
+            updated_at=datetime.now()
+        )
+        
+        # 使用同步连接保存到数据库
+        try:
+            with self.db_manager.get_connection() as conn:
+                conn.execute("BEGIN TRANSACTION")
+                
+                # 插入任务基本信息
+                conn.execute(
+                    "INSERT INTO tasks (task_id, user_id, task_name, description, task_type, priority, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    (task_id, user_id, config.name, config.description or '', config.task_type.value, 
+                     config.priority.value, TaskStatus.PENDING.value, task.created_at.isoformat(), task.updated_at.isoformat())
+                )
+                
+                # 插入任务配置
+                config_data = asdict(config)
+                config_data['task_type'] = config.task_type.value
+                config_data['priority'] = config.priority.value
+                
+                conn.execute(
+                    "INSERT INTO task_configs (config_id, task_id, config_key, config_value) VALUES (?, ?, ?, ?)",
+                    (str(uuid.uuid4()), task_id, "full_config", json.dumps(config_data, ensure_ascii=False))
+                )
+                
+                conn.commit()
+                logger.info(f"创建任务成功: {config.name} (ID: {task_id})")
+                return task_id
+                
+        except Exception as e:
+            self._handle_database_error(e, "创建任务", task_id)
+            raise

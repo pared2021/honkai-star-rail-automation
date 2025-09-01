@@ -13,9 +13,11 @@ from dataclasses import dataclass
 
 import pyautogui
 from PIL import Image, ImageGrab
-from loguru import logger
+from src.core.logger import get_logger
 
-from core.config_manager import ConfigManager, ConfigType
+logger = get_logger(__name__)
+
+from src.core.config_manager import ConfigManager, ConfigType
 
 
 @dataclass
@@ -394,6 +396,22 @@ class GameDetector:
         except Exception as e:
             logger.error(f"激活游戏窗口失败: {e}")
             return False
+    
+    def is_game_detected(self) -> bool:
+        """检查是否检测到游戏
+        
+        Returns:
+            bool: 是否检测到游戏
+        """
+        return self.current_window is not None
+    
+    def get_current_game_window(self) -> Optional[GameWindow]:
+        """获取当前游戏窗口
+        
+        Returns:
+            Optional[GameWindow]: 当前游戏窗口，如果没有则返回None
+        """
+        return self.current_window
     
     def get_detection_stats(self) -> Dict[str, Any]:
         """获取检测统计信息

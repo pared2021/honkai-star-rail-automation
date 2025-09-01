@@ -17,10 +17,11 @@ from PyQt6.QtCore import Qt, QDateTime, QTime, pyqtSignal
 from PyQt6.QtGui import QFont, QIcon
 
 from loguru import logger
-from core.task_manager import TaskManager, TaskType, TaskPriority, TaskConfig
-from core.task_validator import TaskValidator, ValidationLevel
+from adapters.task_manager_adapter import TaskManagerAdapter
+from models.task_models import TaskConfig, TaskType, TaskPriority, ValidationLevel
+from core.task_validator import TaskValidator
 from core.enums import ActionType
-from models.task_model import Task
+from models.task_models import Task
 
 
 class TaskCreationWidget(QWidget):
@@ -30,7 +31,7 @@ class TaskCreationWidget(QWidget):
     task_created = pyqtSignal(str)  # 任务创建成功信号，传递任务ID
     task_creation_failed = pyqtSignal(str)  # 任务创建失败信号，传递错误信息
     
-    def __init__(self, task_manager: TaskManager, parent=None):
+    def __init__(self, task_manager: TaskManagerAdapter, parent=None):
         """初始化任务创建界面
         
         Args:
@@ -457,15 +458,26 @@ class TaskCreationWidget(QWidget):
         """验证配置"""
         try:
             config = self._build_task_config()
-            validation_level = self.validation_combo.currentData()
             
-            result = self.validator.validate_task_config(config, validation_level)
+            results = self.validator.validate_task_config(config)
             
-            if result.is_valid:
-                QMessageBox.information(self, "验证成功", "任务配置验证通过！")
+            # 检查是否有错误级别的问题
+            errors = [r.message for r in results if r.level.value == "error"]
+            warnings = [r.message for r in results if r.level.value == "warning"]
+            
+            if not errors:
+                if warnings:
+                    warning_msg = "\n".join(warnings)
+                    QMessageBox.information(self, "验证成功", f"任务配置验证通过！\n\n警告：\n{warning_msg}")
+                else:
+                    QMessageBox.information(self, "验证成功", "任务配置验证通过！")
             else:
-                error_msg = "\n".join(result.errors)
-                QMessageBox.warning(self, "验证失败", f"任务配置验证失败：\n{error_msg}")
+                error_msg = "\n".join(errors)
+                if warnings:
+                    warning_msg = "\n".join(warnings)
+                    QMessageBox.warning(self, "验证失败", f"任务配置验证失败：\n{error_msg}\n\n警告：\n{warning_msg}")
+                else:
+                    QMessageBox.warning(self, "验证失败", f"任务配置验证失败：\n{error_msg}")
                 
         except Exception as e:
             logger.error(f"配置验证失败: {e}")
@@ -479,10 +491,12 @@ class TaskCreationWidget(QWidget):
             
             # 验证配置
             validation_level = self.validation_combo.currentData()
-            result = self.validator.validate_task_config(config, validation_level)
+            results = self.validator.validate_task_config(config)
             
-            if not result.is_valid:
-                error_msg = "\n".join(result.errors)
+            # 检查是否有错误级别的问题
+            errors = [r.message for r in results if r.level.value == "error"]
+            if errors:
+                error_msg = "\n".join(errors)
                 action = "更新" if self.editing_task_id else "创建"
                 QMessageBox.warning(self, f"{action}失败", f"任务配置验证失败：\n{error_msg}")
                 return
@@ -505,9 +519,9 @@ class TaskCreationWidget(QWidget):
                     raise Exception("任务更新失败")
             else:
                 # 创建新任务
-                task_id = self.task_manager.create_task(
-                    user_id="default_user",  # 暂时使用默认用户
-                    config=config
+                task_id = self.task_manager.create_task_sync(
+                    config=config,
+                    user_id="default_user"  # 暂时使用默认用户
                 )
                 
                 # 发送成功信号
@@ -549,17 +563,20 @@ class TaskCreationWidget(QWidget):
         safe_mode = self.safe_mode_check.isChecked()
         
         # 获取调度设置
-        immediate = self.immediate_check.isChecked()
-        scheduled_time = None if immediate else self.scheduled_time_edit.dateTime().toPython()
+        immediate = self.immediate_radio.isChecked()
+        scheduled_time = None if immediate else self.schedule_datetime.dateTime().toPython()
         repeat = self.repeat_check.isChecked()
         repeat_interval = self.repeat_interval_spin.value() if repeat else None
         
         # 获取动作序列
         actions = []
-        for i in range(self.actions_list.count()):
-            item = self.actions_list.item(i)
-            action_data = item.data(Qt.ItemDataRole.UserRole)
-            actions.append(action_data)
+        actions_text = self.actions_edit.toPlainText().strip()
+        if actions_text:
+            # 简单解析动作文本，每行一个动作
+            for line in actions_text.split('\n'):
+                line = line.strip()
+                if line:
+                    actions.append({'type': 'custom', 'description': line})
         
         # 获取自定义参数
         custom_params = {}

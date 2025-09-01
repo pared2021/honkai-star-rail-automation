@@ -2,7 +2,7 @@ import pytest
 import asyncio
 from unittest.mock import Mock, patch, AsyncMock
 from src.core.game_operations import (
-    GameOperations, TaskType, OperationResult, OperationConfig, TaskResult
+    GameOperations, OperationResult, OperationConfig, TaskResult, GameTaskType
 )
 from src.core.game_detector import SceneType
 
@@ -117,7 +117,7 @@ class TestGameOperations:
         result = await game_operations.execute_daily_stamina_consumption(config)
         
         assert isinstance(result, TaskResult)
-        assert result.task_type == TaskType.DAILY_STAMINA
+        assert result.task_type == GameTaskType.DAILY_STAMINA
         assert result.result == OperationResult.SUCCESS
         assert "体力消耗完成" in result.message
     
@@ -138,7 +138,7 @@ class TestGameOperations:
         result = await game_operations.execute_daily_missions(config)
         
         assert isinstance(result, TaskResult)
-        assert result.task_type == TaskType.DAILY_MISSIONS
+        assert result.task_type == GameTaskType.DAILY_MISSIONS
         assert result.result == OperationResult.SUCCESS
         assert "任务完成" in result.message
     
@@ -158,7 +158,7 @@ class TestGameOperations:
         result = await game_operations.execute_auto_combat(config)
         
         assert isinstance(result, TaskResult)
-        assert result.task_type == TaskType.COMBAT_AUTO
+        assert result.task_type == GameTaskType.COMBAT_AUTO
         assert result.result == OperationResult.SUCCESS
         assert "自动战斗完成" in result.message
     
@@ -188,7 +188,7 @@ class TestGameOperations:
         result = await game_operations.execute_mail_collection(config)
         
         assert isinstance(result, TaskResult)
-        assert result.task_type == TaskType.MAIL_COLLECTION
+        assert result.task_type == GameTaskType.MAIL_COLLECTION
         assert result.result == OperationResult.SUCCESS
         assert "邮件收集完成" in result.message
     

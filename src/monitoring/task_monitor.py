@@ -10,12 +10,14 @@ from dataclasses import dataclass
 from datetime import datetime
 from queue import Queue, Empty
 
-from loguru import logger
+from src.core.logger import get_logger
+
+logger = get_logger(__name__)
 from PyQt6.QtCore import QObject, pyqtSignal, QTimer
 
-from database.db_manager import DatabaseManager
-from automation.automation_controller import AutomationController
-from core.enums import TaskStatus
+from src.database.db_manager import DatabaseManager
+from src.automation.automation_controller import AutomationController
+from src.core.enums import TaskStatus
 
 
 @dataclass

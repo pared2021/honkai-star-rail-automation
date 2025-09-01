@@ -90,7 +90,7 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="测试任务描述"
         )
@@ -118,7 +118,7 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="测试任务描述"
         )
@@ -143,7 +143,7 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="测试任务描述"
         )
@@ -163,7 +163,7 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="测试任务描述"
         )
@@ -195,14 +195,14 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config1 = TaskConfig(
             name="测试任务1",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="测试任务1描述"
         )
         
         config2 = TaskConfig(
             name="测试任务2",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.MEDIUM,
             description="测试任务2描述"
         )
@@ -229,7 +229,7 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="测试任务描述"
         )
@@ -253,7 +253,7 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="测试任务描述"
         )
@@ -278,21 +278,21 @@ class TestAutomationController(unittest.TestCase):
         # 创建不同优先级的任务
         config_low = TaskConfig(
             name="低优先级任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.LOW,
             description="低优先级任务描述"
         )
         
         config_high = TaskConfig(
             name="高优先级任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="高优先级任务描述"
         )
         
         config_medium = TaskConfig(
             name="中优先级任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.MEDIUM,
             description="中优先级任务描述"
         )
@@ -344,7 +344,7 @@ class TestAutomationController(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="信号测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="信号测试任务描述"
         )

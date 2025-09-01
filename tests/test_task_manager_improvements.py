@@ -21,8 +21,8 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
 # 导入需要测试的模块
-from src.core.task_manager import TaskManager, TaskConfig
-from src.models.task_model import Task, TaskType, TaskStatus, TaskPriority
+from src.adapters.task_manager_adapter import TaskManagerAdapter
+from src.models.unified_models import Task, TaskConfig, TaskType, TaskStatus, TaskPriority
 
 # 创建简单的DatabaseManager模拟类
 class MockDatabaseManager:
@@ -127,8 +127,8 @@ class TestTaskManagerImprovements:
         # 创建模拟的数据库管理器
         self.db_manager = MockDatabaseManager(self.temp_db.name)
         
-        # 初始化任务管理器
-        self.task_manager = TaskManager(self.db_manager)
+        # 初始化任务管理器适配器
+        self.task_manager = TaskManagerAdapter(self.db_manager)
         
         print(f"✓ 测试环境已设置，临时数据库: {self.temp_db.name}")
     
@@ -162,7 +162,7 @@ class TestTaskManagerImprovements:
         print("\n=== 测试异步CRUD操作 ===")
         
         # 测试创建任务
-        from src.models.task_model import TaskType, TaskPriority
+        from src.models.task_models import TaskType, TaskPriority
         task_config = TaskConfig(
             task_name="测试任务",
             task_type=TaskType.CUSTOM,
@@ -200,7 +200,7 @@ class TestTaskManagerImprovements:
         print("✓ 更新任务成功")
         
         # 测试状态更新
-        from src.models.task_model import TaskStatus
+        # TaskStatus已经在顶部导入了
         await self.task_manager.update_task_status(task_id, TaskStatus.RUNNING)
         task_after_status_update = await self.task_manager.get_task(task_id)
         assert task_after_status_update.status == TaskStatus.RUNNING, "状态更新失败"

@@ -11,11 +11,13 @@ from dataclasses import dataclass
 from queue import Queue, Empty
 
 import pyautogui
-from loguru import logger
+from src.core.logger import get_logger
 
-from core.config_manager import ConfigManager, ConfigType
-from core.enums import ActionType, TaskStatus
-from database.db_manager import DatabaseManager
+logger = get_logger(__name__)
+
+from src.core.config_manager import ConfigManager, ConfigType
+from src.core.enums import ActionType, TaskStatus
+from src.database.db_manager import DatabaseManager
 from .game_detector import GameDetector, DetectionResult
 
 
@@ -81,6 +83,10 @@ class AutomationController:
             'last_action_time': None
         }
         
+        # 运行状态
+        self.is_running = False
+        self.last_run_time = None
+        
         # 设置pyautogui
         pyautogui.FAILSAFE = True  # 鼠标移到左上角停止
         pyautogui.PAUSE = 0.1  # 操作间隔
@@ -130,6 +136,10 @@ class AutomationController:
         self.task_thread = threading.Thread(target=self._execute_task, daemon=True)
         self.task_thread.start()
         
+        # 更新运行状态
+        self.is_running = True
+        self.last_run_time = time.time()
+        
         logger.info(f"任务开始执行: {task_id}")
         return True
     
@@ -152,6 +162,7 @@ class AutomationController:
         
         # 更新状态
         self.task_status = TaskStatus.STOPPED
+        self.is_running = False
         
         if self.current_task_id:
             self.db_manager.update_task_status(self.current_task_id, TaskStatus.STOPPED.value)
@@ -518,6 +529,14 @@ class AutomationController:
             TaskStatus: 当前任务状态
         """
         return self.task_status
+    
+    def get_last_run_time(self) -> Optional[float]:
+        """获取最后运行时间
+        
+        Returns:
+            Optional[float]: 最后运行时间戳，如果从未运行则返回None
+        """
+        return self.last_run_time
     
     def get_stats(self) -> Dict[str, Any]:
         """获取统计信息

@@ -82,11 +82,15 @@ class TaskStatus(Enum):
 class TaskType(Enum):
     """任务类型枚举（仅包含任务类型，不包含动作类型）"""
     DAILY_MISSION = "daily_mission"  # 日常任务
+    DAILY_MISSIONS = "daily_missions"  # 日常任务（复数形式）
+    DAILY_STAMINA = "daily_stamina"  # 日常体力消耗
     WEEKLY_MISSION = "weekly_mission"  # 周常任务
     MATERIAL_FARMING = "material_farming"  # 材料刷取
     CUSTOM_SEQUENCE = "custom_sequence"  # 自定义序列
     EXPLORATION = "exploration"  # 探索任务
     COMBAT_TRAINING = "combat_training"  # 战斗训练
+    COMBAT_AUTO = "combat_auto"  # 自动战斗
+    MAIL_COLLECTION = "mail_collection"  # 邮件收集
     CUSTOM = "custom"  # 自定义任务
 
 

@@ -1,0 +1,374 @@
+{
+  "logging": {
+    "level": "INFO",
+    "max_file_size": 10485760,
+    "max_files": 10,
+    "log_directory": "./logs",
+    "console_output": true,
+    "file_output": true,
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "date_format": "%Y-%m-%d %H:%M:%S",
+    "enable_rotation": true,
+    "rotation_when": "midnight",
+    "rotation_interval": 1,
+    "compression": true,
+    "encoding": "utf-8"
+  },
+  "monitoring": {
+    "enabled": true,
+    "collection_interval": 5,
+    "retention_days": 30,
+    "max_events": 10000,
+    "max_logs": 50000,
+    "max_metrics": 100000,
+    "enable_real_time": true,
+    "enable_aggregation": true,
+    "aggregation_interval": 60,
+    "enable_compression": true,
+    "auto_cleanup": true,
+    "cleanup_interval": 3600
+  },
+  "alerting": {
+    "enabled": true,
+    "evaluation_interval": 10,
+    "max_alerts": 1000,
+    "alert_retention_days": 7,
+    "enable_grouping": true,
+    "grouping_window": 300,
+    "enable_suppression": true,
+    "suppression_window": 600,
+    "enable_escalation": true,
+    "escalation_levels": [
+      {
+        "level": 1,
+        "delay": 300,
+        "channels": ["log"]
+      },
+      {
+        "level": 2,
+        "delay": 900,
+        "channels": ["log", "desktop"]
+      },
+      {
+        "level": 3,
+        "delay": 1800,
+        "channels": ["log", "desktop", "email"]
+      }
+    ],
+    "default_rules": [
+      {
+        "name": "high_cpu_usage",
+        "condition": "cpu_usage > 80",
+        "severity": "WARNING",
+        "message": "CPU使用率过高: {cpu_usage}%",
+        "channels": ["log", "desktop"],
+        "cooldown": 300,
+        "enabled": true
+      },
+      {
+        "name": "high_memory_usage",
+        "condition": "memory_usage > 85",
+        "severity": "CRITICAL",
+        "message": "内存使用率过高: {memory_usage}%",
+        "channels": ["log", "desktop", "email"],
+        "cooldown": 300,
+        "enabled": true
+      },
+      {
+        "name": "high_disk_usage",
+        "condition": "disk_usage > 90",
+        "severity": "CRITICAL",
+        "message": "磁盘使用率过高: {disk_usage}%",
+        "channels": ["log", "desktop"],
+        "cooldown": 600,
+        "enabled": true
+      },
+      {
+        "name": "high_error_rate",
+        "condition": "error_count_per_minute > 10",
+        "severity": "WARNING",
+        "message": "错误频率过高: {error_count_per_minute}/分钟",
+        "channels": ["log"],
+        "cooldown": 180,
+        "enabled": true
+      },
+      {
+        "name": "task_failure_rate",
+        "condition": "task_failure_rate > 0.1",
+        "severity": "WARNING",
+        "message": "任务失败率过高: {task_failure_rate:.2%}",
+        "channels": ["log"],
+        "cooldown": 300,
+        "enabled": true
+      },
+      {
+        "name": "slow_response_time",
+        "condition": "response_time > 5.0",
+        "severity": "WARNING",
+        "message": "响应时间过慢: {response_time:.2f}秒",
+        "channels": ["log"],
+        "cooldown": 120,
+        "enabled": true
+      },
+      {
+        "name": "low_cache_hit_rate",
+        "condition": "cache_hit_rate < 0.8",
+        "severity": "INFO",
+        "message": "缓存命中率较低: {cache_hit_rate:.2%}",
+        "channels": ["log"],
+        "cooldown": 600,
+        "enabled": true
+      }
+    ]
+  },
+  "performance": {
+    "enabled": true,
+    "monitoring_interval": 5,
+    "history_size": 1000,
+    "enable_auto_optimization": true,
+    "optimization_interval": 30,
+    "thresholds": {
+      "cpu_warning": 70.0,
+      "cpu_critical": 85.0,
+      "memory_warning": 75.0,
+      "memory_critical": 90.0,
+      "disk_warning": 80.0,
+      "disk_critical": 95.0,
+      "response_time_warning": 3.0,
+      "response_time_critical": 10.0,
+      "error_rate_warning": 0.05,
+      "error_rate_critical": 0.1
+    },
+    "optimization_strategies": {
+      "memory_cleanup": {
+        "enabled": true,
+        "trigger_threshold": 85.0,
+        "cleanup_percentage": 20.0
+      },
+      "cache_optimization": {
+        "enabled": true,
+        "trigger_threshold": 0.7,
+        "max_cache_size": 1000
+      },
+      "image_processing": {
+        "enabled": true,
+        "quality_reduction": 0.8,
+        "size_reduction": 0.9,
+        "skip_detection": true
+      }
+    }
+  },
+  "health_check": {
+    "enabled": true,
+    "check_interval": 30,
+    "timeout": 10,
+    "max_failures": 3,
+    "failure_threshold": 0.8,
+    "enable_auto_recovery": true,
+    "recovery_attempts": 3,
+    "recovery_delay": 60,
+    "checks": [
+      {
+        "name": "database",
+        "type": "database",
+        "enabled": true,
+        "interval": 30,
+        "timeout": 5,
+        "critical": true,
+        "config": {
+          "connection_test": true,
+          "query_test": true,
+          "performance_test": false
+        }
+      },
+      {
+        "name": "system_resources",
+        "type": "system",
+        "enabled": true,
+        "interval": 15,
+        "timeout": 3,
+        "critical": false,
+        "config": {
+          "check_cpu": true,
+          "check_memory": true,
+          "check_disk": true,
+          "check_network": false
+        }
+      },
+      {
+        "name": "file_system",
+        "type": "filesystem",
+        "enabled": true,
+        "interval": 60,
+        "timeout": 5,
+        "critical": false,
+        "config": {
+          "paths": [
+            "./logs",
+            "./data",
+            "./config"
+          ],
+          "check_permissions": true,
+          "check_space": true
+        }
+      },
+      {
+        "name": "application_processes",
+        "type": "process",
+        "enabled": true,
+        "interval": 20,
+        "timeout": 3,
+        "critical": true,
+        "config": {
+          "processes": [
+            "task_executor",
+            "game_detector",
+            "automation_controller"
+          ],
+          "check_memory_usage": true,
+          "check_cpu_usage": true
+        }
+      }
+    ]
+  },
+  "notification": {
+    "enabled": true,
+    "channels": {
+      "email": {
+        "enabled": false,
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "use_tls": true,
+        "username": "",
+        "password": "",
+        "from_address": "",
+        "to_addresses": [],
+        "subject_prefix": "[星铁助手监控]",
+        "rate_limit": 10,
+        "rate_window": 3600
+      },
+      "desktop": {
+        "enabled": true,
+        "duration": 5000,
+        "sound": true,
+        "icon": "info",
+        "rate_limit": 5,
+        "rate_window": 300
+      },
+      "log": {
+        "enabled": true,
+        "level": "INFO",
+        "include_details": true,
+        "rate_limit": 100,
+        "rate_window": 60
+      },
+      "webhook": {
+        "enabled": false,
+        "url": "",
+        "method": "POST",
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "timeout": 10,
+        "retry_attempts": 3,
+        "rate_limit": 20,
+        "rate_window": 3600
+      },
+      "sms": {
+        "enabled": false,
+        "provider": "twilio",
+        "api_key": "",
+        "api_secret": "",
+        "from_number": "",
+        "to_numbers": [],
+        "rate_limit": 5,
+        "rate_window": 3600
+      }
+    },
+    "templates": {
+      "alert_created": {
+        "subject": "告警触发: {alert_name}",
+        "body": "告警名称: {alert_name}\n严重程度: {severity}\n消息: {message}\n时间: {timestamp}\n详情: {details}"
+      },
+      "alert_resolved": {
+        "subject": "告警解决: {alert_name}",
+        "body": "告警名称: {alert_name}\n解决时间: {timestamp}\n持续时间: {duration}"
+      },
+      "health_check_failed": {
+        "subject": "健康检查失败: {check_name}",
+        "body": "检查名称: {check_name}\n组件类型: {component_type}\n失败原因: {reason}\n时间: {timestamp}"
+      },
+      "system_error": {
+        "subject": "系统错误: {error_type}",
+        "body": "错误类型: {error_type}\n错误消息: {message}\n时间: {timestamp}\n详情: {details}"
+      }
+    }
+  },
+  "dashboard": {
+    "enabled": true,
+    "auto_refresh": true,
+    "refresh_interval": 5,
+    "theme": "light",
+    "show_charts": true,
+    "chart_history": 100,
+    "show_alerts": true,
+    "max_alerts_display": 20,
+    "show_logs": true,
+    "max_logs_display": 100,
+    "show_events": true,
+    "max_events_display": 50,
+    "enable_filters": true,
+    "enable_export": true,
+    "widgets": {
+      "system_metrics": {
+        "enabled": true,
+        "position": {"row": 0, "col": 0, "width": 2, "height": 1},
+        "refresh_interval": 5
+      },
+      "active_alerts": {
+        "enabled": true,
+        "position": {"row": 0, "col": 2, "width": 2, "height": 1},
+        "refresh_interval": 10
+      },
+      "performance_chart": {
+        "enabled": true,
+        "position": {"row": 1, "col": 0, "width": 4, "height": 2},
+        "refresh_interval": 5,
+        "metrics": ["cpu_usage", "memory_usage", "response_time"]
+      },
+      "log_viewer": {
+        "enabled": true,
+        "position": {"row": 3, "col": 0, "width": 2, "height": 2},
+        "refresh_interval": 3,
+        "max_lines": 100
+      },
+      "event_viewer": {
+        "enabled": true,
+        "position": {"row": 3, "col": 2, "width": 2, "height": 2},
+        "refresh_interval": 3,
+        "max_events": 50
+      }
+    }
+  },
+  "system": {
+    "debug_mode": false,
+    "enable_profiling": false,
+    "profiling_interval": 60,
+    "max_threads": 10,
+    "thread_pool_size": 5,
+    "enable_metrics_export": true,
+    "metrics_export_interval": 300,
+    "metrics_export_format": "json",
+    "enable_backup": true,
+    "backup_interval": 3600,
+    "backup_retention": 7,
+    "enable_compression": true,
+    "compression_level": 6,
+    "temp_directory": "./temp",
+    "data_directory": "./data",
+    "cache_directory": "./cache",
+    "max_memory_usage": 1073741824,
+    "gc_threshold": 0.8,
+    "enable_gc_optimization": true
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "export_time": "2025-09-01T22:04:45.322345",
+  "log_count": 1,
+  "logs": [
+    {
+      "timestamp": "2025-09-01T22:04:38.311861",
+      "level": "INFO",
+      "message": "测试导出日志",
+      "module": "test_export",
+      "function": "",
+      "line": 0,
+      "thread_id": "82860",
+      "task_id": null,
+      "user_id": null,
+      "context": null,
+      "exception": null
+    }
+  ]
+}

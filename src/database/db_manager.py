@@ -16,25 +16,29 @@ from loguru import logger
 class DatabaseManager:
     """数据库管理器类"""
     
-    def __init__(self, db_path: Optional[Path] = None):
+    def __init__(self, db_path: Optional[str] = None):
         """初始化数据库管理器
         
         Args:
-            db_path: 数据库文件路径，默认为项目根目录下的data/app.db
+            db_path: 数据库文件路径，默认为项目根目录下的data/app.db，":memory:"表示内存数据库
         """
         if db_path is None:
             project_root = Path(__file__).parent.parent.parent
             data_dir = project_root / "data"
             data_dir.mkdir(parents=True, exist_ok=True)
-            db_path = data_dir / "app.db"
+            self.db_path = str(data_dir / "app.db")
+        else:
+            self.db_path = db_path
         
-        self.db_path = Path(db_path)
-        self._ensure_database_exists()
+        # 只有非内存数据库才需要确保文件存在
+        if self.db_path != ":memory:":
+            self._ensure_database_exists()
     
     def _ensure_database_exists(self):
         """确保数据库文件存在"""
-        if not self.db_path.exists():
-            self.db_path.touch()
+        db_file = Path(self.db_path)
+        if not db_file.exists():
+            db_file.touch()
             logger.info(f"创建数据库文件: {self.db_path}")
     
     @contextmanager
@@ -42,7 +46,7 @@ class DatabaseManager:
         """获取数据库连接的上下文管理器"""
         conn = None
         try:
-            conn = sqlite3.connect(str(self.db_path))
+            conn = sqlite3.connect(self.db_path)
             conn.row_factory = sqlite3.Row  # 使结果可以通过列名访问
             yield conn
         except Exception as e:
@@ -53,6 +57,25 @@ class DatabaseManager:
         finally:
             if conn:
                 conn.close()
+    
+    def get_connection(self):
+        """获取数据库连接（非上下文管理器版本）"""
+        try:
+            conn = sqlite3.connect(self.db_path)
+            conn.row_factory = sqlite3.Row
+            return conn
+        except Exception as e:
+            logger.error(f"数据库连接失败: {e}")
+            raise
+    
+    def initialize(self):
+        """初始化数据库管理器"""
+        try:
+            self.initialize_database()
+            logger.info("数据库管理器初始化完成")
+        except Exception as e:
+            logger.error(f"数据库管理器初始化失败: {e}")
+            raise
     
     def run_migrations(self):
         """运行数据库迁移"""

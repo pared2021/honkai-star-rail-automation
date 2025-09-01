@@ -311,15 +311,15 @@ class MainWindow(QMainWindow):
         """创建任务管理标签页"""
         from .task_creation_widget import TaskCreationWidget
         from .task_list_widget import TaskListWidget
-        from core.task_manager import TaskManager
+        from adapters.task_manager_adapter import TaskManagerAdapter
         
         widget = QWidget()
         layout = QVBoxLayout(widget)
         layout.setContentsMargins(10, 10, 10, 10)
         layout.setSpacing(10)
         
-        # 创建任务管理器实例
-        self.task_manager = TaskManager(self.db_manager)
+        # 创建任务管理器适配器实例
+        self.task_manager = TaskManagerAdapter(self.db_manager)
         
         # 初始化智能调度器（需要任务管理器）
         try:
@@ -598,10 +598,11 @@ class MainWindow(QMainWindow):
             return
         
         # 创建新任务
+        from ..core.enums import TaskType
         task_id = self.db_manager.create_task(
             user_id="default_user",
             task_name="自动化任务",
-            task_type="automation"
+            task_type=TaskType.CUSTOM.value
         )
         
         self.current_task_id = task_id
@@ -631,7 +632,7 @@ class MainWindow(QMainWindow):
         
         if self.current_task_id:
             # 更新任务状态
-            self.db_manager.update_task_status(self.current_task_id, "stopped")
+            self.db_manager.update_task_status(self.current_task_id, "cancelled")
             
             # 发送信号
             self.task_stopped.emit(self.current_task_id)
@@ -783,6 +784,13 @@ class MainWindow(QMainWindow):
         # 确保任务监控器被停止
         if hasattr(self, 'task_monitor') and self.task_monitor is not None:
             self.task_monitor.stop_monitoring()
+        
+        # 确保任务管理器适配器被正确关闭
+        if hasattr(self, 'task_manager') and self.task_manager is not None:
+            try:
+                self.task_manager.shutdown()
+            except Exception as e:
+                logger.warning(f"关闭任务管理器适配器时出错: {e}")
         
         event.accept()
         logger.info("主窗口关闭")

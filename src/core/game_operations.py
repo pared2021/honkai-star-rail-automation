@@ -13,13 +13,13 @@ import asyncio
 from .logger import get_logger
 from .game_detector import GameDetector, SceneType, UIElement
 from .action_executor import ActionExecutor, ClickType, KeyAction
-from .enums import ActionType
+from .enums import ActionType, TaskType
 from .config_manager import ConfigManager
 
 logger = get_logger(__name__)
 
-class TaskType(Enum):
-    """任务类型"""
+class GameTaskType(Enum):
+    """游戏任务类型"""
     DAILY_STAMINA = "daily_stamina"  # 日常体力消耗
     DAILY_MISSIONS = "daily_missions"  # 日常任务
     SIMULATED_UNIVERSE = "simulated_universe"  # 模拟宇宙
@@ -48,7 +48,7 @@ class OperationConfig:
 @dataclass
 class TaskResult:
     """任务执行结果"""
-    task_type: TaskType
+    task_type: GameTaskType
     result: OperationResult
     message: str
     duration: float
@@ -115,7 +115,7 @@ class GameOperations:
     async def execute_daily_stamina_consumption(self, config: Dict[str, Any]) -> TaskResult:
         """执行日常体力消耗"""
         start_time = time.time()
-        task_type = TaskType.DAILY_STAMINA
+        task_type = GameTaskType.DAILY_STAMINA
         
         try:
             if not self._ensure_game_foreground():
@@ -242,7 +242,7 @@ class GameOperations:
     async def execute_daily_missions(self, config: Dict[str, Any]) -> TaskResult:
         """执行日常任务"""
         start_time = time.time()
-        task_type = TaskType.DAILY_MISSIONS
+        task_type = GameTaskType.DAILY_MISSIONS
         
         try:
             if not self._ensure_game_foreground():
@@ -434,7 +434,7 @@ class GameOperations:
     async def execute_auto_combat(self, config: Dict[str, Any]) -> TaskResult:
         """执行自动战斗"""
         start_time = time.time()
-        task_type = TaskType.COMBAT_AUTO
+        task_type = GameTaskType.COMBAT_AUTO
         
         try:
             if not self._ensure_game_foreground():
@@ -509,7 +509,7 @@ class GameOperations:
     async def execute_mail_collection(self, config: Dict[str, Any]) -> TaskResult:
         """执行邮件收集"""
         start_time = time.time()
-        task_type = TaskType.MAIL_COLLECTION
+        task_type = GameTaskType.MAIL_COLLECTION
         
         try:
             if not self._ensure_game_foreground():

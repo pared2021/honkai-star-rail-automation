@@ -17,10 +17,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
 
 from src.monitoring.task_monitor import TaskMonitor
 from src.automation.automation_controller import AutomationController
-from src.models.task_model import Task, TaskStatus, TaskType, TaskPriority
+from src.automation.game_detector import GameDetector
+from src.models.task_model import Task, TaskStatus, TaskPriority
+from src.core.enums import TaskType
 from src.core.task_manager import TaskManager, TaskConfig
 from src.database.db_manager import DatabaseManager
-from src.config.config_manager import ConfigManager
+from src.core.config_manager import ConfigManager, ConfigType
 
 
 class TestTaskMonitor(unittest.TestCase):
@@ -49,18 +51,32 @@ class TestTaskMonitor(unittest.TestCase):
         self.db_manager = DatabaseManager(db_path=self.temp_db.name)
         self.db_manager.initialize_database()
         
-        self.config_manager = ConfigManager(config_path=self.temp_config.name)
+        self.config_manager = ConfigManager(config_dir=os.path.dirname(self.temp_config.name))
         self.task_manager = TaskManager(self.config_manager, self.db_manager)
+        
+        # 模拟配置方法
+        def mock_get_config(config_type):
+            if config_type == ConfigType.UI_PREFERENCES:
+                return {
+                    'update_interval': 1000,
+                    'max_history': 100
+                }
+            return {}
+        
+        self.config_manager.get_config = Mock(side_effect=mock_get_config)
+        
+        # 初始化游戏检测器
+        self.game_detector = GameDetector(self.config_manager)
         
         # 初始化自动化控制器
         self.automation_controller = AutomationController(
             self.config_manager, 
-            self.db_manager
+            self.db_manager,
+            self.game_detector
         )
         
         # 初始化任务监控器
         self.task_monitor = TaskMonitor(
-            self.config_manager,
             self.db_manager,
             self.automation_controller
         )
@@ -72,8 +88,8 @@ class TestTaskMonitor(unittest.TestCase):
             self.task_monitor.stop_monitoring()
         
         # 停止自动化控制器
-        if self.automation_controller.is_running:
-            self.automation_controller.stop()
+        if self.automation_controller.task_status == TaskStatus.RUNNING:
+            self.automation_controller.stop_task()
         
         # 删除临时文件
         if os.path.exists(self.temp_db.name):
@@ -119,7 +135,7 @@ class TestTaskMonitor(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="监控测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="监控测试任务描述"
         )
@@ -146,7 +162,7 @@ class TestTaskMonitor(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="进度测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="进度测试任务描述"
         )
@@ -189,7 +205,7 @@ class TestTaskMonitor(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="信号测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="信号测试任务描述"
         )
@@ -228,7 +244,7 @@ class TestTaskMonitor(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="队列测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="队列测试任务描述"
         )
@@ -262,7 +278,7 @@ class TestTaskMonitor(unittest.TestCase):
         # 创建测试任务
         config = TaskConfig(
             name="集成测试任务",
-            task_type=TaskType.AUTOMATION,
+            task_type=TaskType.DAILY_MISSION,
             priority=TaskPriority.HIGH,
             description="集成测试任务描述"
         )
@@ -309,7 +325,7 @@ class TestTaskMonitor(unittest.TestCase):
         configs = [
             TaskConfig(
                 name=f"多任务测试{i}",
-                task_type=TaskType.AUTOMATION,
+                task_type=TaskType.DAILY_MISSION,
                 priority=TaskPriority.HIGH,
                 description=f"多任务测试{i}描述"
             ) for i in range(3)
