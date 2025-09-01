@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any, Union
 from datetime import datetime
 
-from models.unified_models import Task, TaskConfig
+from models.task_models import Task, TaskConfig
 from core.enums import TaskStatus, TaskType, TaskPriority
 
 

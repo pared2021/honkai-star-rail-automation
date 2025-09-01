@@ -14,7 +14,7 @@ from src.services.base_async_service import BaseAsyncService
 from src.services.event_bus import EventBus, BaseEvent
 from src.automation.game_detector import GameDetector, GameWindow, DetectionResult
 from src.automation.automation_controller import AutomationController, AutomationAction, ActionType, TaskResult
-from src.models.unified_models import TaskStatus
+from src.models.task_models import TaskStatus
 from src.core.logger import get_logger
 
 logger = get_logger(__name__)

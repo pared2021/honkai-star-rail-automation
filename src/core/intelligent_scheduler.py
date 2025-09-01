@@ -15,7 +15,7 @@ import json
 from loguru import logger
 from .task_manager import TaskManager, TaskConfig
 from .game_detector import GameDetector, SceneType
-from ..models.task_model import Task, TaskStatus, TaskType, TaskPriority
+from ..models.task_models import Task, TaskStatus, TaskType, TaskPriority
 from ..automation.automation_controller import AutomationController
 
 

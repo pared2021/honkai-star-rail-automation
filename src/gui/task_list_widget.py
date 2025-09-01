@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
 任务列表显示界面组件
+重构为MVP模式的View层实现。
 """
 
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from abc import ABCMeta
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
@@ -16,11 +18,17 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QDate, QThread, pyqtSlot
 from PyQt6.QtGui import QFont, QColor, QBrush, QAction, QIcon
 
 from loguru import logger
-from adapters.task_manager_adapter import TaskManagerAdapter
-from models.task_models import TaskType, TaskPriority, Task, TaskStatus
+from src.adapters.task_manager_adapter import TaskManagerAdapter
+from src.models.task_models import TaskType, TaskPriority, Task, TaskStatus
+from .mvp.task_list_view import TaskListView
 
 
-class TaskListWidget(QWidget):
+class QWidgetMeta(type(QWidget), ABCMeta):
+    """解决QWidget和ABC元类冲突的元类"""
+    pass
+
+
+class TaskListWidget(QWidget, TaskListView, metaclass=QWidgetMeta):
     """任务列表显示界面组件"""
     
     # 信号定义
@@ -29,17 +37,21 @@ class TaskListWidget(QWidget):
     task_delete_requested = pyqtSignal(str)  # 任务删除请求信号
     task_start_requested = pyqtSignal(str)  # 任务启动请求信号
     task_stop_requested = pyqtSignal(str)  # 任务停止请求信号
+    task_copy_requested = pyqtSignal(str)  # 任务复制请求信号
+    refresh_requested = pyqtSignal()  # 刷新请求信号
+    filter_changed = pyqtSignal(dict)  # 过滤条件变化信号
     
-    def __init__(self, task_manager: TaskManagerAdapter, task_monitor=None, parent=None):
+    def __init__(self, task_manager: TaskManagerAdapter = None, task_monitor=None, parent=None):
         """初始化任务列表界面
         
         Args:
-            task_manager: 任务管理器实例
+            task_manager: 任务管理器实例（兼容性保留，MVP模式下可为None）
             task_monitor: 任务监控器实例（可选）
             parent: 父组件
         """
         super().__init__(parent)
         
+        # 兼容性保留
         self.task_manager = task_manager
         self.task_monitor = task_monitor
         
@@ -59,15 +71,12 @@ class TaskListWidget(QWidget):
         
         # 自动刷新定时器
         self.refresh_timer = QTimer()
-        self.refresh_timer.timeout.connect(self.refresh_task_list)
+        self.refresh_timer.timeout.connect(self._emit_refresh_requested)
         self.refresh_timer.start(5000)  # 每5秒刷新一次
         
         # 连接任务监控器信号（如果存在）
         if self.task_monitor:
             self._connect_monitor_signals()
-        
-        # 初始加载任务列表
-        self.refresh_task_list()
         
         logger.info("任务列表界面初始化完成")
     
@@ -349,8 +358,14 @@ class TaskListWidget(QWidget):
         self.filter_priority = self.priority_filter_combo.currentData()
         self.filter_text = self.search_edit.text().strip().lower()
         
-        # 应用过滤
-        self._apply_filters()
+        # MVP模式：发射过滤变化信号
+        filters = self.get_current_filters()
+        self.filter_changed.emit(filters)
+        
+        # 兼容性：如果有task_manager，使用传统方式
+        if self.task_manager:
+            # 应用过滤
+            self._apply_filters()
     
     def _clear_filters(self):
         """清除所有过滤条件"""
@@ -482,64 +497,120 @@ class TaskListWidget(QWidget):
     
     def _start_selected_task(self):
         """启动选中的任务"""
-        if self.selected_task_id:
-            self.task_start_requested.emit(self.selected_task_id)
+        if not self.selected_task_id:
+            QMessageBox.warning(self, "警告", "请先选择一个任务")
+            return
+        
+        # MVP模式：发射启动请求信号
+        self.task_start_requested.emit(self.selected_task_id)
+        
+        # 兼容性：如果有task_manager，使用传统方式
+        if self.task_manager:
+            try:
+                self.task_manager.start_task_sync(self.selected_task_id)
+                QMessageBox.information(self, "成功", "任务启动成功")
+                self.refresh_task_list()
+                logger.info(f"任务启动成功: {self.selected_task_id}")
+            except Exception as e:
+                logger.error(f"启动任务失败: {e}")
+                QMessageBox.critical(self, "启动失败", f"启动任务失败：{str(e)}")
     
     def _stop_selected_task(self):
         """停止选中的任务"""
-        if self.selected_task_id:
-            self.task_stop_requested.emit(self.selected_task_id)
+        if not self.selected_task_id:
+            QMessageBox.warning(self, "警告", "请先选择一个任务")
+            return
+        
+        # MVP模式：发射停止请求信号
+        self.task_stop_requested.emit(self.selected_task_id)
+        
+        # 兼容性：如果有task_manager，使用传统方式
+        if self.task_manager:
+            try:
+                self.task_manager.stop_task_sync(self.selected_task_id)
+                QMessageBox.information(self, "成功", "任务停止成功")
+                self.refresh_task_list()
+                logger.info(f"任务停止成功: {self.selected_task_id}")
+            except Exception as e:
+                logger.error(f"停止任务失败: {e}")
+                QMessageBox.critical(self, "停止失败", f"停止任务失败：{str(e)}")
     
     def _edit_selected_task(self):
         """编辑选中的任务"""
-        if self.selected_task_id:
-            self.task_edit_requested.emit(self.selected_task_id)
+        if not self.selected_task_id:
+            QMessageBox.warning(self, "警告", "请先选择一个任务")
+            return
+        
+        # 发射编辑请求信号
+        self.task_edit_requested.emit(self.selected_task_id)
     
     def _copy_selected_task(self):
         """复制选中的任务"""
-        if self.selected_task_id:
+        if not self.selected_task_id:
+            QMessageBox.warning(self, "警告", "请先选择一个任务")
+            return
+        
+        # MVP模式：发射复制请求信号
+        self.task_copy_requested.emit(self.selected_task_id)
+        
+        # 兼容性：如果有task_manager，使用传统方式
+        if self.task_manager:
             try:
-                task = self.task_manager.get_task_sync(self.selected_task_id)
-                if task:
-                    # 创建新的任务配置（复制原配置）
-                    from ..core.task_manager import TaskConfig
-                    new_config = TaskConfig(
-                        task_name=f"{task.name} (副本)",
-                        description=task.description,
-                        task_type=task.task_type,
-                        priority=task.priority,
-                        **task.config  # 复制其他配置项
-                    )
-                    
-                    # 创建新任务
-                    new_task_id = self.task_manager.create_task(
-                        user_id=task.user_id,
-                        config=new_config
-                    )
-                    
-                    QMessageBox.information(self, "复制成功", f"任务复制成功！\n新任务ID: {new_task_id}")
-                    
-                    # 刷新列表
-                    self.refresh_task_list()
-                    
-                    logger.info(f"任务复制成功: {self.selected_task_id} -> {new_task_id}")
-                    
+                selected_task = None
+                for task in self.current_tasks:
+                    if task.task_id == self.selected_task_id:
+                        selected_task = task
+                        break
+                
+                if not selected_task:
+                    QMessageBox.warning(self, "警告", "找不到选中的任务")
+                    return
+                
+                config = selected_task.config.copy() if selected_task.config else {}
+                config['task_name'] = f"{selected_task.name} (副本)"
+                config['description'] = selected_task.description
+                config['task_type'] = selected_task.task_type
+                config['priority'] = selected_task.priority
+                
+                new_task_id = self.task_manager.create_task_sync(
+                    user_id="default_user",
+                    config=config
+                )
+                
+                QMessageBox.information(self, "成功", f"任务复制成功！新任务ID: {new_task_id}")
+                self.refresh_task_list()
+                logger.info(f"任务复制成功: {self.selected_task_id} -> {new_task_id}")
+                
             except Exception as e:
-                logger.error(f"任务复制失败: {e}")
-                QMessageBox.critical(self, "复制失败", f"任务复制失败：{str(e)}")
+                logger.error(f"复制任务失败: {e}")
+                QMessageBox.critical(self, "复制失败", f"复制任务失败：{str(e)}")
     
     def _delete_selected_task(self):
         """删除选中的任务"""
-        if self.selected_task_id:
+        if not self.selected_task_id:
+            QMessageBox.warning(self, "警告", "请先选择一个任务")
+            return
+        
+        # MVP模式：发射删除请求信号
+        self.task_delete_requested.emit(self.selected_task_id)
+        
+        # 兼容性：如果有task_manager，使用传统方式
+        if self.task_manager:
             reply = QMessageBox.question(
-                self, "确认删除", 
-                "确定要删除选中的任务吗？此操作不可撤销。",
+                self, "确认删除", "确定要删除选中的任务吗？此操作不可撤销。",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No
             )
             
             if reply == QMessageBox.StandardButton.Yes:
-                self.task_delete_requested.emit(self.selected_task_id)
+                try:
+                    self.task_manager.delete_task_sync(self.selected_task_id)
+                    QMessageBox.information(self, "成功", "任务删除成功")
+                    self.refresh_task_list()
+                    logger.info(f"任务删除成功: {self.selected_task_id}")
+                except Exception as e:
+                    logger.error(f"删除任务失败: {e}")
+                    QMessageBox.critical(self, "删除失败", f"删除任务失败：{str(e)}")
     
     def _show_execution_history(self):
         """显示选中任务的执行历史"""
@@ -690,19 +761,23 @@ class TaskListWidget(QWidget):
     
     @pyqtSlot()
     def refresh_task_list(self):
-        """刷新任务列表"""
-        try:
-            # 使用同步方法获取所有任务
-            self.current_tasks = self.task_manager.list_tasks_sync(user_id="default_user")
-            
-            # 应用过滤
-            self._apply_filters()
-            
-            logger.debug(f"任务列表已刷新，共 {len(self.current_tasks)} 个任务")
-            
-        except Exception as e:
-            logger.error(f"刷新任务列表失败: {e}")
-            QMessageBox.critical(self, "刷新失败", f"刷新任务列表失败：{str(e)}")
+        """刷新任务列表（兼容性方法）"""
+        if self.task_manager:
+            # 兼容性：使用传统方式
+            try:
+                self.current_tasks = self.task_manager.list_tasks_sync(user_id="default_user")
+                self._apply_filters()
+                logger.debug(f"任务列表已刷新，共 {len(self.current_tasks)} 个任务")
+            except Exception as e:
+                logger.error(f"刷新任务列表失败: {e}")
+                QMessageBox.critical(self, "刷新失败", f"刷新任务列表失败：{str(e)}")
+        else:
+            # MVP模式：发射刷新请求信号
+            self.refresh_requested.emit()
+    
+    def _emit_refresh_requested(self):
+        """发射刷新请求信号"""
+        self.refresh_requested.emit()
     
     def select_task(self, task_id: str):
         """选择指定的任务
@@ -737,6 +812,216 @@ class TaskListWidget(QWidget):
             self.refresh_timer.stop()
         
         logger.info(f"自动刷新{'启用' if enabled else '禁用'}，间隔: {interval}ms")
+    
+    # TaskListView接口实现
+    def display_tasks(self, tasks: List[Task]):
+        """显示任务列表
+        
+        Args:
+            tasks: 要显示的任务列表
+        """
+        try:
+            self.current_tasks = tasks
+            self._apply_filters()
+            logger.debug(f"显示任务列表，共 {len(tasks)} 个任务")
+        except Exception as e:
+            logger.error(f"显示任务列表失败: {e}")
+    
+    def show_task_details(self, task: Optional[Task]):
+        """显示任务详情
+        
+        Args:
+            task: 要显示的任务对象，None表示清除显示
+        """
+        if task:
+            self._show_task_details(task.task_id)
+        else:
+            self._show_no_selection_message()
+    
+    def update_statistics(self, stats: Dict[str, int]):
+        """更新统计信息
+        
+        Args:
+            stats: 统计数据字典
+        """
+        # 这里可以添加统计信息显示逻辑
+        # 当前实现中没有专门的统计显示区域，可以在状态栏或其他地方显示
+        logger.debug(f"统计信息更新: {stats}")
+    
+    def clear_selection(self):
+        """清除任务选择"""
+        self.task_table.clearSelection()
+        self.selected_task_id = None
+        self._show_no_selection_message()
+        self._update_button_states()
+    
+    def set_filter_options(self, status_options: List[TaskStatus], 
+                          type_options: List[TaskType], 
+                          priority_options: List[TaskPriority]):
+        """设置过滤选项
+        
+        Args:
+            status_options: 状态选项列表
+            type_options: 类型选项列表
+            priority_options: 优先级选项列表
+        """
+        try:
+            # 更新状态过滤器
+            self.status_filter_combo.clear()
+            self.status_filter_combo.addItem("全部", None)
+            for status in status_options:
+                self.status_filter_combo.addItem(status.value, status)
+            
+            # 更新类型过滤器
+            self.type_filter_combo.clear()
+            self.type_filter_combo.addItem("全部", None)
+            for task_type in type_options:
+                self.type_filter_combo.addItem(task_type.value, task_type)
+            
+            # 更新优先级过滤器
+            self.priority_filter_combo.clear()
+            self.priority_filter_combo.addItem("全部", None)
+            for priority in priority_options:
+                self.priority_filter_combo.addItem(priority.value, priority)
+            
+            logger.debug("过滤选项已更新")
+            
+        except Exception as e:
+            logger.error(f"设置过滤选项失败: {e}")
+    
+    def get_current_filters(self) -> Dict[str, Any]:
+        """获取当前过滤条件
+        
+        Returns:
+            当前过滤条件字典
+        """
+        filters = {}
+        
+        # 状态过滤
+        status = self.status_filter_combo.currentData()
+        if status:
+            filters['status'] = status
+        
+        # 类型过滤
+        task_type = self.type_filter_combo.currentData()
+        if task_type:
+            filters['type'] = task_type
+        
+        # 优先级过滤
+        priority = self.priority_filter_combo.currentData()
+        if priority:
+            filters['priority'] = priority
+        
+        # 搜索文本
+        search_text = self.search_edit.text().strip()
+        if search_text:
+            filters['search_text'] = search_text
+        
+        return filters
+    
+    def clear_filters(self):
+        """清除所有过滤条件"""
+        self._clear_filters()
+    
+    def set_loading_state(self, loading: bool):
+        """设置加载状态
+        
+        Args:
+            loading: 是否正在加载
+        """
+        # 可以在这里添加加载指示器
+        self.setEnabled(not loading)
+        if loading:
+            logger.debug("设置为加载状态")
+        else:
+            logger.debug("取消加载状态")
+    
+    def enable_operations(self, enabled: bool):
+        """启用/禁用操作按钮
+        
+        Args:
+            enabled: 是否启用
+        """
+        self.start_task_btn.setEnabled(enabled)
+        self.stop_task_btn.setEnabled(enabled)
+        self.edit_task_btn.setEnabled(enabled)
+        self.delete_task_btn.setEnabled(enabled)
+    
+    def enable_actions(self, enabled: bool) -> None:
+        """启用/禁用操作按钮（TaskListView接口方法）
+        
+        Args:
+            enabled: 是否启用
+        """
+        self.enable_operations(enabled)
+    
+    def update_button_states(self, has_selection: bool, selected_task: Optional[Task] = None):
+        """更新按钮状态
+        
+        Args:
+            has_selection: 是否有选中的任务
+            selected_task: 选中的任务对象
+        """
+        self._update_button_states()
+    
+    def show_message(self, message: str, message_type: str = "info"):
+        """显示消息
+        
+        Args:
+            message: 消息内容
+            message_type: 消息类型 (info, warning, error, success)
+        """
+        if message_type == "error":
+            QMessageBox.critical(self, "错误", message)
+        elif message_type == "warning":
+            QMessageBox.warning(self, "警告", message)
+        elif message_type == "success":
+            QMessageBox.information(self, "成功", message)
+        else:
+            QMessageBox.information(self, "信息", message)
+    
+    def show_error_dialog(self, title: str, message: str):
+        """显示错误对话框
+        
+        Args:
+            title: 对话框标题
+            message: 错误消息
+        """
+        QMessageBox.critical(self, title, message)
+    
+    def show_confirmation_dialog(self, title: str, message: str) -> bool:
+        """显示确认对话框
+        
+        Args:
+            title: 对话框标题
+            message: 确认消息
+            
+        Returns:
+            用户是否确认
+        """
+        reply = QMessageBox.question(
+            self, title, message,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+            QMessageBox.StandardButton.No
+        )
+        return reply == QMessageBox.StandardButton.Yes
+    
+    def show_context_menu(self, position, task_id: str):
+        """显示上下文菜单
+        
+        Args:
+            position: 菜单位置
+            task_id: 任务ID
+        """
+        self._show_context_menu(position)
+    
+    def show_execution_history(self, task_id: str):
+        """显示任务执行历史
+        
+        Args:
+            task_id: 任务ID
+        """
+        self._show_execution_history()
     
     def update_task_progress(self, task_id: str, progress: int, message: str = ""):
         """更新任务进度

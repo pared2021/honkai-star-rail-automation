@@ -1,0 +1,91 @@
+2025-09-02 00:12:26 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:25:51 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:25:56 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:26:06 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:27:06 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:27:08 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:27:09 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:27:10 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:27:13 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:27:18 | ERROR    | logging:callHandlers:1737 - 刷新任务列表异常: 'SyncAdapter' object has no attribute 'execute_async'
+2025-09-02 00:30:25 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:25 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:25 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:25 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:27 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:29 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:29 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:29 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:29 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:30 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:30 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:30 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:30 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:35 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:35 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:35 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:35 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:38 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:38 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:38 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:38 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:30:40 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:30:40 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:40 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:30:40 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:44 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:31:44 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:44 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:44 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:46 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:49 | ERROR    | src.gui.task_list_widget:display_tasks:828 - 显示任务列表失败: 'coroutine' object is not iterable
+2025-09-02 00:31:49 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:49 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:49 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:52 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:31:54 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:31:54 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:54 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:57 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:31:57 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:57 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:31:59 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:31:59 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:31:59 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:32:04 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:32:04 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:32:04 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:32:09 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:32:09 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:32:09 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:32:14 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:32:14 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:32:14 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:32:19 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:32:19 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:32:19 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()
+2025-09-02 00:32:24 | ERROR    | logging:callHandlers:1737 - 应用过滤条件失败: 'coroutine' object is not iterable
+2025-09-02 00:32:24 | ERROR    | logging:callHandlers:1737 - 更新统计信息失败: object of type 'coroutine' has no len()
+2025-09-02 00:32:24 | ERROR    | logging:callHandlers:1737 - 成功回调执行错误: object of type 'coroutine' has no len()

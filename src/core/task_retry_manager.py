@@ -16,7 +16,7 @@ from loguru import logger
 from PyQt5.QtCore import QObject, pyqtSignal
 
 from core.enums import TaskStatus, ActionStatus
-from models.task_model import Task
+from models.task_models import Task
 from utils.helpers import retry_on_exception
 
 

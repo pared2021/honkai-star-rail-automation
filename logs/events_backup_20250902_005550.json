@@ -1,0 +1,17 @@
+{
+  "export_time": "2025-09-02T00:55:50.327674",
+  "event_count": 1,
+  "events": [
+    {
+      "timestamp": "2025-09-02T00:55:43.325304",
+      "event_type": "system_error",
+      "source": "test_component",
+      "data": {
+        "message": "测试系统错误事件"
+      },
+      "severity": "info",
+      "task_id": null,
+      "user_id": null
+    }
+  ]
+}

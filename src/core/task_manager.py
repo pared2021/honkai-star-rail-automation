@@ -17,7 +17,7 @@ import time
 
 from loguru import logger
 from database.db_manager import DatabaseManager
-from models.task_model import Task, TaskStatus, TaskType, TaskPriority
+from models.task_models import Task, TaskStatus, TaskType, TaskPriority
 from .task_executor import TaskExecutor
 from .task_actions import ActionFactory
 from .enums import ActionType

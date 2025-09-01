@@ -15,7 +15,7 @@ from loguru import logger
 from .game_detector import GameDetector, SceneType
 from automation.automation_controller import AutomationController
 from .enums import ActionType
-from models.task_model import Task, TaskStatus
+from models.task_models import Task, TaskStatus
 
 
 class ExceptionType(Enum):

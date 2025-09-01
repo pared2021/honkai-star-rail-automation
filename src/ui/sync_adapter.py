@@ -185,6 +185,45 @@ class SyncAdapter(QObject):
         """运行异步任务的简化接口"""
         return self.run_async(coro)
     
+    def execute_async(self,
+                     callback_func: Callable,
+                     success_callback: Optional[Callable] = None,
+                     error_callback: Optional[Callable] = None,
+                     timeout: Optional[float] = None) -> str:
+        """执行异步回调函数
+        
+        Args:
+            callback_func: 要执行的回调函数
+            success_callback: 成功回调函数
+            error_callback: 错误回调函数
+            timeout: 超时时间
+            
+        Returns:
+            任务ID，用于跟踪任务状态
+        """
+        async def async_wrapper():
+            """异步包装器"""
+            try:
+                # 如果callback_func是异步函数，直接await
+                if asyncio.iscoroutinefunction(callback_func):
+                    result = await callback_func()
+                else:
+                    # 如果是同步函数，在线程池中执行
+                    loop = asyncio.get_event_loop()
+                    result = await loop.run_in_executor(None, callback_func)
+                
+                return result
+                
+            except Exception as e:
+                logger.error(f"执行回调函数失败: {e}")
+                raise
+        
+        return self.run_async(
+            async_wrapper(),
+            callback=success_callback,
+            error_callback=error_callback
+        )
+    
     def cleanup(self):
         """清理资源"""
         self.shutdown()

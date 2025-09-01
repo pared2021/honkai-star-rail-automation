@@ -20,7 +20,7 @@ import sys
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, parent_dir)
 
-from models.unified_models import Task, TaskConfig
+from models.task_models import Task, TaskConfig
 from core.enums import TaskStatus, TaskType, TaskPriority
 from database.db_manager import DatabaseManager
 from .task_repository import (

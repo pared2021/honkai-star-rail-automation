@@ -19,7 +19,7 @@ from core.task_executor import TaskExecutor, ExecutionStatus, ExecutionContext
 from core.task_actions import ActionFactory, BaseAction, ActionResult
 from automation.automation_controller import AutomationController
 from automation.game_detector import GameDetector
-from models.task_model import Task, TaskStatus
+from models.task_models import Task, TaskStatus
 from database.db_manager import DatabaseManager
 from events.event_bus import EventBus
 from events.task_events import (

@@ -13,6 +13,7 @@ from src.ui.mvp.base_presenter import BasePresenter
 from src.ui.main_window.main_window_model import MainWindowModel
 from src.ui.main_window.main_window_view import MainWindowView
 from src.ui.sync_adapter import SyncAdapter
+from src.gui.mvp.task_list_mvp import TaskListMVP
 
 # 业务服务导入
 from src.application.task_application_service import TaskApplicationService
@@ -44,6 +45,13 @@ class MainWindowPresenter(BasePresenter):
         self.automation_controller = automation_controller
         self.monitoring_service = monitoring_service
         self.performance_monitor = performance_monitor
+        
+        # 初始化TaskListMVP组件
+        self.task_list_mvp = TaskListMVP(
+            task_service=task_service,
+            sync_adapter=sync_adapter
+        )
+        self.task_list_window = None
         
         # 状态管理
         self.start_time = datetime.now()
@@ -327,13 +335,49 @@ class MainWindowPresenter(BasePresenter):
     def handle_task_management(self):
         """处理任务管理请求"""
         try:
-            # 这里应该打开任务管理窗口
-            # 暂时显示消息
-            self.view.show_info_message("任务管理", "任务管理功能正在开发中...")
+            # 打开任务管理窗口
+            self._show_task_management_window()
             
         except Exception as e:
             logger.error(f"打开任务管理失败: {e}")
             self.view.show_error(f"打开任务管理失败: {str(e)}")
+    
+    def _show_task_management_window(self):
+        """显示任务管理窗口"""
+        try:
+            if self.task_list_window is None:
+                # 创建任务管理窗口
+                from PyQt6.QtWidgets import QDialog, QVBoxLayout
+                
+                self.task_list_window = QDialog(self.view)
+                self.task_list_window.setWindowTitle("任务管理")
+                self.task_list_window.setMinimumSize(1000, 600)
+                
+                # 设置布局
+                layout = QVBoxLayout()
+                
+                # 获取TaskListWidget并添加到布局
+                task_list_widget = self.task_list_mvp.get_widget()
+                layout.addWidget(task_list_widget)
+                
+                self.task_list_window.setLayout(layout)
+                
+                # 初始化TaskListMVP
+                self.task_list_mvp.initialize()
+                
+                logger.info("任务管理窗口创建完成")
+            
+            # 显示窗口
+            self.task_list_window.show()
+            self.task_list_window.raise_()
+            self.task_list_window.activateWindow()
+            
+            # 刷新任务列表
+            self.task_list_mvp.refresh()
+            
+        except Exception as e:
+            logger.error(f"显示任务管理窗口失败: {e}")
+            self.view.show_error(f"显示任务管理窗口失败: {str(e)}")
     
     @pyqtSlot()
     def handle_monitoring(self):
@@ -543,19 +587,30 @@ class MainWindowPresenter(BasePresenter):
     
     def cleanup(self):
         """清理资源"""
+        logger.info("清理主窗口资源")
+        
         try:
             # 停止定时器
-            if self.update_timer.isActive():
-                self.update_timer.stop()
+            if hasattr(self, '_dashboard_timer') and self._dashboard_timer:
+                self._dashboard_timer.stop()
+                self._dashboard_timer = None
+            
+            # 清理TaskListMVP组件
+            if hasattr(self, 'task_list_mvp') and self.task_list_mvp:
+                self.task_list_mvp.cleanup()
+                self.task_list_mvp = None
+            
+            # 关闭任务管理窗口
+            if hasattr(self, 'task_list_window') and self.task_list_window:
+                self.task_list_window.close()
+                self.task_list_window = None
             
             # 清理同步适配器
             if self.sync_adapter:
                 self.sync_adapter.cleanup()
             
             # 调用父类清理
-            super().cleanup()
-            
-            logger.info("主窗口展示器资源清理完成")
+            self._cleanup()
             
         except Exception as e:
             logger.error(f"清理资源失败: {e}")

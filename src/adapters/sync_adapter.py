@@ -337,6 +337,56 @@ class SyncAdapter:
     
     # ==================== 异步任务执行 ====================
     
+    def execute_async(
+        self,
+        callback_func: Callable,
+        success_callback: Optional[Callable] = None,
+        error_callback: Optional[Callable] = None,
+        timeout: Optional[float] = None
+    ) -> str:
+        """
+        执行异步回调函数
+        
+        Args:
+            callback_func: 要执行的回调函数
+            success_callback: 成功回调函数
+            error_callback: 错误回调函数
+            timeout: 超时时间
+            
+        Returns:
+            str: 任务ID
+        """
+        async def async_wrapper():
+            """异步包装器"""
+            try:
+                # 如果callback_func是异步函数，直接await
+                if asyncio.iscoroutinefunction(callback_func):
+                    result = await callback_func()
+                else:
+                    # 如果是同步函数，在线程池中执行
+                    loop = asyncio.get_event_loop()
+                    result = await loop.run_in_executor(None, callback_func)
+                
+                # 调用成功回调
+                if success_callback:
+                    if asyncio.iscoroutinefunction(success_callback):
+                        await success_callback(result)
+                    else:
+                        success_callback(result)
+                
+                return result
+                
+            except Exception as e:
+                # 调用错误回调
+                if error_callback:
+                    if asyncio.iscoroutinefunction(error_callback):
+                        await error_callback(e)
+                    else:
+                        error_callback(e)
+                raise
+        
+        return self.run_async(async_wrapper, timeout=timeout)
+    
     def run_async(
         self,
         coro_func: Callable,

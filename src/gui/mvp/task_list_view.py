@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from typing import List, Optional, Dict, Any
 from PyQt6.QtCore import pyqtSignal, QObject
 
-from ...models.task import Task, TaskStatus, TaskType, TaskPriority
+from ...models.task_models import Task, TaskStatus, TaskType, TaskPriority
 
 
 class TaskListView(ABC):

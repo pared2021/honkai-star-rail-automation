@@ -17,7 +17,7 @@ import sys
 # 添加父目录到Python路径
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from models.unified_models import (
+from models.task_models import (
     Task, TaskConfig, TaskStatus, TaskType, TaskPriority
 )
 from services.event_bus import TaskEvent, TaskEventType

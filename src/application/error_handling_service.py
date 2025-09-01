@@ -23,7 +23,7 @@ from core.exception_recovery import (
 from core.game_detector import GameDetector, SceneType
 from automation.automation_controller import AutomationController
 from core.enums import TaskStatus, ActionStatus
-from models.task_model import Task
+from models.task_models import Task
 from services.base_async_service import BaseAsyncService
 from utils.helpers import retry_on_exception
 from events.event_bus import EventBus

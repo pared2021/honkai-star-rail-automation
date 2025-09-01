@@ -11,7 +11,7 @@ from loguru import logger
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..'))
-from models.unified_models import Task, TaskConfig, TaskStatus, TaskType, TaskPriority
+from models.task_models import Task, TaskConfig, TaskStatus, TaskType, TaskPriority
 from services.task_service import TaskService
 from adapters.sync_adapter import get_global_sync_adapter, async_to_sync
 from repositories.sqlite_task_repository import SQLiteTaskRepository
