@@ -1,4 +1,1 @@
-# -*- coding: utf-8 -*-
-"""
-测试模块初始化文件
-"""
+# Tests package

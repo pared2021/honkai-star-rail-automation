@@ -154,6 +154,9 @@ def test_database_operations():
         traceback.print_exc()
         return False
 
+import pytest
+
+@pytest.mark.asyncio
 async def test_repository_operations():
     """测试仓储操作"""
     print("\n测试仓储操作...")
@@ -232,6 +235,7 @@ async def test_repository_operations():
         traceback.print_exc()
         return False
 
+@pytest.mark.asyncio
 async def test_service_operations():
     """测试服务操作"""
     print("\n测试服务操作...")

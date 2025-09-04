@@ -1,0 +1,70 @@
+# 持续监控配置
+monitoring:
+  # 质量阈值配置
+  thresholds:
+    coverage_threshold: 80.0      # 测试覆盖率阈值
+    pylint_threshold: 8.0         # Pylint评分阈值
+    complexity_threshold: 10      # 代码复杂度阈值
+    duplicate_threshold: 0.8      # 重复代码阈值
+    performance_threshold: 1000   # 性能测试阈值(ms)
+    security_threshold: 0         # 安全漏洞数量阈值
+
+  # 监控频率配置
+  schedule:
+    daily_check: "0 2 * * *"      # 每日凌晨2点
+    weekly_report: "0 9 * * 1"    # 每周一上午9点
+    monthly_audit: "0 10 1 * *"   # 每月1号上午10点
+
+  # 通知配置
+  notifications:
+    email:
+      enabled: false
+      recipients: []
+    slack:
+      enabled: false
+      webhook_url: ""
+    github:
+      enabled: true
+      create_issues: true
+      label_prefix: "quality"
+
+  # 报告配置
+  reports:
+    format: ["json", "html", "markdown"]
+    output_dir: "reports"
+    retention_days: 30
+    include_trends: true
+
+  # 质量门禁配置
+  quality_gates:
+    strict_mode: false
+    allow_warnings: true
+    block_on_failure: true
+    required_checks:
+      - "代码格式化"
+      - "代码风格"
+      - "类型检查"
+      - "测试覆盖率"
+    optional_checks:
+      - "重复检测"
+      - "安全扫描"
+      - "性能测试"
+
+  # 自动修复配置
+  auto_fix:
+    enabled: true
+    format_code: true
+    sort_imports: true
+    fix_lint_issues: false
+    create_pr: true
+
+  # 趋势分析配置
+  trends:
+    enabled: true
+    history_days: 90
+    metrics:
+      - coverage
+      - complexity
+      - duplicates
+      - test_count
+      - line_count

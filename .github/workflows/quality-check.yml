@@ -1,0 +1,70 @@
+name: Quality Check
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # 每天凌晨2点运行
+    - cron: '0 2 * * *'
+
+jobs:
+  quality-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-dev.txt
+    
+    - name: Run Quality Gate
+      run: |
+        python scripts/quality_gate.py
+    
+    - name: Upload Quality Report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: quality-report
+        path: reports/quality_gate.json
+    
+    - name: Comment PR with Quality Report
+      if: github.event_name == 'pull_request'
+      uses: actions/github-script@v6
+      with:
+        script: |
+          const fs = require('fs');
+          const path = 'reports/quality_gate.json';
+          
+          if (fs.existsSync(path)) {
+            const report = JSON.parse(fs.readFileSync(path, 'utf8'));
+            const summary = report.summary;
+            
+            const comment = `## 🔍 质量检查报告
+            
+            **检查结果**: ${summary.passed}/${summary.total_checks} 通过
+            
+            ${summary.passed === summary.total_checks ? '✅ 所有质量检查通过！' : '❌ 部分质量检查未通过，请查看详细报告。'}
+            
+            **检查项目**:
+            ${report.results.map(r => `- ${r.status === 'passed' ? '✅' : '❌'} ${r.name}: ${r.message}`).join('\n')}
+            
+            **总耗时**: ${(summary.total_duration / 1000).toFixed(2)}秒`;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+          }

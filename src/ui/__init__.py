@@ -8,4 +8,4 @@ try:
 except ImportError:
     MonitoringDashboard = None
 
-__all__ = ['MonitoringDashboard']
+__all__ = ["MonitoringDashboard"]

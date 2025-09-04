@@ -1,432 +1,578 @@
-# -*- coding: utf-8 -*-
-"""
-任务执行器 - 负责执行任务和管理动作序列
+"""任务执行引擎
+
+实现任务调度、执行状态管理、重试机制和超时控制的核心组件。
 """
 
-import json
+from datetime import datetime, timedelta
+import logging
 import time
-import uuid
-from typing import Dict, Any, List, Optional, Callable
-from dataclasses import dataclass
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
+
+import asyncio
+
+if TYPE_CHECKING:
+    from src.services import TaskApplicationService, AutomationApplicationService
+
+from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
-from pathlib import Path
+from uuid import uuid4
 
-from loguru import logger
-from PyQt6.QtCore import QObject, pyqtSignal, QThread, QTimer
+from src.models.task_models import Task, TaskStatus, TaskType
+from src.repositories import TaskExecutionRepository, TaskRepository
+from src.services.event_bus import EventBus, TaskEventType
 
-from .task_actions import ActionFactory, BaseAction, ActionResult, ActionStatus
-from src.models.task_models import Task, TaskStatus
-from src.database.db_manager import DatabaseManager
+logger = logging.getLogger(__name__)
 
 
-class ExecutionStatus(Enum):
-    """执行状态枚举"""
-    IDLE = "idle"
-    RUNNING = "running"
-    PAUSED = "paused"
+class TaskExecutionError(Exception):
+    """任务执行错误"""
+
+    pass
+
+
+class ExecutorStatus(Enum):
+    """执行器状态"""
+
     STOPPED = "stopped"
-    COMPLETED = "completed"
-    FAILED = "failed"
+    STARTING = "starting"
+    RUNNING = "running"
+    STOPPING = "stopping"
+    PAUSED = "paused"
 
 
-@dataclass
-class ExecutionContext:
-    """执行上下文"""
-    task_id: str
-    execution_id: str
-    user_id: str
-    start_time: float
-    current_action_index: int = 0
-    total_actions: int = 0
-    completed_actions: int = 0
-    failed_actions: int = 0
-    status: ExecutionStatus = ExecutionStatus.IDLE
-    error_message: Optional[str] = None
-    
+class TaskExecutionContext:
+    """任务执行上下文"""
+
+    def __init__(self, task: Task, execution_id: str):
+        self.task = task
+        self.execution_id = execution_id
+        self.start_time = datetime.now()
+        self.retry_count = 0
+        self.last_error: Optional[Exception] = None
+        self.is_cancelled = False
+        self.timeout_handle: Optional[asyncio.Handle] = None
+
     @property
-    def progress_percentage(self) -> float:
-        """执行进度百分比"""
-        if self.total_actions == 0:
-            return 0.0
-        return (self.completed_actions / self.total_actions) * 100
-    
-    def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
-        return {
-            'task_id': self.task_id,
-            'execution_id': self.execution_id,
-            'user_id': self.user_id,
-            'start_time': self.start_time,
-            'current_action_index': self.current_action_index,
-            'total_actions': self.total_actions,
-            'completed_actions': self.completed_actions,
-            'failed_actions': self.failed_actions,
-            'progress_percentage': self.progress_percentage,
-            'status': self.status.value,
-            'error_message': self.error_message
+    def elapsed_time(self) -> float:
+        """获取已执行时间（秒）"""
+        return (datetime.now() - self.start_time).total_seconds()
+
+    def cancel_timeout(self):
+        """取消超时处理"""
+        if self.timeout_handle and not self.timeout_handle.cancelled():
+            self.timeout_handle.cancel()
+            self.timeout_handle = None
+
+
+class RetryPolicy:
+    """重试策略"""
+
+    def __init__(
+        self,
+        max_retries: int = 3,
+        base_delay: float = 1.0,
+        max_delay: float = 60.0,
+        exponential_base: float = 2.0,
+        jitter: bool = True,
+    ):
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+        self.max_delay = max_delay
+        self.exponential_base = exponential_base
+        self.jitter = jitter
+
+    def should_retry(self, retry_count: int, error: Exception) -> bool:
+        """判断是否应该重试"""
+        if retry_count >= self.max_retries:
+            return False
+
+        # 某些错误不应该重试
+        if isinstance(error, ValueError):
+            return False
+
+        # 检查是否是TaskExecutionError
+        if error.__class__.__name__ == "TaskExecutionError":
+            return False
+
+        return True
+
+    def get_delay(self, retry_count: int) -> float:
+        """获取重试延迟时间"""
+        delay = self.base_delay * (self.exponential_base**retry_count)
+        delay = min(delay, self.max_delay)
+
+        if self.jitter:
+            import random
+
+            delay *= 0.5 + random.random() * 0.5  # 添加50%的随机抖动
+
+        return delay
+
+
+class TaskExecutor:
+    """任务执行引擎
+
+    负责任务的调度、执行、状态管理和错误处理。
+    """
+
+    def __init__(
+        self,
+        event_bus: EventBus,
+        task_service: "TaskApplicationService",
+        automation_service: "AutomationApplicationService",
+        max_concurrent_tasks: int = 5,
+        default_timeout: float = 300.0,  # 5分钟
+    ):
+        self.event_bus = event_bus
+        self.task_service = task_service
+        self.automation_service = automation_service
+        self.max_concurrent_tasks = max_concurrent_tasks
+        self.default_timeout = default_timeout
+
+        # 执行器状态
+        self.status = ExecutorStatus.STOPPED
+        self._running_tasks: Dict[str, TaskExecutionContext] = {}
+        self._task_queue: asyncio.Queue = asyncio.Queue()
+        self._worker_tasks: List[asyncio.Task] = []
+        self._scheduler_task: Optional[asyncio.Task] = None
+
+        # 重试策略
+        self.retry_policy = RetryPolicy()
+
+        # 线程池用于CPU密集型任务
+        self.thread_pool = ThreadPoolExecutor(max_workers=2)
+
+        # 任务执行器映射
+        self._task_executors: Dict[TaskType, Callable] = {
+            TaskType.AUTOMATION: self._execute_automation_task,
+            TaskType.SCHEDULED: self._execute_scheduled_task,
+            TaskType.MANUAL: self._execute_manual_task,
         }
 
+    async def start(self) -> bool:
+        """启动执行引擎"""
+        if self.status != ExecutorStatus.STOPPED:
+            logger.warning(f"执行引擎已在运行，当前状态: {self.status}")
+            return False
 
-class TaskExecutor(QObject):
-    """任务执行器"""
-    
-    # 信号定义
-    execution_started = pyqtSignal(str, str)  # task_id, execution_id
-    execution_progress = pyqtSignal(str, str, float)  # task_id, execution_id, progress
-    execution_completed = pyqtSignal(str, str, bool)  # task_id, execution_id, success
-    execution_paused = pyqtSignal(str, str)  # task_id, execution_id
-    execution_resumed = pyqtSignal(str, str)  # task_id, execution_id
-    execution_stopped = pyqtSignal(str, str)  # task_id, execution_id
-    action_executed = pyqtSignal(str, str, dict)  # task_id, execution_id, action_result
-    execution_error = pyqtSignal(str, str, str)  # task_id, execution_id, error_message
-    
-    def __init__(self, db_manager: DatabaseManager):
-        super().__init__()
-        self.db_manager = db_manager
-        self.current_execution: Optional[ExecutionContext] = None
-        self.current_actions: List[BaseAction] = []
-        self.is_paused = False
-        self.should_stop = False
-        
-        # 执行定时器
-        self.execution_timer = QTimer()
-        self.execution_timer.timeout.connect(self._execute_next_action)
-        self.execution_timer.setSingleShot(True)
-    
-    def execute_task(self, task: Task, user_id: str) -> str:
-        """执行任务
-        
+        try:
+            self.status = ExecutorStatus.STARTING
+            logger.info("启动任务执行引擎...")
+
+            # 启动工作线程
+            self._worker_tasks = [
+                asyncio.create_task(self._worker_loop(i))
+                for i in range(self.max_concurrent_tasks)
+            ]
+
+            # 启动调度器
+            self._scheduler_task = asyncio.create_task(self._scheduler_loop())
+
+            self.status = ExecutorStatus.RUNNING
+            logger.info(
+                f"任务执行引擎启动成功，工作线程数: {self.max_concurrent_tasks}"
+            )
+            return True
+
+        except Exception as e:
+            logger.error(f"启动执行引擎失败: {e}")
+            self.status = ExecutorStatus.STOPPED
+            return False
+
+    async def stop(self, timeout: float = 30.0) -> bool:
+        """停止执行引擎"""
+        if self.status == ExecutorStatus.STOPPED:
+            return True
+
+        try:
+            self.status = ExecutorStatus.STOPPING
+            logger.info("停止任务执行引擎...")
+
+            # 取消所有正在执行的任务
+            for context in self._running_tasks.values():
+                context.is_cancelled = True
+                context.cancel_timeout()
+
+            # 停止调度器
+            if self._scheduler_task:
+                self._scheduler_task.cancel()
+                try:
+                    await asyncio.wait_for(self._scheduler_task, timeout=5.0)
+                except (asyncio.CancelledError, asyncio.TimeoutError):
+                    pass
+
+            # 停止工作线程
+            for task in self._worker_tasks:
+                task.cancel()
+
+            if self._worker_tasks:
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(*self._worker_tasks, return_exceptions=True),
+                        timeout=timeout,
+                    )
+                except asyncio.TimeoutError:
+                    logger.warning("工作线程停止超时")
+
+            # 关闭线程池
+            self.thread_pool.shutdown(wait=True)
+
+            self.status = ExecutorStatus.STOPPED
+            logger.info("任务执行引擎已停止")
+            return True
+
+        except Exception as e:
+            logger.error(f"停止执行引擎失败: {e}")
+            return False
+
+    async def pause(self) -> bool:
+        """暂停执行引擎"""
+        if self.status != ExecutorStatus.RUNNING:
+            return False
+
+        self.status = ExecutorStatus.PAUSED
+        logger.info("任务执行引擎已暂停")
+        return True
+
+    async def resume(self) -> bool:
+        """恢复执行引擎"""
+        if self.status != ExecutorStatus.PAUSED:
+            return False
+
+        self.status = ExecutorStatus.RUNNING
+        logger.info("任务执行引擎已恢复")
+        return True
+
+    async def submit_task(self, task: Task) -> bool:
+        """提交任务到执行队列
+
         Args:
             task: 要执行的任务
-            user_id: 用户ID
-            
+
         Returns:
-            str: 执行ID
+            是否提交成功
         """
-        if self.current_execution and self.current_execution.status == ExecutionStatus.RUNNING:
-            raise RuntimeError("已有任务正在执行中")
-        
-        # 创建执行上下文
-        execution_id = str(uuid.uuid4())
-        self.current_execution = ExecutionContext(
-            task_id=task.task_id,
-            execution_id=execution_id,
-            user_id=user_id,
-            start_time=time.time(),
-            status=ExecutionStatus.RUNNING
-        )
-        
+        if self.status not in [ExecutorStatus.RUNNING, ExecutorStatus.PAUSED]:
+            logger.warning(f"执行引擎未运行，无法提交任务: {task.task_id}")
+            return False
+
         try:
-            # 获取任务动作
-            self._load_task_actions(task.task_id)
-            
-            # 创建执行记录
-            self.db_manager.create_task_execution(
-                task_id=task.task_id,
-                execution_id=execution_id,
-                user_id=user_id,
-                status='running',
-                start_time=self.current_execution.start_time
-            )
-            
-            # 更新任务状态
-            self.db_manager.update_task_status(task.task_id, TaskStatus.RUNNING.value)
-            
-            # 发送开始信号
-            self.execution_started.emit(task.task_id, execution_id)
-            
-            # 开始执行
-            self._start_execution()
-            
-            logger.info(f"任务执行开始: {task.task_id} (执行ID: {execution_id})")
-            
+            await self._task_queue.put(task)
+            logger.info(f"任务已提交到执行队列: {task.task_id}")
+            return True
         except Exception as e:
-            error_msg = f"任务执行启动失败: {str(e)}"
-            logger.error(error_msg)
-            self._handle_execution_error(error_msg)
-            raise
-        
-        return execution_id
-    
-    def pause_execution(self):
-        """暂停执行"""
-        if not self.current_execution or self.current_execution.status != ExecutionStatus.RUNNING:
-            return
-        
-        self.is_paused = True
-        self.current_execution.status = ExecutionStatus.PAUSED
-        self.execution_timer.stop()
-        
-        # 更新数据库
-        self.db_manager.update_task_execution(
-            self.current_execution.execution_id,
-            status='paused'
-        )
-        
-        self.execution_paused.emit(
-            self.current_execution.task_id,
-            self.current_execution.execution_id
-        )
-        
-        logger.info(f"任务执行已暂停: {self.current_execution.task_id}")
-    
-    def resume_execution(self):
-        """恢复执行"""
-        if not self.current_execution or self.current_execution.status != ExecutionStatus.PAUSED:
-            return
-        
-        self.is_paused = False
-        self.current_execution.status = ExecutionStatus.RUNNING
-        
-        # 更新数据库
-        self.db_manager.update_task_execution(
-            self.current_execution.execution_id,
-            status='running'
-        )
-        
-        self.execution_resumed.emit(
-            self.current_execution.task_id,
-            self.current_execution.execution_id
-        )
-        
-        # 继续执行
-        self._continue_execution()
-        
-        logger.info(f"任务执行已恢复: {self.current_execution.task_id}")
-    
-    def stop_execution(self):
-        """停止执行"""
-        if not self.current_execution:
-            return
-        
-        self.should_stop = True
-        self.execution_timer.stop()
-        
-        if self.current_execution.status in [ExecutionStatus.RUNNING, ExecutionStatus.PAUSED]:
-            self.current_execution.status = ExecutionStatus.STOPPED
-            
-            # 更新数据库
-            self.db_manager.update_task_execution(
-                self.current_execution.execution_id,
-                status='stopped',
-                end_time=time.time()
+            logger.error(f"提交任务失败: {e}")
+            return False
+
+    async def cancel_task(self, task_id: str) -> bool:
+        """取消正在执行的任务
+
+        Args:
+            task_id: 任务ID
+
+        Returns:
+            是否取消成功
+        """
+        context = self._running_tasks.get(task_id)
+        if not context:
+            logger.warning(f"任务未在执行中: {task_id}")
+            return False
+
+        context.is_cancelled = True
+        context.cancel_timeout()
+        logger.info(f"任务已标记为取消: {task_id}")
+        return True
+
+    def get_running_tasks(self) -> List[str]:
+        """获取正在执行的任务列表"""
+        return list(self._running_tasks.keys())
+
+    def get_executor_status(self) -> Dict[str, Any]:
+        """获取执行器状态信息"""
+        return {
+            "status": self.status.value,
+            "running_tasks_count": len(self._running_tasks),
+            "queue_size": self._task_queue.qsize(),
+            "max_concurrent_tasks": self.max_concurrent_tasks,
+            "worker_tasks_count": len(self._worker_tasks),
+        }
+
+    async def _scheduler_loop(self):
+        """调度器循环"""
+        logger.info("调度器循环启动")
+
+        try:
+            while self.status != ExecutorStatus.STOPPING:
+                try:
+                    # 检查计划任务
+                    await self._check_scheduled_tasks()
+
+                    # 等待一段时间后再次检查
+                    await asyncio.sleep(10.0)
+
+                except asyncio.CancelledError:
+                    break
+                except Exception as e:
+                    logger.error(f"调度器循环错误: {e}")
+                    await asyncio.sleep(5.0)
+
+        except asyncio.CancelledError:
+            pass
+        finally:
+            logger.info("调度器循环结束")
+
+    async def _worker_loop(self, worker_id: int):
+        """工作线程循环"""
+        logger.info(f"工作线程 {worker_id} 启动")
+
+        try:
+            while self.status != ExecutorStatus.STOPPING:
+                try:
+                    # 等待任务
+                    task = await asyncio.wait_for(self._task_queue.get(), timeout=1.0)
+
+                    # 检查执行器状态
+                    if self.status == ExecutorStatus.PAUSED:
+                        # 暂停状态下重新放回队列
+                        await self._task_queue.put(task)
+                        await asyncio.sleep(1.0)
+                        continue
+
+                    # 执行任务
+                    await self._execute_task(task)
+
+                except asyncio.TimeoutError:
+                    # 超时是正常的，继续循环
+                    continue
+                except asyncio.CancelledError:
+                    break
+                except Exception as e:
+                    logger.error(f"工作线程 {worker_id} 错误: {e}")
+                    await asyncio.sleep(1.0)
+
+        except asyncio.CancelledError:
+            pass
+        finally:
+            logger.info(f"工作线程 {worker_id} 结束")
+
+    async def _check_scheduled_tasks(self):
+        """检查计划任务"""
+        try:
+            # 获取应该执行的计划任务
+            now = datetime.now()
+            scheduled_tasks = await self.task_service.get_scheduled_tasks(now)
+
+            for task in scheduled_tasks:
+                if task.task_id not in self._running_tasks:
+                    await self.submit_task(task)
+
+        except Exception as e:
+            logger.error(f"检查计划任务失败: {e}")
+
+    async def _execute_task(self, task: Task):
+        """执行单个任务"""
+        execution_id = str(uuid4())
+        context = TaskExecutionContext(task, execution_id)
+
+        try:
+            # 记录执行开始
+            self._running_tasks[task.task_id] = context
+
+            # 启动任务执行
+            execution_id = await self.task_service.execute_task(
+                task.task_id, task.user_id
             )
-            
-            self.db_manager.update_task_status(
-                self.current_execution.task_id, 
-                TaskStatus.STOPPED.value
-            )
-            
-            self.execution_stopped.emit(
-                self.current_execution.task_id,
-                self.current_execution.execution_id
-            )
-            
-            logger.info(f"任务执行已停止: {self.current_execution.task_id}")
-        
-        self._cleanup_execution()
-    
-    def get_execution_status(self) -> Optional[Dict[str, Any]]:
-        """获取当前执行状态"""
-        if not self.current_execution:
-            return None
-        return self.current_execution.to_dict()
-    
-    def _load_task_actions(self, task_id: str):
-        """加载任务动作"""
-        actions_data = self.db_manager.get_task_actions(task_id)
-        self.current_actions = []
-        
-        for action_data in actions_data:
+            context.execution_id = execution_id
+
+            # 设置超时
+            timeout = getattr(task.config, "timeout", self.default_timeout)
+            if timeout > 0:
+                context.timeout_handle = asyncio.get_event_loop().call_later(
+                    timeout, self._handle_task_timeout, task.task_id
+                )
+
+            # 执行任务
+            await self._execute_task_with_retry(context)
+
+        except Exception as e:
+            logger.error(f"任务执行失败: {task.task_id}, 错误: {e}")
+            await self._handle_task_failure(context, e)
+        finally:
+            # 清理
+            context.cancel_timeout()
+            self._running_tasks.pop(task.task_id, None)
+
+    async def _execute_task_with_retry(self, context: TaskExecutionContext):
+        """带重试的任务执行"""
+        task = context.task
+
+        while True:
             try:
-                action = ActionFactory.create_action(action_data)
-                self.current_actions.append(action)
+                # 检查是否被取消
+                if context.is_cancelled:
+                    await self.task_service.cancel_task(task.task_id, task.user_id)
+                    return
+
+                # 执行任务
+                result = await self._execute_task_by_type(context)
+
+                # 任务成功完成
+                await self.task_service.complete_task(
+                    task.task_id, context.execution_id, result
+                )
+
+                logger.info(f"任务执行成功: {task.task_id}")
+                return
+
             except Exception as e:
-                logger.error(f"创建动作失败: {str(e)}, 动作数据: {action_data}")
-        
-        self.current_execution.total_actions = len(self.current_actions)
-        logger.info(f"加载了 {len(self.current_actions)} 个动作")
-    
-    def _start_execution(self):
-        """开始执行"""
-        if not self.current_actions:
-            self._complete_execution(True, "没有动作需要执行")
-            return
-        
-        self.current_execution.current_action_index = 0
-        self.is_paused = False
-        self.should_stop = False
-        
-        # 开始执行第一个动作
-        self._continue_execution()
-    
-    def _continue_execution(self):
-        """继续执行"""
-        if self.should_stop:
-            return
-        
-        if self.is_paused:
-            return
-        
-        if self.current_execution.current_action_index >= len(self.current_actions):
-            self._complete_execution(True)
-            return
-        
-        # 延迟执行下一个动作（避免阻塞UI）
-        self.execution_timer.start(100)  # 100ms延迟
-    
-    def _execute_next_action(self):
-        """执行下一个动作"""
-        if self.should_stop or self.is_paused:
-            return
-        
-        if self.current_execution.current_action_index >= len(self.current_actions):
-            self._complete_execution(True)
-            return
-        
-        # 获取当前动作
-        action = self.current_actions[self.current_execution.current_action_index]
-        
-        try:
-            logger.info(f"执行动作 {self.current_execution.current_action_index + 1}/{len(self.current_actions)}: {action.action_type.value}")
-            
-            # 执行动作
-            result = action.execute()
-            
-            # 记录执行结果
-            self._record_action_result(action, result)
-            
-            # 更新进度
-            if result.status == ActionStatus.COMPLETED:
-                self.current_execution.completed_actions += 1
-            else:
-                self.current_execution.failed_actions += 1
-            
-            # 发送进度信号
-            self.execution_progress.emit(
-                self.current_execution.task_id,
-                self.current_execution.execution_id,
-                self.current_execution.progress_percentage
-            )
-            
-            # 发送动作执行信号
-            self.action_executed.emit(
-                self.current_execution.task_id,
-                self.current_execution.execution_id,
-                result.to_dict()
-            )
-            
-            # 移动到下一个动作
-            self.current_execution.current_action_index += 1
-            
-            # 继续执行
-            self._continue_execution()
-            
-        except Exception as e:
-            error_msg = f"动作执行失败: {str(e)}"
-            logger.error(error_msg)
-            self._handle_execution_error(error_msg)
-    
-    def _record_action_result(self, action: BaseAction, result: ActionResult):
-        """记录动作执行结果"""
-        try:
-            # 这里可以扩展为记录到数据库
-            log_data = {
-                'execution_id': self.current_execution.execution_id,
-                'action_id': action.action_id,
-                'action_type': action.action_type.value,
-                'status': result.status.value,
-                'duration': result.duration,
-                'error_message': result.error_message,
-                'output_data': result.output_data
-            }
-            
-            # 添加执行日志
-            self.db_manager.add_execution_log(
-                task_id=self.current_execution.task_id,
-                execution_id=self.current_execution.execution_id,
-                level='INFO' if result.status == ActionStatus.COMPLETED else 'ERROR',
-                message=f"动作 {action.action_type.value} 执行{result.status.value}",
-                details=json.dumps(log_data, ensure_ascii=False)
-            )
-            
-        except Exception as e:
-            logger.error(f"记录动作结果失败: {str(e)}")
-    
-    def _complete_execution(self, success: bool, message: str = None):
-        """完成执行"""
-        if not self.current_execution:
-            return
-        
-        end_time = time.time()
-        
-        if success:
-            self.current_execution.status = ExecutionStatus.COMPLETED
-            task_status = TaskStatus.COMPLETED.value
+                context.last_error = e
+                context.retry_count += 1
+
+                # 检查是否应该重试
+                if not self.retry_policy.should_retry(context.retry_count - 1, e):
+                    raise e
+
+                # 计算重试延迟
+                delay = self.retry_policy.get_delay(context.retry_count - 1)
+                logger.warning(
+                    f"任务执行失败，{delay:.1f}秒后重试 ({context.retry_count}/{self.retry_policy.max_retries}): "
+                    f"{task.task_id}, 错误: {e}"
+                )
+
+                # 等待重试
+                await asyncio.sleep(delay)
+
+    async def _execute_task_by_type(
+        self, context: TaskExecutionContext
+    ) -> Optional[Dict[str, Any]]:
+        """根据任务类型执行任务"""
+        task = context.task
+        executor = self._task_executors.get(task.task_type)
+
+        if not executor:
+            raise TaskExecutionError(f"不支持的任务类型: {task.task_type}")
+
+        return await executor(context)
+
+    async def _execute_automation_task(
+        self, context: TaskExecutionContext
+    ) -> Optional[Dict[str, Any]]:
+        """执行自动化任务"""
+        task = context.task
+        config = task.config
+
+        if not config.automation_config:
+            raise TaskExecutionError("自动化任务缺少automation_config")
+
+        automation_config = config.automation_config
+
+        # 检测游戏窗口
+        game_names = automation_config.get("game_names", [])
+        if game_names:
+            windows = await self.automation_service.detect_game_windows(game_names)
+            if not windows:
+                raise TaskExecutionError(f"未找到游戏窗口: {game_names}")
+            window = windows[0]
         else:
-            self.current_execution.status = ExecutionStatus.FAILED
-            task_status = TaskStatus.FAILED.value
-            if message:
-                self.current_execution.error_message = message
-        
-        # 更新数据库
-        self.db_manager.update_task_execution(
-            self.current_execution.execution_id,
-            status=self.current_execution.status.value.lower(),
-            end_time=end_time,
-            result_data=json.dumps(self.current_execution.to_dict(), ensure_ascii=False)
-        )
-        
-        self.db_manager.update_task_status(
-            self.current_execution.task_id,
-            task_status
-        )
-        
-        # 发送完成信号
-        self.execution_completed.emit(
-            self.current_execution.task_id,
-            self.current_execution.execution_id,
-            success
-        )
-        
-        logger.info(f"任务执行完成: {self.current_execution.task_id} - {'成功' if success else '失败'}")
-        
-        self._cleanup_execution()
-    
-    def _handle_execution_error(self, error_message: str):
-        """处理执行错误"""
-        if not self.current_execution:
-            return
-        
-        self.current_execution.error_message = error_message
-        
-        # 发送错误信号
-        self.execution_error.emit(
-            self.current_execution.task_id,
-            self.current_execution.execution_id,
-            error_message
-        )
-        
-        # 完成执行（失败）
-        self._complete_execution(False, error_message)
-    
-    def _cleanup_execution(self):
-        """清理执行状态"""
-        self.execution_timer.stop()
-        self.current_execution = None
-        self.current_actions = []
-        self.is_paused = False
-        self.should_stop = False
+            window = None
 
+        # 执行自动化序列
+        sequence = automation_config.get("sequence", [])
+        if sequence:
+            success = await self.automation_service.execute_automation_sequence(
+                context.execution_id, sequence, window
+            )
 
-class TaskExecutorThread(QThread):
-    """任务执行器线程"""
-    
-    def __init__(self, executor: TaskExecutor):
-        super().__init__()
-        self.executor = executor
-    
-    def run(self):
-        """线程运行"""
-        # 在线程中运行执行器
-        self.exec()
+            if not success:
+                raise TaskExecutionError("自动化序列执行失败")
+
+        return {
+            "window_title": window.title if window else None,
+            "sequence_length": len(sequence),
+            "execution_time": context.elapsed_time,
+        }
+
+    async def _execute_scheduled_task(
+        self, context: TaskExecutionContext
+    ) -> Optional[Dict[str, Any]]:
+        """执行计划任务"""
+        task = context.task
+        config = task.config
+
+        if not config.schedule_config:
+            raise TaskExecutionError("计划任务缺少schedule_config")
+
+        schedule_config = config.schedule_config
+
+        # 根据计划配置执行相应的操作
+        action_type = schedule_config.get("action_type")
+
+        if action_type == "automation":
+            # 执行自动化操作
+            automation_config = schedule_config.get("automation_config")
+            if automation_config:
+                # 临时设置automation_config
+                task.config.automation_config = automation_config
+                return await self._execute_automation_task(context)
+
+        elif action_type == "notification":
+            # 发送通知
+            message = schedule_config.get("message", "计划任务执行")
+            logger.info(f"计划任务通知: {message}")
+            return {"message": message}
+
+        else:
+            raise TaskExecutionError(f"不支持的计划任务类型: {action_type}")
+
+        return {"action_type": action_type}
+
+    async def _execute_manual_task(
+        self, context: TaskExecutionContext
+    ) -> Optional[Dict[str, Any]]:
+        """执行手动任务"""
+        task = context.task
+
+        # 手动任务通常需要用户交互，这里只是示例
+        logger.info(f"执行手动任务: {task.task_id}")
+
+        # 模拟一些处理时间
+        await asyncio.sleep(1.0)
+
+        return {"task_type": "manual", "execution_time": context.elapsed_time}
+
+    async def _handle_task_failure(
+        self, context: TaskExecutionContext, error: Exception
+    ):
+        """处理任务失败"""
+        try:
+            await self.task_service.complete_task(
+                context.task.task_id, context.execution_id, None, str(error)
+            )
+        except Exception as e:
+            logger.error(f"处理任务失败时出错: {e}")
+
+    def _handle_task_timeout(self, task_id: str):
+        """处理任务超时"""
+        context = self._running_tasks.get(task_id)
+        if context:
+            context.is_cancelled = True
+            logger.warning(f"任务执行超时: {task_id}")
+
+    def get_status(self) -> Dict[str, Any]:
+        """获取执行器状态"""
+        return {
+            "status": self.status.value,
+            "running_tasks": len(self._running_tasks),
+            "max_concurrent_tasks": self.max_concurrent_tasks,
+            "queue_size": self._task_queue.qsize(),
+            "worker_tasks": len(self._worker_tasks),
+        }
+
+    def get_running_tasks(self) -> List[str]:
+        """获取正在运行的任务ID列表"""
+        return list(self._running_tasks.keys())
+
+    def __del__(self):
+        """析构函数"""
+        if hasattr(self, "thread_pool"):
+            self.thread_pool.shutdown(wait=False)

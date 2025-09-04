@@ -1,0 +1,91 @@
+{
+  "quality_thresholds": {
+    "overall_score": 8.0,
+    "code_style": {
+      "flake8_max_violations": 10,
+      "black_compliance": true,
+      "isort_compliance": true
+    },
+    "code_quality": {
+      "pylint_min_score": 8.0,
+      "complexity_max": 10,
+      "maintainability_min": 7.0
+    },
+    "type_checking": {
+      "mypy_error_tolerance": 5,
+      "type_coverage_min": 80
+    },
+    "testing": {
+      "coverage_min": 80,
+      "test_pass_rate": 100
+    },
+    "duplication": {
+      "max_duplicate_lines": 50,
+      "similarity_threshold": 0.8
+    }
+  },
+  "ci_settings": {
+    "fail_fast": false,
+    "auto_fix": true,
+    "generate_reports": true,
+    "upload_artifacts": true
+  },
+  "notification_settings": {
+    "slack_webhook": null,
+    "email_notifications": false,
+    "github_comments": true
+  },
+  "exclusions": {
+    "files": [
+      "tests/fixtures/*",
+      "docs/*",
+      "scripts/legacy/*",
+      "**/migrations/*"
+    ],
+    "directories": [
+      "venv",
+      ".venv",
+      "__pycache__",
+      ".pytest_cache",
+      ".mypy_cache",
+      "build",
+      "dist"
+    ]
+  },
+  "tools_config": {
+    "flake8": {
+      "config_file": ".flake8",
+      "enabled": true
+    },
+    "pylint": {
+      "config_file": ".pylintrc",
+      "enabled": true
+    },
+    "mypy": {
+      "config_file": "mypy.ini",
+      "enabled": true
+    },
+    "black": {
+      "config_file": "pyproject.toml",
+      "enabled": true
+    },
+    "isort": {
+      "config_file": "pyproject.toml",
+      "enabled": true
+    },
+    "pytest": {
+      "config_file": "pyproject.toml",
+      "enabled": true
+    },
+    "coverage": {
+      "config_file": "pyproject.toml",
+      "enabled": true
+    }
+  },
+  "reporting": {
+    "formats": ["json", "html", "xml"],
+    "output_dir": "reports",
+    "archive_reports": true,
+    "retention_days": 30
+  }
+}

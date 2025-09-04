@@ -6,7 +6,7 @@ sys.path.insert(0, 'src')
 
 try:
     print("测试 TaskConfig 导入...")
-    from core.task_manager import TaskConfig
+    from models.task_models import TaskConfig
     from core.task_model import TaskType, TaskPriority
     print("✓ 导入成功")
     

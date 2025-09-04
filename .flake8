@@ -1,0 +1,61 @@
+[flake8]
+# 最大行长度
+max-line-length = 88
+
+# 忽略的错误代码
+ignore = 
+    # E203: whitespace before ':' (conflicts with black)
+    E203,
+    # W503: line break before binary operator (conflicts with black)
+    W503,
+    # E501: line too long (handled by black)
+    E501
+
+# 排除的目录
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    env,
+    .env,
+    build,
+    dist,
+    *.egg-info,
+    .tox,
+    .coverage,
+    .pytest_cache,
+    migrations
+
+# 每个文件的最大复杂度
+max-complexity = 10
+
+# 导入顺序检查
+import-order-style = google
+
+# 文档字符串检查
+docstring-convention = google
+
+# 选择的检查插件
+select = 
+    # pyflakes
+    F,
+    # pycodestyle errors
+    E,
+    # pycodestyle warnings  
+    W,
+    # mccabe complexity
+    C90,
+    # import order
+    I,
+    # docstring
+    D
+
+# 针对特定文件的规则
+per-file-ignores =
+    # 测试文件可以有更长的行和更复杂的结构
+    tests/*:E501,D,
+    # __init__.py 文件可以有未使用的导入
+    __init__.py:F401,
+    # 配置文件可以有更长的行
+    */config/*:E501

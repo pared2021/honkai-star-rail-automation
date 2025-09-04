@@ -1,24 +1,104 @@
-# -*- coding: utf-8 -*-
-"""
-核心模块包
+"""核心模块
+
+包含任务执行引擎、事件系统等核心组件。
 """
 
-# 注释掉相对导入以避免导入错误
-# 当作为包使用时，这些导入会在需要时进行
-# from .task_manager import TaskConfig, TaskManager
-# from .action_executor import (
-#     ActionExecutor, ActionResult, ActionType, ClickType, WaitType, LoopType,
-#     ClickAction, KeyAction, WaitAction, LoopAction
-# )
-# from .game_operations import GameOperations, TaskType, OperationResult
-# from .game_detector import GameDetector, SceneType, UIElement
-# from .config_manager import ConfigManager
+from .error_handling import (
+    DatabaseRecoveryHandler,
+    ErrorCategory,
+    ErrorClassifier,
+    ErrorContext,
+    ErrorHandler,
+    ErrorRecoveryHandler,
+    ErrorSeverity,
+    ExponentialBackoffStrategy,
+    FixedDelayStrategy,
+    LinearBackoffStrategy,
+    NetworkRecoveryHandler,
+    RetryStrategy,
+    with_error_handling,
+)
+from .events import (
+    ActionExecutedEvent,
+    AutomationEvent,
+    Event,
+    EventBus,
+    EventHandler,
+    LoggingEventHandler,
+    MetricsEventHandler,
+    ScreenshotTakenEvent,
+    TaskCreatedEvent,
+    TaskEvent,
+    TaskExecutionCompletedEvent,
+    TaskExecutionStartedEvent,
+    TaskStatusChangedEvent,
+    WindowDetectedEvent,
+)
+from .sync_adapter import (
+    AsyncCallback,
+    AsyncToSyncAdapter,
+    CallbackData,
+    CallbackManager,
+    CallbackType,
+    EventBridge,
+    SyncCallback,
+    SyncToAsyncAdapter,
+    async_sync,
+    default_event_bridge,
+    sync_async,
+)
+from .task_executor import (
+    ExecutorStatus,
+    RetryPolicy,
+    TaskExecutionContext,
+    TaskExecutor,
+)
 
 __all__ = [
-    'TaskConfig', 'TaskManager',
-    'ActionExecutor', 'ActionResult', 'ActionType', 'ClickType', 'WaitType', 'LoopType',
-    'ClickAction', 'KeyAction', 'WaitAction', 'LoopAction',
-    'GameOperations', 'TaskType', 'OperationResult',
-    'GameDetector', 'SceneType', 'UIElement',
-    'ConfigManager'
+    # 任务执行引擎
+    "TaskExecutor",
+    "ExecutorStatus",
+    "TaskExecutionContext",
+    "RetryPolicy",
+    # 事件系统
+    "Event",
+    "TaskEvent",
+    "TaskCreatedEvent",
+    "TaskStatusChangedEvent",
+    "TaskExecutionStartedEvent",
+    "TaskExecutionCompletedEvent",
+    "AutomationEvent",
+    "WindowDetectedEvent",
+    "ActionExecutedEvent",
+    "ScreenshotTakenEvent",
+    "EventHandler",
+    "EventBus",
+    "LoggingEventHandler",
+    "MetricsEventHandler",
+    # 错误处理
+    "ErrorSeverity",
+    "ErrorCategory",
+    "ErrorContext",
+    "ErrorClassifier",
+    "RetryStrategy",
+    "ExponentialBackoffStrategy",
+    "LinearBackoffStrategy",
+    "FixedDelayStrategy",
+    "ErrorRecoveryHandler",
+    "DatabaseRecoveryHandler",
+    "NetworkRecoveryHandler",
+    "ErrorHandler",
+    "with_error_handling",
+    # 同步适配器
+    "CallbackType",
+    "CallbackData",
+    "AsyncCallback",
+    "SyncCallback",
+    "CallbackManager",
+    "AsyncToSyncAdapter",
+    "SyncToAsyncAdapter",
+    "EventBridge",
+    "default_event_bridge",
+    "sync_async",
+    "async_sync",
 ]

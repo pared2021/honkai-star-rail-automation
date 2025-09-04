@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-工具模块 - 通用工具函数和辅助类
-"""
+"""工具模块 - 通用工具函数和辅助类."""
 
 __version__ = "1.0.0"
 __author__ = "Honkai Star Rail Automation Team"
