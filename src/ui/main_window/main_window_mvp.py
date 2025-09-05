@@ -37,8 +37,24 @@ class MainWindowMVP:
         self.view.update_status("自动化已启动")
         self.view.append_log("自动化功能已启动...")
         
-        # TODO: 实现实际的自动化逻辑
-        self.view.append_log("注意：自动化功能正在开发中")
+        try:
+            # 获取监控系统
+            from src.monitoring import get_monitoring_system
+            monitoring_system = get_monitoring_system()
+            
+            if monitoring_system:
+                monitoring_system.start()
+                self.view.append_log("自动化监控系统已启动")
+            
+            # 更新监控界面状态
+            if hasattr(self.view, 'monitoring_widget'):
+                self.view.monitoring_widget.add_log("自动化处理已开始")
+                
+            self.view.append_log("自动化处理已启动")
+            
+        except Exception as e:
+            self.view.append_log(f"启动自动化处理时出错: {str(e)}")
+            logger.error(f"启动自动化处理失败: {str(e)}")
         
     def on_stop_automation(self):
         """停止自动化处理."""
@@ -46,7 +62,24 @@ class MainWindowMVP:
         self.view.update_status("自动化已停止")
         self.view.append_log("自动化功能已停止")
         
-        # TODO: 实现实际的停止逻辑
+        try:
+            # 获取监控系统
+            from src.monitoring import get_monitoring_system
+            monitoring_system = get_monitoring_system()
+            
+            if monitoring_system:
+                monitoring_system.stop()
+                self.view.append_log("自动化监控系统已停止")
+            
+            # 更新监控界面状态
+            if hasattr(self.view, 'monitoring_widget'):
+                self.view.monitoring_widget.add_log("自动化处理已停止")
+                
+            self.view.append_log("自动化处理已停止")
+            
+        except Exception as e:
+            self.view.append_log(f"停止自动化处理时出错: {str(e)}")
+            logger.error(f"停止自动化处理失败: {str(e)}")
         
     def close(self):
         """关闭主窗口."""

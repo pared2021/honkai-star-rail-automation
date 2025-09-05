@@ -126,16 +126,28 @@ class MainWindowView(QMainWindow):
         self.tab_widget.addTab(control_tab, "主控制")
         
         # 设置选项卡
-        settings_tab = QWidget()
-        settings_layout = QVBoxLayout(settings_tab)
-        settings_layout.addWidget(QLabel("设置功能开发中..."))
-        self.tab_widget.addTab(settings_tab, "设置")
+        try:
+            from .settings_widget import SettingsWidget
+            self.settings_widget = SettingsWidget()
+            self.tab_widget.addTab(self.settings_widget, "设置")
+        except Exception as e:
+            # 如果导入失败，创建占位符
+            settings_placeholder = QWidget()
+            settings_layout = QVBoxLayout(settings_placeholder)
+            settings_layout.addWidget(QLabel(f"设置界面加载失败: {str(e)}"))
+            self.tab_widget.addTab(settings_placeholder, "设置")
         
         # 状态监控选项卡
-        monitor_tab = QWidget()
-        monitor_layout = QVBoxLayout(monitor_tab)
-        monitor_layout.addWidget(QLabel("状态监控功能开发中..."))
-        self.tab_widget.addTab(monitor_tab, "状态监控")
+        try:
+            from .monitoring_widget import MonitoringWidget
+            self.monitoring_widget = MonitoringWidget()
+            self.tab_widget.addTab(self.monitoring_widget, "状态监控")
+        except Exception as e:
+            # 如果导入失败，创建占位符
+            monitoring_placeholder = QWidget()
+            monitoring_layout = QVBoxLayout(monitoring_placeholder)
+            monitoring_layout.addWidget(QLabel(f"监控界面加载失败: {str(e)}"))
+            self.tab_widget.addTab(monitoring_placeholder, "状态监控")
         
     def setup_menu_bar(self):
         """设置菜单栏."""

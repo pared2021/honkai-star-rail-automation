@@ -15,14 +15,16 @@ import sys
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
+# 首先创建QApplication实例（必须在任何QWidget导入之前）
+from PyQt6.QtWidgets import QApplication
+app = QApplication(sys.argv)
+
 from PyQt6.QtCore import QDir, Qt
 from PyQt6.QtGui import QIcon
-from PyQt6.QtWidgets import QApplication
 
 from src.core.config_manager import ConfigManager
 from src.core.logger import setup_logger
 from src.database.db_manager import DatabaseManager
-from src.ui.main_window import MainWindowMVP as MainWindow
 
 
 def setup_application():
@@ -57,11 +59,9 @@ def create_directories():
 def main():
     """主函数"""
     try:
+        # QApplication已在模块级别创建
         # 设置应用程序
         setup_application()
-
-        # 创建QApplication实例
-        app = QApplication(sys.argv)
 
         # 创建必要目录
         create_directories()
@@ -83,6 +83,9 @@ def main():
         initialize_services()
         logger.info("依赖注入容器初始化完成")
 
+        # 延迟导入主窗口（避免在QApplication创建前导入QWidget）
+        from src.ui.main_window import MainWindowMVP as MainWindow
+        
         # 创建主窗口MVP组件
         main_window = MainWindow()
         main_window.show()

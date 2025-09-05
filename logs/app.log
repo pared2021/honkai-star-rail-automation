@@ -9,3 +9,46 @@
 2025-09-06 00:20:21 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:36 - 用户点击开始自动化
 2025-09-06 00:20:24 | INFO     | src.ui.main_window.main_window_mvp:on_stop_automation:45 - 用户点击停止自动化
 2025-09-06 00:20:27 | INFO     | __main__:main:95 - 应用程序退出，退出码: 0
+2025-09-06 07:36:57 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-06 07:36:57 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:36:57 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:36:57 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-06 07:36:57 | INFO     | src.ui.main_window.main_window_mvp:__init__:20 - 主窗口MVP初始化完成
+2025-09-06 07:36:57 | INFO     | __main__:main:90 - 主窗口已显示
+2025-09-06 07:38:24 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:36 - 用户点击开始自动化
+2025-09-06 07:38:27 | INFO     | src.ui.main_window.main_window_mvp:on_stop_automation:45 - 用户点击停止自动化
+2025-09-06 07:38:30 | INFO     | __main__:main:95 - 应用程序退出，退出码: 0
+2025-09-06 07:39:16 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-06 07:39:16 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:39:16 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:39:16 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-06 07:39:16 | INFO     | src.ui.main_window.main_window_mvp:__init__:20 - 主窗口MVP初始化完成
+2025-09-06 07:39:16 | INFO     | __main__:main:90 - 主窗口已显示
+2025-09-06 07:44:42 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-06 07:44:42 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:44:42 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:44:42 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-06 07:45:10 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-06 07:45:10 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:45:10 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:45:10 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-06 07:45:46 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-06 07:45:46 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:45:46 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:45:46 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-06 07:46:27 | INFO     | __main__:main:72 - 应用程序启动
+2025-09-06 07:46:27 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:46:27 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:46:27 | INFO     | __main__:main:85 - 依赖注入容器初始化完成
+2025-09-06 07:46:43 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-06 07:46:43 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:46:43 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:46:43 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-06 07:47:20 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-06 07:47:20 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-06 07:47:20 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-06 07:47:20 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-06 07:47:21 | INFO     | src.ui.main_window.main_window_mvp:__init__:20 - 主窗口MVP初始化完成
+2025-09-06 07:47:21 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-06 07:48:43 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:36 - 用户点击开始自动化
+2025-09-06 07:48:50 | INFO     | __main__:main:98 - 应用程序退出，退出码: 0
