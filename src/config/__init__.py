@@ -1,8 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-配置模块
-"""
+"""配置管理模块。
 
-from ..core.config_manager import ConfigManager
-
-__all__ = ["ConfigManager"]
+提供应用程序配置管理和设置功能。
+"""

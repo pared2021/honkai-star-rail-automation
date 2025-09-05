@@ -1,16 +1,4 @@
-"""游戏设置模块
+"""游戏设置界面模块。
 
-该模块提供游戏设置的MVP架构组件。
+提供游戏配置和参数设置的用户界面组件。
 """
-
-from .game_settings_model import GameSettingsModel
-from .game_settings_view import GameSettingsView
-from .game_settings_presenter import GameSettingsPresenter
-from .game_settings_mvp import GameSettingsMVP
-
-__all__ = [
-    "GameSettingsModel",
-    "GameSettingsView", 
-    "GameSettingsPresenter",
-    "GameSettingsMVP"
-]

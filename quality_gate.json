@@ -1,0 +1,79 @@
+{
+  "thresholds": {
+    "coverage_threshold": 80.0,
+    "pylint_threshold": 8.0,
+    "complexity_threshold": 10,
+    "duplicate_threshold": 0.8
+  },
+  "tools": {
+    "black": {
+      "enabled": true,
+      "command": [
+        "E:\\UGit\\xingtie\\venv\\Scripts\\python.exe",
+        "-m",
+        "black"
+      ],
+      "check_args": [
+        "--check",
+        "--diff"
+      ],
+      "fix_args": []
+    },
+    "isort": {
+      "enabled": true,
+      "command": [
+        "E:\\UGit\\xingtie\\venv\\Scripts\\python.exe",
+        "-m",
+        "isort"
+      ],
+      "check_args": [
+        "--check-only",
+        "--diff"
+      ],
+      "fix_args": []
+    },
+    "flake8": {
+      "enabled": true,
+      "command": [
+        "E:\\UGit\\xingtie\\venv\\Scripts\\python.exe",
+        "-m",
+        "flake8"
+      ],
+      "check_args": [],
+      "fix_args": null
+    },
+    "pylint": {
+      "enabled": true,
+      "command": [
+        "E:\\UGit\\xingtie\\venv\\Scripts\\python.exe",
+        "-m",
+        "pylint"
+      ],
+      "check_args": [
+        "--output-format=json"
+      ],
+      "fix_args": null
+    },
+    "mypy": {
+      "enabled": true,
+      "command": [
+        "E:\\UGit\\xingtie\\venv\\Scripts\\python.exe",
+        "-m",
+        "mypy"
+      ],
+      "check_args": [
+        "--json-report",
+        "E:\\UGit\\xingtie\\reports\\mypy.json"
+      ],
+      "fix_args": null
+    }
+  },
+  "exclude_paths": [
+    "*/tests/*",
+    "*/test_*",
+    "*/__pycache__/*",
+    "*/venv/*",
+    "*/env/*",
+    "*/.tox/*"
+  ]
+}

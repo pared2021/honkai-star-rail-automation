@@ -19,7 +19,7 @@ except Exception as e:
 
 try:
     from src.core.task_manager import TaskManager
-from src.models.task_models import TaskConfig
+    from src.models.task_models import TaskConfig
     print("✓ TaskManager 导入成功")
 except Exception as e:
     print(f"✗ TaskManager 导入失败: {e}")

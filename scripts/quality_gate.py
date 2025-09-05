@@ -88,7 +88,7 @@ class QualityGate:
             "mypy": {
                 "enabled": True,
                 "command": [sys.executable, "-m", "mypy"],
-                "check_args": ["--json-report", str(self.reports_dir / "mypy.json")],
+                "check_args": ["--show-error-codes", "--no-error-summary"],
                 "fix_args": None  # mypy不支持自动修复
             }
         }

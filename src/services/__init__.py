@@ -1,12 +1,4 @@
-"""服务层模块
+"""服务层模块。
 
-提供UI层和核心层之间的解耦服务。
+提供业务服务和领域服务的实现。
 """
-
-from .application_service import ApplicationService
-from .ui_service_facade import UIServiceFacade
-
-__all__ = [
-    'ApplicationService',
-    'UIServiceFacade'
-]

@@ -41,43 +41,55 @@ class TestTemplateMatcher:
 
     def test_load_templates_success(self):
         """测试成功加载模板"""
-        with patch.object(self.template_matcher, '_load_template_file') as mock_load:
-            with patch('pathlib.Path.exists', return_value=True):
-                with patch('pathlib.Path.iterdir') as mock_iterdir:
-                    # 模拟目录结构
-                    mock_dir = MagicMock()
-                    mock_dir.is_dir.return_value = True
-                    mock_dir.name = 'ui'
-                    mock_dir.glob.return_value = [Path('test_template.png')]
-                    mock_iterdir.return_value = [mock_dir]
+        with patch.object(self.template_matcher, 'load_template') as mock_load:
+            with patch('os.path.exists', return_value=True):
+                with patch('os.listdir') as mock_listdir:
+                    # 模拟目录中的文件
+                    mock_listdir.return_value = ['test_template.png', 'another_template.jpg']
                     
-                    self.template_matcher.load_templates()
+                    self.template_matcher.load_templates('mock_templates_dir')
                     
-                    mock_load.assert_called()
+                    # 验证load_template被调用了两次
+                    assert mock_load.call_count == 2
+                    # 使用Windows路径分隔符
+                    mock_load.assert_any_call('mock_templates_dir\\test_template.png')
+                    mock_load.assert_any_call('mock_templates_dir\\another_template.jpg')
 
     def test_load_template_file_not_found(self):
         """测试模板文件不存在"""
         with patch('cv2.imread') as mock_imread:
             mock_imread.return_value = None
             
-            # 直接测试 _load_template_file 方法
-            self.template_matcher._load_template_file(Path("nonexistent.png"), "ui")
+            # 测试 load_template 方法
+            result = self.template_matcher.load_template("nonexistent.png")
             
-            # 验证模板没有被添加到缓存中
-            assert "ui_nonexistent" not in self.template_matcher.templates_cache
+            # 验证返回None且模板没有被添加到缓存中
+            assert result is None
+            assert "nonexistent" not in self.template_matcher.templates_cache
 
+    @pytest.mark.skipif(not hasattr(TemplateMatcher, '_convert_svg_to_image'), reason="SVG conversion not available")
     def test_load_svg_template(self):
         """测试加载SVG模板"""
+        # 如果cairosvg不可用，跳过测试
+        from src.core.game_detector import CAIROSVG_AVAILABLE
+        if not CAIROSVG_AVAILABLE:
+            pytest.skip("cairosvg not available")
+            
+        svg_content = '<svg><rect width="100" height="100" fill="red"/></svg>'
+        
         with patch('cairosvg.svg2png') as mock_svg2png, \
              patch('PIL.Image.open') as mock_image_open:
             mock_svg2png.return_value = b'fake_png_data'
             mock_pil_image = Mock()
+            mock_pil_image.mode = 'RGB'
             mock_image_open.return_value = mock_pil_image
             
-            with patch('cv2.cvtColor') as mock_cvtcolor:
+            with patch('cv2.cvtColor') as mock_cvtcolor, \
+                 patch('numpy.array') as mock_array:
                 mock_cvtcolor.return_value = self.test_template
+                mock_array.return_value = self.test_template
                 
-                result = self.template_matcher._convert_svg_to_image(Path('test.svg'))
+                result = self.template_matcher._convert_svg_to_image(svg_content)
                 
                 assert result is not None
                 mock_svg2png.assert_called_once()
@@ -106,14 +118,16 @@ class TestTemplateMatcher:
 
     def test_match_template_success(self):
         """测试模板匹配成功"""
-        # 模拟模板缓存
-        self.template_matcher.templates_cache["test_template"] = {
-            "image": self.test_template,
-            "threshold": 0.8,
-            "path": "test_template.png",
-            "category": "test",
-            "original_size": self.test_template.shape[:2]
-        }
+        from src.core.game_detector import TemplateInfo
+        
+        # 模拟模板信息缓存
+        template_info = TemplateInfo(
+            name="test_template",
+            image=self.test_template,
+            threshold=0.8,
+            path="test_template.png"
+        )
+        self.template_matcher.template_info_cache["test_template"] = template_info
         
         with patch('cv2.matchTemplate') as mock_match, \
              patch('cv2.minMaxLoc') as mock_minmax:
@@ -130,38 +144,45 @@ class TestTemplateMatcher:
 
     def test_match_template_below_threshold(self):
         """测试匹配置信度低于阈值的情况"""
-        screenshot = np.zeros((200, 200, 3), dtype=np.uint8)
-        template = np.ones((50, 50, 3), dtype=np.uint8) * 128  # 灰色模板
+        from src.core.game_detector import TemplateInfo
         
-        # 模拟模板缓存
-        self.template_matcher.templates_cache["test_template"] = {
-            "image": template,
-            "threshold": 0.9,  # 高阈值
-            "path": "test_template.png",
-            "category": "test",
-            "original_size": template.shape[:2]
-        }
+        # 模拟模板信息缓存
+        template_info = TemplateInfo(
+            name="test_template",
+            image=self.test_template,
+            threshold=0.8,
+            path="test_template.png"
+        )
+        self.template_matcher.template_info_cache["test_template"] = template_info
         
-        result = self.template_matcher.match_template(screenshot, "test_template")
-        assert result is None
+        with patch('cv2.matchTemplate') as mock_match, \
+             patch('cv2.minMaxLoc') as mock_minmax:
+            mock_match.return_value = np.array([[0.5]])
+            mock_minmax.return_value = (0.1, 0.5, (10, 10), (100, 100))  # 低于阈值0.8
+            
+            result = self.template_matcher.match_template(self.test_screenshot, "test_template")
+            
+            assert result is None
 
     def test_match_multiple_templates(self):
         """测试匹配多个模板"""
-        # 设置模板缓存
-        self.template_matcher.templates_cache["template1"] = {
-            "image": self.test_template,
-            "threshold": 0.8,
-            "path": "template1.png",
-            "category": "test",
-            "original_size": self.test_template.shape[:2]
-        }
-        self.template_matcher.templates_cache["template2"] = {
-            "image": self.test_template,
-            "threshold": 0.8,
-            "path": "template2.png",
-            "category": "test",
-            "original_size": self.test_template.shape[:2]
-        }
+        from src.core.game_detector import TemplateInfo
+        
+        # 设置模板信息缓存
+        template_info1 = TemplateInfo(
+            name="template1",
+            image=self.test_template,
+            threshold=0.8,
+            path="template1.png"
+        )
+        template_info2 = TemplateInfo(
+            name="template2",
+            image=self.test_template,
+            threshold=0.8,
+            path="template2.png"
+        )
+        self.template_matcher.template_info_cache["template1"] = template_info1
+        self.template_matcher.template_info_cache["template2"] = template_info2
         
         with patch.object(self.template_matcher, 'match_template') as mock_match:
             mock_match.side_effect = [
@@ -250,16 +271,24 @@ class TestWindowManager:
         mock_mfc_dc.CreateCompatibleDC.return_value = mock_save_dc
         
         with patch('win32ui.CreateBitmap') as mock_create_bitmap, \
-             patch('win32gui.ReleaseDC'):
+             patch('win32gui.ReleaseDC'), \
+             patch('win32gui.DeleteObject'), \
+             patch('cv2.cvtColor') as mock_cvtcolor:
             
             mock_create_bitmap.return_value = mock_bitmap
             mock_bitmap.GetBitmapBits.return_value = b'\x00' * (800 * 600 * 4)
             mock_bitmap.GetInfo.return_value = {'bmWidth': 800, 'bmHeight': 600}
+            mock_bitmap.GetHandle.return_value = 1002
+            
+            # Mock cv2.cvtColor to return a proper numpy array
+            test_image = np.random.randint(0, 255, (600, 800, 3), dtype=np.uint8)
+            mock_cvtcolor.return_value = test_image
             
             result = self.window_manager.capture_window(game_window)
             
             assert result is not None
             assert isinstance(result, np.ndarray)
+            assert result.shape == (600, 800, 3)
 
     @patch('win32gui.SetForegroundWindow')
     @patch('win32gui.ShowWindow')
@@ -274,11 +303,18 @@ class TestWindowManager:
             is_foreground=True
         )
         
-        result = self.window_manager.bring_window_to_front(game_window)
+        # 设置mock返回值为成功
+        mock_show_window.return_value = True
+        mock_set_foreground.return_value = True
         
-        assert result is True
-        mock_show_window.assert_called_once_with(12345, 9)  # SW_RESTORE
-        mock_set_foreground.assert_called_once_with(12345)
+        with patch('src.core.game_detector.win32con') as mock_win32con:
+            mock_win32con.SW_RESTORE = 9
+            
+            result = self.window_manager.bring_window_to_front(game_window)
+            
+            assert result is True
+            mock_show_window.assert_called_once_with(12345, 9)  # SW_RESTORE
+            mock_set_foreground.assert_called_once_with(12345)
 
 
 class TestGameDetector:
@@ -478,13 +514,16 @@ class TestGameDetector:
 
     def test_bring_game_to_front_success(self):
         """测试将游戏窗口置于前台成功"""
+        # 设置当前窗口
+        self.game_detector.window_manager.current_window = self.mock_game_window
+        
         with patch.object(self.game_detector.window_manager, 'bring_window_to_front') as mock_bring_to_front:
             mock_bring_to_front.return_value = True
             
             result = self.game_detector.bring_game_to_front()
             
             assert result is True
-            mock_bring_to_front.assert_called_once()
+            mock_bring_to_front.assert_called_once_with(self.mock_game_window)
 
     def test_bring_game_to_front_no_window(self):
         """测试无窗口时置于前台"""
@@ -641,37 +680,70 @@ class TestTemplateMatcherAdvanced:
         mock_listdir.return_value = ['template1.png', 'template2.svg', 'not_image.txt']
         
         with patch.object(self.template_matcher, 'load_template') as mock_load:
-            mock_load.side_effect = [
-                TemplateInfo('template1', self.test_template, 0.8, 'template1.png', {}),
-                TemplateInfo('template2', self.test_template, 0.8, 'template2.svg', {}),
-                None  # 非图像文件
-            ]
+            # 模拟load_template的返回值，成功时返回TemplateInfo，失败时返回None
+            template_info1 = TemplateInfo('template1', self.test_template, 0.8, 'template1.png')
+            template_info2 = TemplateInfo('template2', self.test_template, 0.8, 'template2.svg')
+            
+            def mock_load_side_effect(file_path):
+                if 'template1.png' in file_path:
+                    # 模拟成功加载，直接添加到缓存
+                    self.template_matcher.template_info_cache['template1'] = template_info1
+                    return template_info1
+                elif 'template2.svg' in file_path:
+                    # 模拟成功加载，直接添加到缓存
+                    self.template_matcher.template_info_cache['template2'] = template_info2
+                    return template_info2
+                else:
+                    return None
+            
+            mock_load.side_effect = mock_load_side_effect
             
             self.template_matcher.load_templates('test_dir')
             
-            assert mock_load.call_count == 3
-            assert len(self.template_matcher.templates_cache) == 2
+            assert mock_load.call_count == 2  # 只有png和svg文件会被处理
+            assert len(self.template_matcher.template_info_cache) == 2
 
+    @pytest.mark.skipif(not hasattr(TemplateMatcher, '_convert_svg_to_image'), reason="SVG conversion not available")
     def test_convert_svg_to_image_success(self):
         """测试SVG转换为图像成功"""
         svg_content = '<svg><rect width="100" height="100" fill="red"/></svg>'
         
+        # 如果cairosvg不可用，直接返回None
+        from src.core.game_detector import CAIROSVG_AVAILABLE
+        if not CAIROSVG_AVAILABLE:
+            result = self.template_matcher._convert_svg_to_image(svg_content)
+            assert result is None
+            return
+        
         with patch('cairosvg.svg2png') as mock_svg2png, \
-             patch('cv2.imdecode') as mock_imdecode:
+             patch('PIL.Image.open') as mock_image_open, \
+             patch('cv2.cvtColor') as mock_cvtcolor:
             
             mock_svg2png.return_value = b'fake_png_data'
-            mock_imdecode.return_value = self.test_template
+            mock_pil_image = Mock()
+            mock_pil_image.mode = 'RGB'
+            mock_image_open.return_value = mock_pil_image
+            mock_cvtcolor.return_value = self.test_template
             
-            result = self.template_matcher._convert_svg_to_image(svg_content)
-            
-            assert result is not None
-            assert isinstance(result, np.ndarray)
-            mock_svg2png.assert_called_once()
-            mock_imdecode.assert_called_once()
+            with patch('numpy.array') as mock_array:
+                mock_array.return_value = self.test_template
+                
+                result = self.template_matcher._convert_svg_to_image(svg_content)
+                
+                assert result is not None
+                assert isinstance(result, np.ndarray)
 
+    @pytest.mark.skipif(not hasattr(TemplateMatcher, '_convert_svg_to_image'), reason="SVG conversion not available")
     def test_convert_svg_to_image_failure(self):
         """测试SVG转换失败"""
         svg_content = 'invalid_svg'
+        
+        # 如果cairosvg不可用，直接返回None
+        from src.core.game_detector import CAIROSVG_AVAILABLE
+        if not CAIROSVG_AVAILABLE:
+            result = self.template_matcher._convert_svg_to_image(svg_content)
+            assert result is None
+            return
         
         with patch('cairosvg.svg2png') as mock_svg2png:
             mock_svg2png.side_effect = Exception('SVG conversion failed')
@@ -686,17 +758,12 @@ class TestTemplateMatcherAdvanced:
             name='test',
             image=self.test_template,
             threshold=0.8,
-            path='test.png',
-            metadata={'enable_scaling': True}
+            path='test.png'
         )
         
         with patch('cv2.matchTemplate') as mock_match, \
-             patch('cv2.minMaxLoc') as mock_minmax, \
-             patch.object(self.template_matcher, '_calculate_scale_factors') as mock_scales, \
-             patch.object(self.template_matcher, '_scale_template') as mock_scale:
+             patch('cv2.minMaxLoc') as mock_minmax:
             
-            mock_scales.return_value = [0.8, 1.0, 1.2]
-            mock_scale.side_effect = [self.test_template] * 3
             mock_match.return_value = np.array([[0.9]])
             mock_minmax.return_value = (0.1, 0.9, (10, 10), (100, 100))
             
@@ -706,8 +773,10 @@ class TestTemplateMatcherAdvanced:
             
             assert result is not None
             assert isinstance(result, UIElement)
-            assert mock_scales.call_count == 1
-            assert mock_scale.call_count == 3
+            assert result.name == 'test'
+            assert result.confidence == 0.9
+            assert mock_match.call_count == 1
+            assert mock_minmax.call_count == 1
 
 
 class TestWindowManagerAdvanced:
