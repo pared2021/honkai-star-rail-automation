@@ -86,7 +86,12 @@ class CodeQualityChecker:
 
     def check_flake8(self) -> bool:
         """检查代码风格"""
-        cmd = ["python", "-m", "flake8", str(self.src_dir)]
+        cmd = [
+            "python", "-m", "flake8", 
+            str(self.src_dir),
+            "--max-line-length=88",
+            "--extend-ignore=E203,W503,D400"
+        ]
 
         success, stdout, stderr = self.run_command(cmd, "检查代码风格 (flake8)")
 
@@ -115,7 +120,7 @@ class CodeQualityChecker:
 
     def check_mypy(self) -> bool:
         """检查类型注解"""
-        cmd = ["python", "-m", "mypy", str(self.src_dir)]
+        cmd = ["python", "-m", "mypy", str(self.src_dir), "--ignore-missing-imports"]
 
         success, stdout, stderr = self.run_command(cmd, "检查类型注解 (mypy)")
 

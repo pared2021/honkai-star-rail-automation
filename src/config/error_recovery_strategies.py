@@ -1,14 +1,14 @@
-"""错误恢复策略配置模块。
+"""错误恢复策略配置模块.
 
 定义错误恢复的策略配置。
 """
 
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 
 class RecoveryStrategy(Enum):
-    """恢复策略枚举。"""
+    """恢复策略枚举."""
 
     RETRY = "retry"
     FALLBACK = "fallback"
@@ -17,10 +17,10 @@ class RecoveryStrategy(Enum):
 
 
 class ErrorRecoveryStrategies:
-    """错误恢复策略配置类。"""
+    """错误恢复策略配置类."""
 
     def __init__(self):
-        """初始化错误恢复策略。"""
+        """初始化错误恢复策略."""
         self._strategies: Dict[str, RecoveryStrategy] = {
             "connection_error": RecoveryStrategy.RETRY,
             "timeout_error": RecoveryStrategy.RETRY,
@@ -36,7 +36,7 @@ class ErrorRecoveryStrategies:
         }
 
     def get_strategy(self, error_type: str) -> RecoveryStrategy:
-        """获取指定错误类型的恢复策略。
+        """获取指定错误类型的恢复策略.
 
         Args:
             error_type: 错误类型
@@ -47,7 +47,7 @@ class ErrorRecoveryStrategies:
         return self._strategies.get(error_type, self._strategies["default"])
 
     def get_retry_config(self, error_type: str) -> Dict[str, Any]:
-        """获取重试配置。
+        """获取重试配置.
 
         Args:
             error_type: 错误类型
@@ -58,7 +58,7 @@ class ErrorRecoveryStrategies:
         return self._retry_configs.get(error_type, self._retry_configs["default"])
 
     def set_strategy(self, error_type: str, strategy: RecoveryStrategy) -> None:
-        """设置错误恢复策略。
+        """设置错误恢复策略.
 
         Args:
             error_type: 错误类型
@@ -67,7 +67,7 @@ class ErrorRecoveryStrategies:
         self._strategies[error_type] = strategy
 
     def set_retry_config(self, error_type: str, max_retries: int, delay: float) -> None:
-        """设置重试配置。
+        """设置重试配置.
 
         Args:
             error_type: 错误类型

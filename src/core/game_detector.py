@@ -1,4 +1,4 @@
-"""游戏检测模块。
+"""游戏检测模块.
 
 提供游戏窗口检测、UI元素识别等功能。
 """
@@ -7,18 +7,10 @@ from dataclasses import dataclass
 from enum import Enum
 import os
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-if TYPE_CHECKING:
-    import cv2
-    import numpy as np
-else:
-    try:
-        import cv2
-        import numpy as np
-    except ImportError:
-        cv2 = None  # type: ignore
-        np = None  # type: ignore
+import cv2
+import numpy as np
 
 try:
     import win32con
@@ -31,7 +23,7 @@ from src.config.config_manager import ConfigManager
 
 
 class SceneType(Enum):
-    """场景类型枚举。"""
+    """场景类型枚举."""
 
     UNKNOWN = "unknown"
     MAIN_MENU = "main_menu"
@@ -42,7 +34,7 @@ class SceneType(Enum):
 
 @dataclass
 class GameWindow:
-    """游戏窗口信息。"""
+    """游戏窗口信息."""
 
     hwnd: int
     title: str
@@ -54,7 +46,7 @@ class GameWindow:
 
 @dataclass
 class UIElement:
-    """UI元素信息。"""
+    """UI元素信息."""
 
     name: str
     position: Tuple[int, int]
@@ -64,29 +56,29 @@ class UIElement:
 
     @property
     def center(self) -> Tuple[int, int]:
-        """获取中心点坐标。"""
+        """获取中心点坐标."""
         x, y = self.position
         w, h = self.size
         return (x + w // 2, y + h // 2)
 
     @property
     def width(self) -> int:
-        """获取宽度。"""
+        """获取宽度."""
         return self.size[0]
 
     @property
     def height(self) -> int:
-        """获取高度。"""
+        """获取高度."""
         return self.size[1]
 
     @property
     def top_left(self) -> Tuple[int, int]:
-        """获取左上角坐标。"""
+        """获取左上角坐标."""
         return self.position
 
     @property
     def bottom_right(self) -> Tuple[int, int]:
-        """获取右下角坐标。"""
+        """获取右下角坐标."""
         x, y = self.position
         w, h = self.size
         return (x + w, y + h)
@@ -94,7 +86,7 @@ class UIElement:
 
 @dataclass
 class TemplateInfo:
-    """模板信息。"""
+    """模板信息."""
 
     name: str
     image: Any  # numpy array
@@ -102,11 +94,11 @@ class TemplateInfo:
     path: str
 
     def __hash__(self) -> int:
-        """计算哈希值。"""
+        """计算哈希值."""
         return hash((self.name, self.threshold, self.path))
 
     def __eq__(self, other) -> bool:
-        """判断相等性。"""
+        """判断相等性."""
         if not isinstance(other, TemplateInfo):
             return False
         return (
@@ -117,16 +109,16 @@ class TemplateInfo:
 
 
 class TemplateMatcher:
-    """模板匹配器。"""
+    """模板匹配器."""
 
     def __init__(self):
-        """初始化模板匹配器。"""
+        """初始化模板匹配器."""
         self.template_info_cache: Dict[str, TemplateInfo] = {}
 
     def load_template(
         self, template_path: str, threshold: float = 0.8
     ) -> Optional[TemplateInfo]:
-        """加载模板图像。
+        """加载模板图像.
 
         Args:
             template_path: 模板图像路径
@@ -154,7 +146,7 @@ class TemplateMatcher:
         return template_info
 
     def load_templates(self, templates_dir: str) -> None:
-        """批量加载模板。
+        """批量加载模板.
 
         Args:
             templates_dir: 模板目录路径
@@ -170,7 +162,7 @@ class TemplateMatcher:
     def match_template(
         self, screenshot: Any, template_name: str
     ) -> Optional[UIElement]:
-        """匹配模板。
+        """匹配模板.
 
         Args:
             screenshot: 截图图像
@@ -209,7 +201,7 @@ class TemplateMatcher:
     def _calculate_scale_factors(
         self, screenshot_size: tuple, template_size: tuple
     ) -> List[float]:
-        """计算缩放因子。
+        """计算缩放因子.
 
         Args:
             screenshot_size: 截图尺寸 (height, width)
@@ -221,10 +213,6 @@ class TemplateMatcher:
         # 基础缩放因子
         factors = [1.0]  # 原始尺寸
 
-        # 根据截图和模板的尺寸比例计算其他缩放因子
-        height_ratio = screenshot_size[0] / template_size[0]
-        width_ratio = screenshot_size[1] / template_size[1]
-
         # 添加一些常用的缩放因子
         for scale in [0.5, 0.75, 1.25, 1.5, 2.0]:
             if 0.1 <= scale <= 5.0:  # 合理的缩放范围
@@ -233,7 +221,7 @@ class TemplateMatcher:
         return sorted(set(factors))  # 去重并排序
 
     def _scale_template(self, template: Any, scale_factor: float) -> Optional[Any]:
-        """缩放模板图像。
+        """缩放模板图像.
 
         Args:
             template: 模板图像
@@ -261,7 +249,7 @@ class TemplateMatcher:
     def match_multiple_templates(
         self, screenshot: Any, template_names: List[str]
     ) -> List[UIElement]:
-        """匹配多个模板。
+        """匹配多个模板.
 
         Args:
             screenshot: 截图图像
@@ -279,14 +267,14 @@ class TemplateMatcher:
 
 
 class WindowManager:
-    """窗口管理器。"""
+    """窗口管理器."""
 
     def __init__(self):
-        """初始化窗口管理器。"""
+        """初始化窗口管理器."""
         self.current_window: Optional[GameWindow] = None
 
     def find_game_window(self, game_titles: List[str]) -> Optional[GameWindow]:
-        """查找游戏窗口。
+        """查找游戏窗口.
 
         Args:
             game_titles: 游戏标题列表
@@ -298,7 +286,7 @@ class WindowManager:
         return windows[0] if windows else None
 
     def find_game_windows(self, game_titles: List[str]) -> List[GameWindow]:
-        """查找游戏窗口列表。
+        """查找游戏窗口列表.
 
         Args:
             game_titles: 游戏标题列表
@@ -341,7 +329,7 @@ class WindowManager:
         return windows
 
     def capture_window(self, window: GameWindow) -> Optional[Any]:
-        """截取窗口图像。
+        """截取窗口图像.
 
         Args:
             window: 游戏窗口
@@ -364,7 +352,7 @@ class WindowManager:
             return None
 
     def bring_window_to_front(self, window: GameWindow) -> bool:
-        """将窗口置于前台。
+        """将窗口置于前台.
 
         Args:
             window: 游戏窗口
@@ -386,10 +374,10 @@ class WindowManager:
 
 
 class GameDetector:
-    """游戏检测器。"""
+    """游戏检测器."""
 
     def __init__(self, config_manager: Optional[ConfigManager] = None):
-        """初始化游戏检测器。
+        """初始化游戏检测器.
 
         Args:
             config_manager: 配置管理器
@@ -405,7 +393,7 @@ class GameDetector:
         self._load_game_config()
 
     def _load_game_config(self) -> None:
-        """加载游戏配置。"""
+        """加载游戏配置."""
         # 从配置中获取游戏标题等信息
         self.game_titles = ["Test Game", "Game Window"]
 
@@ -415,7 +403,7 @@ class GameDetector:
             self.template_matcher.load_templates(templates_dir)
 
     def is_game_running(self) -> bool:
-        """检查游戏是否正在运行。
+        """检查游戏是否正在运行.
 
         Returns:
             bool: 游戏是否正在运行
@@ -429,7 +417,7 @@ class GameDetector:
         return False
 
     def detect_ui_elements(self, element_names: List[str]) -> List[UIElement]:
-        """检测UI元素。
+        """检测UI元素.
 
         Args:
             element_names: 要检测的元素名称列表
@@ -457,7 +445,7 @@ class GameDetector:
         return elements
 
     def detect_scene(self) -> SceneType:
-        """检测当前场景。
+        """检测当前场景.
 
         Returns:
             SceneType: 当前场景类型
@@ -481,7 +469,7 @@ class GameDetector:
         return self.current_scene
 
     def get_current_scene(self) -> SceneType:
-        """获取当前场景。
+        """获取当前场景.
 
         Returns:
             SceneType: 当前场景类型
@@ -507,7 +495,7 @@ class GameDetector:
 
     def capture_screenshot(self) -> Optional[Any]:
         """
-        截取游戏窗口截图
+        截取游戏窗口截图.
 
         Returns:
             Optional[np.ndarray]: 截图数组，失败时返回None
@@ -532,7 +520,7 @@ class GameDetector:
         save_path: Optional[str] = None,
     ) -> Optional[Any]:
         """
-        可视化检测结果
+        可视化检测结果.
 
         Args:
             screenshot: 原始截图
@@ -581,7 +569,7 @@ class GameDetector:
             return None
 
     def detect_game_window(self) -> Optional[GameWindow]:
-        """检测游戏窗口。
+        """检测游戏窗口.
 
         Returns:
             Optional[GameWindow]: 检测到的游戏窗口，未找到返回None
@@ -596,7 +584,7 @@ class GameDetector:
             return None
 
     def get_game_status(self) -> dict:
-        """获取游戏状态信息。
+        """获取游戏状态信息.
 
         Returns:
             dict: 游戏状态信息
@@ -617,7 +605,7 @@ class GameDetector:
             }
 
     def bring_game_to_front(self) -> bool:
-        """将游戏窗口置于前台。
+        """将游戏窗口置于前台.
 
         Returns:
             bool: 成功返回True，失败返回False
@@ -633,7 +621,7 @@ class GameDetector:
             return False
 
     def detect_current_scene(self) -> SceneType:
-        """检测当前场景。
+        """检测当前场景.
 
         Returns:
             SceneType: 当前场景类型
@@ -674,7 +662,8 @@ class GameDetector:
     def detect_and_visualize_scene(
         self, save_path: Optional[str] = None
     ) -> Optional[Any]:
-        """检测并可视化场景。
+        """
+        检测并可视化场景.
 
         Args:
             save_path: 保存路径，可选
@@ -688,7 +677,7 @@ class GameDetector:
                 return None
 
             # 检测场景
-            scene = self.detect_current_scene()
+            self.detect_current_scene()
 
             # 获取所有检测到的元素
             scene_templates = ["main_menu", "battle_ui", "loading_screen"]
@@ -703,7 +692,7 @@ class GameDetector:
             return None
 
     def find_ui_element(self, element_name: str) -> Optional[UIElement]:
-        """查找UI元素。
+        """查找UI元素.
 
         Args:
             element_name: 元素名称
@@ -719,7 +708,7 @@ class GameDetector:
             return None
 
     def find_multiple_ui_elements(self, element_names: List[str]) -> List[UIElement]:
-        """查找多个UI元素。
+        """查找多个UI元素.
 
         Args:
             element_names: 元素名称列表
@@ -736,7 +725,7 @@ class GameDetector:
     def wait_for_ui_element(
         self, element_name: str, timeout: float = 10.0
     ) -> Optional[UIElement]:
-        """等待UI元素出现。
+        """等待UI元素出现.
 
         Args:
             element_name: 元素名称
@@ -759,7 +748,7 @@ class GameDetector:
     def wait_for_template(
         self, template_name: str, timeout: float = 10.0
     ) -> Optional[UIElement]:
-        """等待模板出现。
+        """等待模板出现.
 
         Args:
             template_name: 模板名称
@@ -771,7 +760,7 @@ class GameDetector:
         return self.wait_for_ui_element(template_name, timeout)
 
     def _find_window_by_process(self, process_name: str) -> Optional[GameWindow]:
-        """通过进程名查找窗口。
+        """通过进程名查找窗口.
 
         Args:
             process_name: 进程名称

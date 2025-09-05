@@ -1,17 +1,15 @@
-"""自动化控制器模块。
+"""自动化控制器模块.
 
-提供自动化任务的控制和协调功能。
+提供自动化任务的控制和协调功能.
 """
 
 from enum import Enum
 import logging
 from typing import Any, Dict, List, Optional
 
-import asyncio
-
 
 class AutomationStatus(Enum):
-    """自动化状态枚举。"""
+    """自动化状态枚举."""
 
     IDLE = "idle"
     RUNNING = "running"
@@ -21,10 +19,10 @@ class AutomationStatus(Enum):
 
 
 class AutomationController:
-    """自动化控制器类，提供自动化任务的控制和协调功能。"""
+    """自动化控制器类，提供自动化任务的控制和协调功能."""
 
     def __init__(self, config: Optional[Dict[str, Any]] = None):
-        """初始化自动化控制器。
+        """初始化自动化控制器.
 
         Args:
             config: 配置字典，可选
@@ -37,7 +35,7 @@ class AutomationController:
 
     @property
     def status(self) -> AutomationStatus:
-        """获取当前状态。
+        """获取当前状态.
 
         Returns:
             当前自动化状态
@@ -46,7 +44,7 @@ class AutomationController:
 
     @property
     def is_running(self) -> bool:
-        """检查是否正在运行。
+        """检查是否正在运行.
 
         Returns:
             是否正在运行
@@ -54,7 +52,7 @@ class AutomationController:
         return self._running
 
     def start(self) -> bool:
-        """启动自动化控制器。
+        """启动自动化控制器.
 
         Returns:
             启动是否成功
@@ -74,7 +72,7 @@ class AutomationController:
             return False
 
     def stop(self) -> bool:
-        """停止自动化控制器。
+        """停止自动化控制器.
 
         Returns:
             停止是否成功
@@ -94,7 +92,7 @@ class AutomationController:
             return False
 
     def execute(self, task: Any) -> bool:
-        """执行单个任务。
+        """执行单个任务.
 
         Args:
             task: 要执行的任务
@@ -115,7 +113,7 @@ class AutomationController:
             return False
 
     def run(self, tasks: Optional[List[Any]] = None) -> bool:
-        """运行任务列表。
+        """运行任务列表.
 
         Args:
             tasks: 任务列表，可选
@@ -144,7 +142,7 @@ class AutomationController:
             return False
 
     def add_task(self, task: Any) -> None:
-        """添加任务。
+        """添加任务.
 
         Args:
             task: 要添加的任务
@@ -153,12 +151,12 @@ class AutomationController:
         self._logger.info(f"已添加任务: {task}")
 
     def clear_tasks(self) -> None:
-        """清空任务列表。"""
+        """清空任务列表."""
         self._tasks.clear()
         self._logger.info("已清空任务列表")
 
     def get_tasks(self) -> List[Any]:
-        """获取任务列表。
+        """获取任务列表.
 
         Returns:
             当前任务列表

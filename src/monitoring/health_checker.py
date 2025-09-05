@@ -1,4 +1,4 @@
-"""健康检查器模块。
+"""健康检查器模块.
 
 提供系统健康状态检查功能。
 """
@@ -8,13 +8,11 @@ from enum import Enum
 import logging
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
-
-import asyncio
+from typing import Any, Callable, Dict, Optional, Union
 
 
 class HealthStatus(Enum):
-    """健康状态枚举。"""
+    """健康状态枚举."""
 
     HEALTHY = "healthy"
     DEGRADED = "degraded"
@@ -24,7 +22,7 @@ class HealthStatus(Enum):
 
 @dataclass
 class HealthCheckResult:
-    """健康检查结果数据类。"""
+    """健康检查结果数据类."""
 
     component: str
     status: HealthStatus
@@ -35,13 +33,13 @@ class HealthCheckResult:
 
 
 class HealthChecker:
-    """健康检查器。
+    """健康检查器.
 
     负责检查系统各组件的健康状态。
     """
 
     def __init__(self, check_interval: float = 30.0):
-        """初始化健康检查器。
+        """初始化健康检查器.
 
         Args:
             check_interval: 检查间隔（秒）
@@ -56,7 +54,7 @@ class HealthChecker:
         self._overall_status = HealthStatus.UNKNOWN
 
     def add_check(self, name: str, check_func: Callable[[], HealthCheckResult]) -> None:
-        """添加健康检查。
+        """添加健康检查.
 
         Args:
             name: 检查名称
@@ -68,7 +66,7 @@ class HealthChecker:
         self._logger.info(f"Health check added: {name}")
 
     def remove_check(self, name: str) -> bool:
-        """移除健康检查。
+        """移除健康检查.
 
         Args:
             name: 检查名称
@@ -89,7 +87,7 @@ class HealthChecker:
     def check_health(
         self, component: Optional[str] = None
     ) -> Union[HealthCheckResult, Dict[str, HealthCheckResult]]:
-        """执行健康检查。
+        """执行健康检查.
 
         Args:
             component: 指定组件名称，None表示检查所有组件
@@ -153,7 +151,7 @@ class HealthChecker:
     def get_status(
         self, component: Optional[str] = None
     ) -> Union[HealthStatus, Dict[str, HealthStatus]]:
-        """获取健康状态。
+        """获取健康状态.
 
         Args:
             component: 指定组件名称，None表示获取所有组件状态
@@ -170,7 +168,7 @@ class HealthChecker:
                 return {name: result.status for name, result in self._results.items()}
 
     def get_overall_status(self) -> HealthStatus:
-        """获取整体健康状态。
+        """获取整体健康状态.
 
         Returns:
             整体健康状态
@@ -181,7 +179,7 @@ class HealthChecker:
     def get_results(
         self, component: Optional[str] = None
     ) -> Union[Optional[HealthCheckResult], Dict[str, HealthCheckResult]]:
-        """获取健康检查结果。
+        """获取健康检查结果.
 
         Args:
             component: 指定组件名称，None表示获取所有结果
@@ -196,15 +194,15 @@ class HealthChecker:
                 return self._results.copy()
 
     def start(self) -> None:
-        """开始监控。"""
+        """开始监控."""
         self.start_monitoring()
 
     def stop(self) -> None:
-        """停止监控。"""
+        """停止监控."""
         self.stop_monitoring()
 
     def start_monitoring(self) -> None:
-        """开始监控。"""
+        """开始监控."""
         if self._running:
             return
 
@@ -215,7 +213,7 @@ class HealthChecker:
         self._logger.info("Health monitoring started")
 
     def stop_monitoring(self) -> None:
-        """停止监控。"""
+        """停止监控."""
         if not self._running:
             return
 
@@ -227,7 +225,7 @@ class HealthChecker:
         self._logger.info("Health monitoring stopped")
 
     def _monitoring_loop(self) -> None:
-        """监控循环。"""
+        """监控循环."""
         while self._running:
             try:
                 self.check_health()
@@ -237,7 +235,7 @@ class HealthChecker:
                 time.sleep(1.0)  # 短暂休息后继续
 
     def _update_overall_status(self, results: Dict[str, HealthCheckResult]) -> None:
-        """更新整体状态。
+        """更新整体状态.
 
         Args:
             results: 检查结果字典
@@ -262,8 +260,7 @@ class HealthChecker:
             self._overall_status = HealthStatus.UNKNOWN
 
     def create_basic_checks(self) -> None:
-        """创建基本的健康检查。"""
-
+        """创建基本的健康检查."""
         # CPU 使用率检查
         def cpu_check() -> HealthCheckResult:
             try:

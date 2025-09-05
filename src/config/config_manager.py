@@ -1,19 +1,18 @@
-"""配置管理器模块。
+"""配置管理器模块.
 
 提供配置的统一管理和访问接口。
 """
 
 import json
-import os
 from pathlib import Path
 from typing import Any, Dict, Optional
 
 
 class ConfigManager:
-    """配置管理器类，提供配置的统一管理和访问接口。"""
+    """配置管理器类，提供配置的统一管理和访问接口."""
 
     def __init__(self, config_file: Optional[str] = None):
-        """初始化配置管理器。
+        """初始化配置管理器.
 
         Args:
             config_file: 配置文件路径，默认为None
@@ -23,7 +22,7 @@ class ConfigManager:
         self._load_config()
 
     def _load_config(self) -> None:
-        """加载配置文件。"""
+        """加载配置文件."""
         config_path = Path(self._config_file)
         if config_path.exists():
             try:
@@ -35,7 +34,7 @@ class ConfigManager:
             self._config_data = {}
 
     def get(self, key: str, default: Any = None) -> Any:
-        """获取配置值。
+        """获取配置值.
 
         Args:
             key: 配置键
@@ -47,7 +46,7 @@ class ConfigManager:
         return self._config_data.get(key, default)
 
     def set(self, key: str, value: Any) -> None:
-        """设置配置值。
+        """设置配置值.
 
         Args:
             key: 配置键
@@ -56,7 +55,7 @@ class ConfigManager:
         self._config_data[key] = value
 
     def save(self) -> None:
-        """保存配置到文件。"""
+        """保存配置到文件."""
         config_path = Path(self._config_file)
         config_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -67,11 +66,11 @@ class ConfigManager:
             pass
 
     def reload(self) -> None:
-        """重新加载配置文件。"""
+        """重新加载配置文件."""
         self._load_config()
 
     def get_all(self) -> Dict[str, Any]:
-        """获取所有配置。
+        """获取所有配置.
 
         Returns:
             所有配置的字典

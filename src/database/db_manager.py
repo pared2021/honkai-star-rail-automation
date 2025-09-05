@@ -1,4 +1,4 @@
-"""数据库管理器模块。.
+"""数据库管理器模块..
 
 提供数据库的管理和操作功能。
 """
@@ -9,13 +9,13 @@ from typing import Any, Dict, List, Optional
 
 
 class DatabaseManager:
-    """数据库管理器类。.
+    """数据库管理器类..
 
     提供数据库连接管理、事务处理和基本的CRUD操作。
     """
 
     def __init__(self, db_path: Optional[str] = None):
-        """初始化数据库管理器。.
+        """初始化数据库管理器..
 
         Args:
             db_path: 数据库文件路径，如果为None则使用内存数据库
@@ -26,7 +26,7 @@ class DatabaseManager:
         self._initialized = False
 
     def get_connection(self) -> sqlite3.Connection:
-        """获取数据库连接。.
+        """获取数据库连接..
 
         Returns:
             数据库连接对象
@@ -41,7 +41,7 @@ class DatabaseManager:
     def execute_query(
         self, query: str, params: Optional[tuple] = None
     ) -> List[Dict[str, Any]]:
-        """执行查询语句。.
+        """执行查询语句..
 
         Args:
             query: SQL查询语句
@@ -65,7 +65,7 @@ class DatabaseManager:
             cursor.close()
 
     def execute_update(self, query: str, params: Optional[tuple] = None) -> int:
-        """执行更新语句。.
+        """执行更新语句..
 
         Args:
             query: SQL更新语句
@@ -92,28 +92,28 @@ class DatabaseManager:
             cursor.close()
 
     def begin_transaction(self):
-        """开始事务。."""
+        """开始事务.."""
         conn = self.get_connection()
         conn.execute("BEGIN")
 
     def commit_transaction(self):
-        """提交事务。."""
+        """提交事务.."""
         conn = self.get_connection()
         conn.commit()
 
     def rollback_transaction(self):
-        """回滚事务。."""
+        """回滚事务.."""
         conn = self.get_connection()
         conn.rollback()
 
     def close(self):
-        """关闭数据库连接。."""
+        """关闭数据库连接.."""
         if hasattr(self._local, "connection"):
             self._local.connection.close()
             delattr(self._local, "connection")
 
     def initialize_schema(self):
-        """初始化数据库架构。."""
+        """初始化数据库架构.."""
         if self._initialized:
             return
 
@@ -153,12 +153,12 @@ class DatabaseManager:
             self._initialized = True
 
     def __enter__(self):
-        """上下文管理器入口。."""
+        """上下文管理器入口.."""
         self.begin_transaction()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """上下文管理器出口。."""
+        """上下文管理器出口.."""
         if exc_type is None:
             self.commit_transaction()
         else:

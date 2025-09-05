@@ -19,7 +19,7 @@ import asyncio
 
 
 class AdapterStatus(Enum):
-    """适配器状态枚举。."""
+    """适配器状态枚举.."""
 
     STOPPED = "stopped"
     STARTING = "starting"
@@ -29,7 +29,7 @@ class AdapterStatus(Enum):
 
 
 class CallbackType(Enum):
-    """回调类型枚举。."""
+    """回调类型枚举.."""
 
     SUCCESS = "success"
     ERROR = "error"
@@ -38,20 +38,20 @@ class CallbackType(Enum):
 
 
 class SyncAdapterError(Exception):
-    """同步适配器异常。."""
+    """同步适配器异常.."""
 
     pass
 
 
 class AsyncTaskError(Exception):
-    """异步任务异常。."""
+    """异步任务异常.."""
 
     pass
 
 
 @dataclass
 class CallbackData:
-    """回调数据类。."""
+    """回调数据类.."""
 
     task_id: str
     callback_type: CallbackType
@@ -64,7 +64,7 @@ class CallbackData:
 
 @dataclass
 class AsyncResult:
-    """异步结果数据类。."""
+    """异步结果数据类.."""
 
     task_id: str
     is_success: bool = False
@@ -79,7 +79,7 @@ class AsyncResult:
 
 @dataclass
 class CallbackInfo:
-    """回调信息数据类。."""
+    """回调信息数据类.."""
 
     callback_id: str
     callback_type: CallbackType
@@ -91,13 +91,13 @@ class CallbackInfo:
 
 
 class AsyncCallback(ABC):
-    """异步回调抽象基类。."""
+    """异步回调抽象基类.."""
 
     @abstractmethod
     async def on_success(
         self, result: Any, metadata: Optional[Dict[str, Any]] = None
     ) -> None:
-        """成功回调。.
+        """成功回调..
 
         Args:
             result: 任务结果
@@ -109,7 +109,7 @@ class AsyncCallback(ABC):
     async def on_error(
         self, error: Exception, metadata: Optional[Dict[str, Any]] = None
     ) -> None:
-        """错误回调。.
+        """错误回调..
 
         Args:
             error: 错误信息
@@ -124,7 +124,7 @@ class AsyncCallback(ABC):
         message: str = "",
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """进度回调。.
+        """进度回调..
 
         Args:
             progress: 进度值(0.0-1.0)
@@ -135,13 +135,13 @@ class AsyncCallback(ABC):
 
 
 class SyncCallback(ABC):
-    """同步回调抽象基类。."""
+    """同步回调抽象基类.."""
 
     @abstractmethod
     def on_success(
         self, result: Any, metadata: Optional[Dict[str, Any]] = None
     ) -> None:
-        """成功回调。.
+        """成功回调..
 
         Args:
             result: 任务结果
@@ -153,7 +153,7 @@ class SyncCallback(ABC):
     def on_error(
         self, error: Exception, metadata: Optional[Dict[str, Any]] = None
     ) -> None:
-        """错误回调。.
+        """错误回调..
 
         Args:
             error: 错误信息
@@ -168,7 +168,7 @@ class SyncCallback(ABC):
         message: str = "",
         metadata: Optional[Dict[str, Any]] = None,
     ) -> None:
-        """进度回调。.
+        """进度回调..
 
         Args:
             progress: 进度值(0.0-1.0)
@@ -179,13 +179,13 @@ class SyncCallback(ABC):
 
 
 class SyncAdapter:
-    """同步适配器主类。.
+    """同步适配器主类..
 
     提供异步任务管理、回调处理、线程同步等功能。
     """
 
     def __init__(self, max_workers: int = 4, max_queue_size: int = 1000):
-        """初始化同步适配器。.
+        """初始化同步适配器..
 
         Args:
             max_workers: 最大工作线程数
@@ -219,7 +219,7 @@ class SyncAdapter:
         self._lock = threading.RLock()
 
     def get_status(self) -> AdapterStatus:
-        """获取适配器状态。.
+        """获取适配器状态..
 
         Returns:
             当前状态
@@ -227,7 +227,7 @@ class SyncAdapter:
         return self._status
 
     def start(self) -> bool:
-        """启动适配器。.
+        """启动适配器..
 
         Returns:
             是否启动成功
@@ -248,7 +248,7 @@ class SyncAdapter:
                 raise SyncAdapterError(f"Failed to start adapter: {e}")
 
     def stop(self) -> bool:
-        """停止适配器。.
+        """停止适配器..
 
         Returns:
             是否停止成功
@@ -269,7 +269,7 @@ class SyncAdapter:
                 raise SyncAdapterError(f"Failed to stop adapter: {e}")
 
     def _start_event_loop(self) -> None:
-        """启动事件循环。."""
+        """启动事件循环.."""
         import threading
 
         # 使用事件来同步线程启动
@@ -296,7 +296,7 @@ class SyncAdapter:
             raise SyncAdapterError("Failed to start event loop")
 
     def _stop_event_loop(self, timeout: float = 5.0) -> None:
-        """停止事件循环。.
+        """停止事件循环..
 
         Args:
             timeout: 超时时间
@@ -311,7 +311,7 @@ class SyncAdapter:
         self._loop_thread = None
 
     def _start_callback_thread(self) -> None:
-        """启动回调处理线程。."""
+        """启动回调处理线程.."""
         self._stop_callback_event.clear()
         self._callback_thread = threading.Thread(
             target=self._process_callbacks, daemon=True
@@ -319,7 +319,7 @@ class SyncAdapter:
         self._callback_thread.start()
 
     def _stop_callback_thread(self, timeout: float = 5.0) -> None:
-        """停止回调处理线程。.
+        """停止回调处理线程..
 
         Args:
             timeout: 超时时间
@@ -330,7 +330,7 @@ class SyncAdapter:
         self._callback_thread = None
 
     def _process_callbacks(self) -> None:
-        """处理回调队列。."""
+        """处理回调队列.."""
         while not self._stop_callback_event.is_set():
             try:
                 callback_data = self._callback_queue.get(timeout=0.1)
@@ -342,7 +342,7 @@ class SyncAdapter:
                 pass
 
     def _execute_callback(self, callback_data: CallbackData) -> None:
-        """执行回调。.
+        """执行回调..
 
         Args:
             callback_data: 回调数据
@@ -381,7 +381,7 @@ class SyncAdapter:
         callback_type: CallbackType,
         task_id: Optional[str] = None,
     ) -> str:
-        """注册回调函数。.
+        """注册回调函数..
 
         Args:
             callback_func: 回调函数
@@ -406,7 +406,7 @@ class SyncAdapter:
         return callback_id
 
     def unregister_callback(self, callback_id: str) -> bool:
-        """注销回调函数。.
+        """注销回调函数..
 
         Args:
             callback_id: 回调ID
@@ -421,7 +421,7 @@ class SyncAdapter:
             return False
 
     def submit_async_task(self, coro: Callable, *args, **kwargs) -> str:
-        """提交异步任务。.
+        """提交异步任务..
 
         Args:
             coro: 协程函数或协程对象
@@ -514,7 +514,7 @@ class SyncAdapter:
         return task_id
 
     def run_async(self, coro, *args, **kwargs) -> str:
-        """运行异步任务（submit_async_task的别名）。.
+        """运行异步任务（submit_async_task的别名）..
 
         Args:
             coro: 协程函数或协程对象
@@ -527,7 +527,7 @@ class SyncAdapter:
         return self.submit_async_task(coro, *args, **kwargs)
 
     def wait_for_result(self, task_id: str, timeout: Optional[float] = None) -> Any:
-        """等待任务结果。.
+        """等待任务结果..
 
         Args:
             task_id: 任务ID
@@ -555,7 +555,7 @@ class SyncAdapter:
             raise e
 
     def get_stats(self) -> Dict[str, Any]:
-        """获取统计信息。.
+        """获取统计信息..
 
         Returns:
             统计信息字典
@@ -568,7 +568,7 @@ class SyncAdapter:
             return stats
 
     def _emit_status_change(self) -> None:
-        """发出状态变更信号。."""
+        """发出状态变更信号.."""
         callback_data = CallbackData(
             task_id="", callback_type=CallbackType.STATUS_CHANGE, data=self._status
         )

@@ -1,19 +1,17 @@
-"""任务数据模型模块。.
+"""任务数据模型模块..
 
 定义任务相关的数据模型和实体类。
 """
 
-from datetime import datetime
 from enum import Enum
 import json
-from typing import Any, Dict, List, Optional
-import uuid
+from typing import Any, Dict, Optional
 
 from pydantic import BaseModel, ConfigDict, Field
 
 
 class TaskType(Enum):
-    """任务类型枚举"""
+    """任务类型枚举."""
 
     DAILY_MISSION = "daily_mission"  # 日常任务
     WEEKLY_MISSION = "weekly_mission"  # 周常任务
@@ -24,7 +22,7 @@ class TaskType(Enum):
 
 
 class TaskStatus(Enum):
-    """任务状态枚举"""
+    """任务状态枚举."""
 
     PENDING = "pending"  # 等待中
     RUNNING = "running"  # 运行中
@@ -35,7 +33,7 @@ class TaskStatus(Enum):
 
 
 class TaskConfig(BaseModel):
-    """任务配置模型"""
+    """任务配置模型."""
 
     model_config = ConfigDict(use_enum_values=True)
 
@@ -53,24 +51,24 @@ class TaskConfig(BaseModel):
     )
 
     def to_dict(self) -> Dict[str, Any]:
-        """转换为字典"""
+        """转换为字典."""
         data = self.model_dump()
         data["task_type"] = self.task_type.value
         return data
 
     @classmethod
     def from_dict(cls, data: Dict[str, Any]) -> "TaskConfig":
-        """从字典创建"""
+        """从字典创建."""
         data = data.copy()
         if "task_type" in data:
             data["task_type"] = TaskType(data["task_type"])
         return cls(**data)
 
     def to_json(self) -> str:
-        """转换为JSON"""
+        """转换为JSON."""
         return json.dumps(self.to_dict(), ensure_ascii=False)
 
     @classmethod
     def from_json(cls, json_str: str) -> "TaskConfig":
-        """从JSON创建"""
+        """从JSON创建."""
         return cls.from_dict(json.loads(json_str))

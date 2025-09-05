@@ -1,9 +1,9 @@
-"""指标收集器模块。
+"""指标收集器模块.
 
 提供系统指标的收集和管理功能。
 """
 
-from collections import defaultdict, deque
+from collections import defaultdict
 from dataclasses import dataclass, field
 from enum import Enum
 import logging
@@ -13,7 +13,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 
 
 class MetricType(Enum):
-    """指标类型枚举。"""
+    """指标类型枚举."""
 
     COUNTER = "counter"
     GAUGE = "gauge"
@@ -24,7 +24,7 @@ class MetricType(Enum):
 
 @dataclass
 class Metric:
-    """指标数据类。"""
+    """指标数据类."""
 
     name: str
     value: Union[int, float]
@@ -36,13 +36,13 @@ class Metric:
 
 
 class MetricsCollector:
-    """指标收集器。
+    """指标收集器.
 
     负责收集、存储和管理系统指标。
     """
 
     def __init__(self, max_metrics: int = 10000):
-        """初始化指标收集器。
+        """初始化指标收集器.
 
         Args:
             max_metrics: 最大指标数量
@@ -60,7 +60,7 @@ class MetricsCollector:
     def record_counter(
         self, name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None
     ) -> None:
-        """记录计数器指标。
+        """记录计数器指标.
 
         Args:
             name: 指标名称
@@ -83,7 +83,7 @@ class MetricsCollector:
     def set_gauge(
         self, name: str, value: float, labels: Optional[Dict[str, str]] = None
     ) -> None:
-        """设置仪表盘指标。
+        """设置仪表盘指标.
 
         Args:
             name: 指标名称
@@ -106,7 +106,7 @@ class MetricsCollector:
     def record_histogram(
         self, name: str, value: float, labels: Optional[Dict[str, str]] = None
     ) -> None:
-        """记录直方图指标。
+        """记录直方图指标.
 
         Args:
             name: 指标名称
@@ -133,7 +133,7 @@ class MetricsCollector:
     def record_timer(
         self, name: str, duration: float, labels: Optional[Dict[str, str]] = None
     ) -> None:
-        """记录计时器指标。
+        """记录计时器指标.
 
         Args:
             name: 指标名称
@@ -161,7 +161,7 @@ class MetricsCollector:
     def timer(
         self, name: str, labels: Optional[Dict[str, str]] = None
     ) -> "TimerContext":
-        """创建计时器上下文管理器。
+        """创建计时器上下文管理器.
 
         Args:
             name: 指标名称
@@ -175,7 +175,7 @@ class MetricsCollector:
     def collect_metrics(
         self, metric_name: Optional[str] = None
     ) -> Dict[str, List[Metric]]:
-        """收集指标。
+        """收集指标.
 
         Args:
             metric_name: 指定指标名称，None表示收集所有指标
@@ -193,7 +193,7 @@ class MetricsCollector:
                 return {name: metrics.copy() for name, metrics in self._metrics.items()}
 
     def get_counter(self, name: str, labels: Optional[Dict[str, str]] = None) -> float:
-        """获取计数器值。
+        """获取计数器值.
 
         Args:
             name: 指标名称
@@ -209,7 +209,7 @@ class MetricsCollector:
     def get_gauge(
         self, name: str, labels: Optional[Dict[str, str]] = None
     ) -> Optional[float]:
-        """获取仪表盘值。
+        """获取仪表盘值.
 
         Args:
             name: 指标名称
@@ -225,7 +225,7 @@ class MetricsCollector:
     def get_histogram_stats(
         self, name: str, labels: Optional[Dict[str, str]] = None
     ) -> Optional[Dict[str, float]]:
-        """获取直方图统计信息。
+        """获取直方图统计信息.
 
         Args:
             name: 指标名称
@@ -259,7 +259,7 @@ class MetricsCollector:
     def get_timer_stats(
         self, name: str, labels: Optional[Dict[str, str]] = None
     ) -> Optional[Dict[str, float]]:
-        """获取计时器统计信息。
+        """获取计时器统计信息.
 
         Args:
             name: 指标名称
@@ -293,7 +293,7 @@ class MetricsCollector:
     def register_collector(
         self, name: str, collector_func: Callable[[], Dict[str, Any]]
     ) -> None:
-        """注册自定义指标收集器。
+        """注册自定义指标收集器.
 
         Args:
             name: 收集器名称
@@ -305,7 +305,7 @@ class MetricsCollector:
         self._logger.info(f"Metrics collector registered: {name}")
 
     def unregister_collector(self, name: str) -> bool:
-        """注销自定义指标收集器。
+        """注销自定义指标收集器.
 
         Args:
             name: 收集器名称
@@ -322,7 +322,7 @@ class MetricsCollector:
         return False
 
     def get_all_metrics(self) -> Dict[str, Any]:
-        """获取所有指标的汇总信息。
+        """获取所有指标的汇总信息.
 
         Returns:
             指标汇总字典
@@ -349,15 +349,15 @@ class MetricsCollector:
             return result
 
     def start(self) -> None:
-        """开始指标收集。"""
+        """开始指标收集."""
         self._logger.info("Metrics collection started")
 
     def stop(self) -> None:
-        """停止指标收集。"""
+        """停止指标收集."""
         self._logger.info("Metrics collection stopped")
 
     def reset_metrics(self, metric_name: Optional[str] = None) -> None:
-        """重置指标。
+        """重置指标.
 
         Args:
             metric_name: 指定指标名称，None表示重置所有指标
@@ -405,7 +405,7 @@ class MetricsCollector:
         self._logger.info(f"Metrics reset: {metric_name or 'all'}")
 
     def _make_key(self, name: str, labels: Optional[Dict[str, str]]) -> str:
-        """创建指标键。
+        """创建指标键.
 
         Args:
             name: 指标名称
@@ -421,7 +421,7 @@ class MetricsCollector:
         return f"{name}{{{label_str}}}"
 
     def _add_metric(self, name: str, metric: Metric) -> None:
-        """添加指标到历史记录。
+        """添加指标到历史记录.
 
         Args:
             name: 指标名称
@@ -434,7 +434,7 @@ class MetricsCollector:
             self._metrics[name] = self._metrics[name][-self._max_metrics :]
 
     def _run_collectors(self) -> None:
-        """运行自定义收集器。"""
+        """运行自定义收集器."""
         for name, collector_func in self._collectors.items():
             try:
                 metrics_data = collector_func()
@@ -469,7 +469,7 @@ class MetricsCollector:
                 self._logger.error(f"Error running collector {name}: {e}")
 
     def _calculate_stats(self, values: List[float]) -> Dict[str, float]:
-        """计算统计信息。
+        """计算统计信息.
 
         Args:
             values: 数值列表
@@ -497,7 +497,7 @@ class MetricsCollector:
 
 
 class TimerContext:
-    """计时器上下文管理器。"""
+    """计时器上下文管理器."""
 
     def __init__(
         self,
@@ -505,7 +505,7 @@ class TimerContext:
         name: str,
         labels: Optional[Dict[str, str]] = None,
     ):
-        """初始化计时器上下文。
+        """初始化计时器上下文.
 
         Args:
             collector: 指标收集器
@@ -518,12 +518,12 @@ class TimerContext:
         self._start_time: Optional[float] = None
 
     def __enter__(self) -> "TimerContext":
-        """进入上下文。"""
+        """进入上下文."""
         self._start_time = time.time()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:
-        """退出上下文。"""
+        """退出上下文."""
         if self._start_time is not None:
             duration = time.time() - self._start_time
             self._collector.record_timer(self._name, duration, self._labels)

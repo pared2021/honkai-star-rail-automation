@@ -1,4 +1,4 @@
-"""任务管理器模块。.
+"""任务管理器模块..
 
 提供任务调度、执行和管理功能，是系统的核心组件之一。
 """
@@ -15,7 +15,7 @@ import uuid
 
 
 class ExecutionMode(Enum):
-    """任务执行模式枚举。."""
+    """任务执行模式枚举.."""
 
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
@@ -23,7 +23,7 @@ class ExecutionMode(Enum):
 
 
 class TaskState(Enum):
-    """任务状态枚举。."""
+    """任务状态枚举.."""
 
     QUEUED = "queued"
     RUNNING = "running"
@@ -35,7 +35,7 @@ class TaskState(Enum):
 
 
 class TaskPriority(Enum):
-    """任务优先级枚举。."""
+    """任务优先级枚举.."""
 
     LOW = 3
     MEDIUM = 2
@@ -45,7 +45,7 @@ class TaskPriority(Enum):
 
 @dataclass
 class TaskExecution:
-    """任务执行信息。."""
+    """任务执行信息.."""
 
     task_id: str
     execution_id: str
@@ -62,7 +62,7 @@ class TaskExecution:
 
 @dataclass
 class WorkerInfo:
-    """工作线程信息。."""
+    """工作线程信息.."""
 
     worker_id: str
     thread_id: int
@@ -75,7 +75,7 @@ class WorkerInfo:
 
 @dataclass
 class ResourceLimits:
-    """资源限制配置。."""
+    """资源限制配置.."""
 
     max_concurrent_tasks: int = 5
     max_cpu_usage: float = 80.0
@@ -85,10 +85,10 @@ class ResourceLimits:
 
 
 class ConcurrentTaskQueue:
-    """并发任务队列，支持优先级调度。."""
+    """并发任务队列，支持优先级调度.."""
 
     def __init__(self):
-        """初始化队列。."""
+        """初始化队列.."""
         self.queues: Dict[TaskPriority, PriorityQueue] = {
             priority: PriorityQueue() for priority in TaskPriority
         }
@@ -96,7 +96,7 @@ class ConcurrentTaskQueue:
         self.task_count = 0
 
     def put(self, task_execution: TaskExecution) -> None:
-        """添加任务到队列。."""
+        """添加任务到队列.."""
         with self._lock:
             priority_queue = self.queues[task_execution.priority]
             # 使用任务创建时间作为次要排序键
@@ -106,7 +106,7 @@ class ConcurrentTaskQueue:
             self.task_count += 1
 
     def get(self, timeout: Optional[float] = None) -> Optional[TaskExecution]:
-        """从队列获取任务（按优先级）。."""
+        """从队列获取任务（按优先级）.."""
         with self._lock:
             # 按优先级顺序检查队列
             for priority in sorted(TaskPriority, key=lambda p: p.value):
@@ -120,21 +120,21 @@ class ConcurrentTaskQueue:
             return None
 
     def size(self) -> int:
-        """获取队列总大小。."""
+        """获取队列总大小.."""
         with self._lock:
             return sum(queue.qsize() for queue in self.queues.values())
 
     def get_priority_counts(self) -> Dict[TaskPriority, int]:
-        """获取各优先级队列的任务数量。."""
+        """获取各优先级队列的任务数量.."""
         with self._lock:
             return {priority: queue.qsize() for priority, queue in self.queues.items()}
 
 
 class TaskManager:
-    """任务管理器主类。."""
+    """任务管理器主类.."""
 
     def __init__(self, db_manager=None, default_user_id: str = "system"):
-        """初始化任务管理器。.
+        """初始化任务管理器..
 
         Args:
             db_manager: 数据库管理器实例
@@ -176,7 +176,7 @@ class TaskManager:
             self._task_executor = type("MockTaskExecutor", (), {})()
 
     def start_concurrent_manager(self) -> None:
-        """启动并发任务管理器。."""
+        """启动并发任务管理器.."""
         if self._concurrent_manager_running:
             return
 
@@ -196,7 +196,7 @@ class TaskManager:
         self._concurrent_manager_thread.start()
 
     def stop_concurrent_manager(self) -> None:
-        """停止并发任务管理器。."""
+        """停止并发任务管理器.."""
         if not self._concurrent_manager_running:
             return
 
@@ -213,7 +213,7 @@ class TaskManager:
             self._executor = None
 
     def _concurrent_manager_loop(self) -> None:
-        """并发任务管理器主循环。."""
+        """并发任务管理器主循环.."""
         while self._concurrent_manager_running and not self._shutdown_event.is_set():
             try:
                 # 检查是否有可用的工作线程
@@ -239,7 +239,7 @@ class TaskManager:
                 time.sleep(0.1)
 
     def _execute_task(self, task_execution: TaskExecution) -> None:
-        """执行任务。."""
+        """执行任务.."""
         if not self._executor:
             return
 
@@ -253,7 +253,7 @@ class TaskManager:
         future.add_done_callback(lambda f: self._task_completed(task_execution, f))
 
     def _run_task(self, task_execution: TaskExecution) -> Any:
-        """运行任务的实际逻辑。."""
+        """运行任务的实际逻辑.."""
         try:
             # 模拟任务执行
             time.sleep(0.1)  # 模拟工作
@@ -263,7 +263,7 @@ class TaskManager:
             raise
 
     def _task_completed(self, task_execution: TaskExecution, future: Future) -> None:
-        """任务完成回调。."""
+        """任务完成回调.."""
         task_execution.end_time = datetime.now()
 
         try:
@@ -284,7 +284,7 @@ class TaskManager:
     def submit_concurrent_task(
         self, task_id: str, priority: TaskPriority = TaskPriority.MEDIUM, **kwargs
     ) -> str:
-        """提交并发任务。.
+        """提交并发任务..
 
         Args:
             task_id: 任务ID
@@ -309,7 +309,7 @@ class TaskManager:
         return execution_id
 
     async def cancel_concurrent_task(self, execution_id: str) -> bool:
-        """取消并发任务。.
+        """取消并发任务..
 
         Args:
             execution_id: 执行ID
@@ -340,7 +340,7 @@ class TaskManager:
         priority: int = 1,
         **options,
     ) -> str:
-        """创建任务。.
+        """创建任务..
 
         Args:
             func: 要执行的函数
@@ -371,7 +371,7 @@ class TaskManager:
         return task_id
 
     async def get_task(self, task_id: str) -> Optional[Dict[str, Any]]:
-        """获取任务信息。.
+        """获取任务信息..
 
         Args:
             task_id: 任务ID
@@ -406,7 +406,7 @@ class TaskManager:
     async def list_tasks(
         self, status: Optional[TaskState] = None
     ) -> List[Dict[str, Any]]:
-        """列出任务。.
+        """列出任务..
 
         Args:
             status: 过滤状态
@@ -437,7 +437,7 @@ class TaskManager:
         return tasks
 
     async def get_task_statistics(self) -> Dict[str, int]:
-        """获取任务统计信息。.
+        """获取任务统计信息..
 
         Returns:
             统计信息字典
@@ -454,7 +454,7 @@ class TaskManager:
         return stats
 
     def get_concurrent_status(self) -> Dict[str, Any]:
-        """获取并发管理器状态。.
+        """获取并发管理器状态..
 
         Returns:
             状态信息字典
@@ -470,13 +470,13 @@ class TaskManager:
 
 
 class TaskExecutor:
-    """任务执行器类。.
+    """任务执行器类..
 
     负责实际执行任务的逻辑。
     """
 
     def __init__(self, db_manager=None):
-        """初始化任务执行器。.
+        """初始化任务执行器..
 
         Args:
             db_manager: 数据库管理器实例
@@ -486,16 +486,16 @@ class TaskExecutor:
         self._executor = ThreadPoolExecutor(max_workers=4)
 
     def start(self):
-        """启动执行器。."""
+        """启动执行器.."""
         self._running = True
 
     def stop(self):
-        """停止执行器。."""
+        """停止执行器.."""
         self._running = False
         self._executor.shutdown(wait=True)
 
     def execute_task(self, task_execution: TaskExecution) -> Any:
-        """执行任务。.
+        """执行任务..
 
         Args:
             task_execution: 任务执行信息
@@ -524,7 +524,7 @@ class TaskExecutor:
             task_execution.end_time = datetime.now()
 
     def submit_async_task(self, task_execution: TaskExecution) -> Future:
-        """异步提交任务。.
+        """异步提交任务..
 
         Args:
             task_execution: 任务执行信息

@@ -1,6 +1,6 @@
-"""任务管理器适配器模块。
+"""任务管理器适配器模块.
 
-提供任务管理器的适配器实现，用于连接不同的任务管理系统。
+提供任务管理器的适配器实现，用于连接不同的任务管理系统.
 """
 
 from typing import Any, Optional
@@ -8,13 +8,14 @@ from unittest.mock import Mock
 
 
 class TaskManager:
-    """任务管理器类。"""
+    """任务管理器类."""
 
     def __init__(self):
+        """初始化任务管理器."""
         self._tasks = {}
 
     def get_task(self, task_id: int) -> Optional[Any]:
-        """获取任务。
+        """获取任务.
 
         Args:
             task_id: 任务ID
@@ -25,7 +26,7 @@ class TaskManager:
         return self._tasks.get(task_id)
 
     def add_task(self, task_id: int, task: Any) -> None:
-        """添加任务。
+        """添加任务.
 
         Args:
             task_id: 任务ID
@@ -35,9 +36,10 @@ class TaskManager:
 
 
 class Container:
-    """依赖注入容器。"""
+    """依赖注入容器."""
 
     def __init__(self):
+        """初始化依赖注入容器."""
         self.task_manager = TaskManager()
 
 
@@ -46,7 +48,7 @@ _container = Container()
 
 
 def get_container() -> Container:
-    """获取容器实例。
+    """获取容器实例.
 
     Returns:
         容器实例
@@ -55,10 +57,10 @@ def get_container() -> Container:
 
 
 class TaskManagerAdapter:
-    """任务管理器适配器类。"""
+    """任务管理器适配器类."""
 
     def __init__(self, db_manager=None):
-        """初始化任务管理器适配器。
+        """初始化任务管理器适配器.
 
         Args:
             db_manager: 数据库管理器实例（可选）
@@ -67,7 +69,7 @@ class TaskManagerAdapter:
         self._db_manager = db_manager
 
     def get_task_sync(self, task_id: Optional[int] = None) -> Any:
-        """同步获取任务。
+        """同步获取任务.
 
         Args:
             task_id: 任务ID，可选

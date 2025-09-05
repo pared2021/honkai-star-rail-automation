@@ -1,4 +1,4 @@
-"""数据库配置模块。.
+"""数据库配置模块..
 
 提供数据库连接和配置管理功能。
 """
@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional
 
 @dataclass
 class DatabaseConfig:
-    """数据库配置类。"""
+    """数据库配置类."""
 
     # 数据库类型
     db_type: str = "sqlite"
@@ -38,14 +38,14 @@ class DatabaseConfig:
     autoflush: bool = True
 
     def __post_init__(self):
-        """初始化后处理。"""
+        """初始化后处理."""
         if self.db_type == "sqlite" and not self.db_path:
             # 默认SQLite数据库路径
             self.db_path = str(Path("data") / "xingtie.db")
 
     @classmethod
     def from_env(cls) -> "DatabaseConfig":
-        """从环境变量创建配置。"""
+        """从环境变量创建配置."""
         return cls(
             db_type=os.getenv("DB_TYPE", "sqlite"),
             db_path=os.getenv("DB_PATH"),
@@ -64,18 +64,24 @@ class DatabaseConfig:
         )
 
     def get_connection_string(self) -> str:
-        """获取数据库连接字符串。"""
+        """获取数据库连接字符串."""
         if self.db_type == "sqlite":
             return f"sqlite:///{self.db_path}"
         elif self.db_type == "postgresql":
-            return f"postgresql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+            return (
+                f"postgresql://{self.username}:{self.password}@"
+                f"{self.host}:{self.port}/{self.database}"
+            )
         elif self.db_type == "mysql":
-            return f"mysql+pymysql://{self.username}:{self.password}@{self.host}:{self.port}/{self.database}"
+            return (
+                f"mysql+pymysql://{self.username}:{self.password}@"
+                f"{self.host}:{self.port}/{self.database}"
+            )
         else:
             raise ValueError(f"不支持的数据库类型: {self.db_type}")
 
     def to_dict(self) -> Dict[str, Any]:
-        """转换为字典。"""
+        """转换为字典."""
         return {
             "db_type": self.db_type,
             "db_path": self.db_path,
