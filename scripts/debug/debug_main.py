@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from pathlib import Path
 import sys
 import traceback
-from pathlib import Path
 
 # 添加项目根目录到Python路径
 project_root = Path(__file__).parent
@@ -16,12 +16,13 @@ print(f"Python path: {sys.path[:3]}")
 try:
     print("Importing src.main...")
     import src.main
+
     print("src.main imported successfully")
-    
+
     print("Calling main()...")
     src.main.main()
     print("main() completed successfully")
-    
+
 except ImportError as e:
     print(f"Import error: {e}")
     traceback.print_exc()

@@ -64,9 +64,7 @@ class DatabaseManager:
         finally:
             cursor.close()
 
-    def execute_update(
-        self, query: str, params: Optional[tuple] = None
-    ) -> int:
+    def execute_update(self, query: str, params: Optional[tuple] = None) -> int:
         """执行更新语句。.
 
         Args:
@@ -121,7 +119,7 @@ class DatabaseManager:
 
         with self._lock:
             if self._initialized:
-                return  # type: ignore
+                return
 
             # 创建基本表结构
             self.execute_update(

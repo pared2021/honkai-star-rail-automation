@@ -4,12 +4,13 @@
 基于技术架构重构文档的设计规范
 """
 
-from enum import Enum
-from typing import Dict, Any, Optional, List
 from datetime import datetime
-from pydantic import BaseModel, Field, ConfigDict
-import uuid
+from enum import Enum
 import json
+from typing import Any, Dict, List, Optional
+import uuid
+
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class TaskType(Enum):

@@ -8,6 +8,19 @@ from unittest.mock import Mock
 import pytest
 
 
+@pytest.fixture
+def temp_db_path():
+    """创建临时数据库文件路径"""
+    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as temp_file:
+        temp_path = temp_file.name
+
+    yield temp_path
+
+    # 清理临时文件
+    if os.path.exists(temp_path):
+        os.unlink(temp_path)
+
+
 class TestDatabase:
     """数据库简化测试类"""
 

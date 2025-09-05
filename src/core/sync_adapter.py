@@ -4,17 +4,18 @@
 提供异步和同步操作之间的桥梁.
 """
 
-import asyncio
-import contextlib
-import threading
-import time
-import uuid
 from abc import ABC, abstractmethod
 from concurrent.futures import Future
+import contextlib
 from dataclasses import dataclass, field
 from enum import Enum
 from queue import Empty, Queue
+import threading
+import time
 from typing import Any, Callable, Dict, Optional
+import uuid
+
+import asyncio
 
 
 class AdapterStatus(Enum):
@@ -269,20 +270,27 @@ class SyncAdapter:
 
     def _start_event_loop(self) -> None:
         """启动事件循环。."""
+        import threading
+
+        # 使用事件来同步线程启动
+        loop_ready = threading.Event()
 
         def run_loop():
-            self._loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self._loop)
-            self._loop.run_forever()
+            try:
+                self._loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(self._loop)
+                loop_ready.set()  # 通知主线程事件循环已准备好
+                self._loop.run_forever()
+            except Exception:
+                loop_ready.set()  # 即使出错也要通知主线程
+                raise
 
         self._loop_thread = threading.Thread(target=run_loop, daemon=True)
         self._loop_thread.start()
 
         # 等待事件循环启动
-        timeout = 5.0
-        start_time = time.time()
-        while self._loop is None and (time.time() - start_time) < timeout:
-            time.sleep(0.01)
+        if not loop_ready.wait(timeout=5.0):
+            raise SyncAdapterError("Failed to start event loop")
 
         if self._loop is None:
             raise SyncAdapterError("Failed to start event loop")
@@ -350,14 +358,11 @@ class SyncAdapter:
             ):
 
                 try:
-                    if asyncio.iscoroutinefunction(
-                        callback_info.callback_func
-                    ):
+                    if asyncio.iscoroutinefunction(callback_info.callback_func):
                         # 异步回调
                         if self._loop:
                             asyncio.run_coroutine_threadsafe(
-                                callback_info.callback_func(callback_data),
-                                self._loop
+                                callback_info.callback_func(callback_data), self._loop
                             )
                     else:
                         # 同步回调
@@ -365,6 +370,7 @@ class SyncAdapter:
                 except Exception as e:
                     # 记录回调执行错误，但不中断处理
                     import logging
+
                     logging.getLogger(__name__).warning(
                         f"Callback execution failed: {e}"
                     )
@@ -440,15 +446,15 @@ class SyncAdapter:
                 if asyncio.iscoroutinefunction(coro):
                     result = await coro(*args, **kwargs)
                 elif asyncio.iscoroutine(coro):
-                    result = await coro  # type: ignore
+                    result = await coro
                 else:
                     # 如果是普通函数，在线程池中执行
                     import concurrent.futures
+
                     if self._loop is not None:
                         with concurrent.futures.ThreadPoolExecutor() as ex:
                             result = await self._loop.run_in_executor(
-                                ex,
-                                lambda: coro(*args, **kwargs)
+                                ex, lambda: coro(*args, **kwargs)
                             )
                     else:
                         result = coro(*args, **kwargs)
@@ -466,9 +472,7 @@ class SyncAdapter:
 
                 # 触发成功回调
                 callback_data = CallbackData(
-                    task_id=task_id,
-                    callback_type=CallbackType.SUCCESS,
-                    data=result
+                    task_id=task_id, callback_type=CallbackType.SUCCESS, data=result
                 )
                 self._callback_queue.put(callback_data)
 
@@ -491,9 +495,7 @@ class SyncAdapter:
 
                 # 触发错误回调
                 callback_data = CallbackData(
-                    task_id=task_id,
-                    callback_type=CallbackType.ERROR,
-                    error=e
+                    task_id=task_id, callback_type=CallbackType.ERROR, error=e
                 )
                 self._callback_queue.put(callback_data)
 
@@ -503,9 +505,7 @@ class SyncAdapter:
                 raise
 
         # 在事件循环中调度任务
-        future = asyncio.run_coroutine_threadsafe(
-            wrapped_coro(), self._loop
-        )
+        future = asyncio.run_coroutine_threadsafe(wrapped_coro(), self._loop)
         self._tasks[task_id] = future
 
         with self._lock:
@@ -526,9 +526,7 @@ class SyncAdapter:
         """
         return self.submit_async_task(coro, *args, **kwargs)
 
-    def wait_for_result(
-        self, task_id: str, timeout: Optional[float] = None
-    ) -> Any:
+    def wait_for_result(self, task_id: str, timeout: Optional[float] = None) -> Any:
         """等待任务结果。.
 
         Args:
@@ -564,17 +562,15 @@ class SyncAdapter:
         """
         with self._lock:
             stats = self._stats.copy()
-            stats["pending_results"] = len([
-                r for r in self._results.values() if not r.is_completed
-            ])
+            stats["pending_results"] = len(
+                [r for r in self._results.values() if not r.is_completed]
+            )
             return stats
 
     def _emit_status_change(self) -> None:
         """发出状态变更信号。."""
         callback_data = CallbackData(
-            task_id="",
-            callback_type=CallbackType.STATUS_CHANGE,
-            data=self._status
+            task_id="", callback_type=CallbackType.STATUS_CHANGE, data=self._status
         )
         with contextlib.suppress(Exception):
             self._callback_queue.put_nowait(callback_data)

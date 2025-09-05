@@ -3,15 +3,15 @@
 提供任务调度、执行和管理功能，是系统的核心组件之一。
 """
 
-import threading
-import time
-import uuid
 from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from queue import Empty, PriorityQueue
+import threading
+import time
 from typing import Any, Callable, Dict, List, Optional
+import uuid
 
 
 class ExecutionMode(Enum):
@@ -90,8 +90,7 @@ class ConcurrentTaskQueue:
     def __init__(self):
         """初始化队列。."""
         self.queues: Dict[TaskPriority, PriorityQueue] = {
-            priority: PriorityQueue()
-            for priority in TaskPriority
+            priority: PriorityQueue() for priority in TaskPriority
         }
         self._lock = threading.Lock()
         self.task_count = 0
@@ -128,10 +127,7 @@ class ConcurrentTaskQueue:
     def get_priority_counts(self) -> Dict[TaskPriority, int]:
         """获取各优先级队列的任务数量。."""
         with self._lock:
-            return {
-                priority: queue.qsize()
-                for priority, queue in self.queues.items()
-            }
+            return {priority: queue.qsize() for priority, queue in self.queues.items()}
 
 
 class TaskManager:
@@ -173,6 +169,7 @@ class TaskManager:
         # 初始化任务执行器（模拟）
         try:
             from .task_executor import TaskExecutor  # type: ignore
+
             self._task_executor = TaskExecutor()
         except (ImportError, AttributeError):
             # 如果TaskExecutor不存在，创建一个模拟对象
@@ -217,10 +214,7 @@ class TaskManager:
 
     def _concurrent_manager_loop(self) -> None:
         """并发任务管理器主循环。."""
-        while (
-            self._concurrent_manager_running
-            and not self._shutdown_event.is_set()
-        ):
+        while self._concurrent_manager_running and not self._shutdown_event.is_set():
             try:
                 # 检查是否有可用的工作线程
                 if (
@@ -256,9 +250,7 @@ class TaskManager:
 
         # 提交到线程池
         future = self._executor.submit(self._run_task, task_execution)
-        future.add_done_callback(
-            lambda f: self._task_completed(task_execution, f)
-        )
+        future.add_done_callback(lambda f: self._task_completed(task_execution, f))
 
     def _run_task(self, task_execution: TaskExecution) -> Any:
         """运行任务的实际逻辑。."""
@@ -270,11 +262,7 @@ class TaskManager:
             task_execution.error = e
             raise
 
-    def _task_completed(
-        self,
-        task_execution: TaskExecution,
-        future: Future
-    ) -> None:
+    def _task_completed(self, task_execution: TaskExecution, future: Future) -> None:
         """任务完成回调。."""
         task_execution.end_time = datetime.now()
 
@@ -291,15 +279,10 @@ class TaskManager:
         # 移动到完成列表
         if task_execution.execution_id in self._active_executions:
             del self._active_executions[task_execution.execution_id]
-        self._completed_executions[
-            task_execution.execution_id
-        ] = task_execution
+        self._completed_executions[task_execution.execution_id] = task_execution
 
     def submit_concurrent_task(
-        self,
-        task_id: str,
-        priority: TaskPriority = TaskPriority.MEDIUM,
-        **kwargs
+        self, task_id: str, priority: TaskPriority = TaskPriority.MEDIUM, **kwargs
     ) -> str:
         """提交并发任务。.
 
@@ -383,9 +366,7 @@ class TaskManager:
             task_priority = TaskPriority.LOW
 
         # 提交到并发队列
-        self.submit_concurrent_task(
-            task_id=task_id, priority=task_priority
-        )
+        self.submit_concurrent_task(task_id=task_id, priority=task_priority)
 
         return task_id
 
@@ -483,9 +464,7 @@ class TaskManager:
             "queue_size": self._concurrent_task_queue.size(),
             "active_executions": len(self._active_executions),
             "completed_executions": len(self._completed_executions),
-            "priority_counts": (
-                self._concurrent_task_queue.get_priority_counts()
-            ),
+            "priority_counts": (self._concurrent_task_queue.get_priority_counts()),
             "stats": self._stats.copy(),
         }
 
