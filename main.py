@@ -19,7 +19,7 @@ from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt, QDir
 from PyQt6.QtGui import QIcon
 
-from src.gui.main_window import MainWindow
+from src.ui.main_window import MainWindowMVP as MainWindow
 from src.core.config_manager import ConfigManager
 from src.core.logger import setup_logger
 from src.database.db_manager import DatabaseManager
@@ -77,8 +77,13 @@ def main():
         db_manager = DatabaseManager()
         db_manager.initialize_database()
         
-        # 创建主窗口，传递数据库管理器
-        main_window = MainWindow(config_manager=config_manager, db_manager=db_manager)
+        # 初始化依赖注入容器
+        from src.core.service_locator import initialize_services
+        initialize_services()
+        logger.info("依赖注入容器初始化完成")
+        
+        # 创建主窗口MVP组件
+        main_window = MainWindow()
         main_window.show()
         
         logger.info("主窗口已显示")

@@ -1,598 +1,679 @@
-# -*- coding: utf-8 -*-
-"""
-主窗口视图 - MVP模式的View层实现
+"""主窗口View层
+
+负责主窗口UI界面的展示和用户交互
 """
 
-from datetime import datetime
-from typing import Any, Dict, List, Optional
-
-from PyQt6.QtCore import Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QAction, QColor, QFont, QIcon, QPalette
-from ...gui.common.gui_components import (
-    BaseWidget,
-    QCheckBox,
-    QComboBox,
-    QFrame,
-    QGridLayout,
-    QGroupBox,
-    QHBoxLayout,
-    QLabel,
-    QMainWindow,
-    QMenu,
-    QMenuBar,
-    QProgressBar,
-    QPushButton,
-    QSpinBox,
-    QSplitter,
-    QStatusBar,
-    QTabWidget,
-    QTextEdit,
-    QToolBar,
-    QVBoxLayout,
-    QWidget,
+from typing import Optional, Dict, Any, List
+from PyQt6.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QSplitter,
+    QTabWidget, QPushButton, QTextEdit, QLabel, QMenuBar, QMenu,
+    QToolBar, QStatusBar, QMessageBox, QApplication
 )
-from loguru import logger
+from PyQt6.QtCore import Qt, pyqtSignal, QSize
+from PyQt6.QtGui import QIcon, QAction, QFont
+import logging
 
-from src.ui.mvp.base_view import BaseView
+from ...core.interfaces.base_view import BaseView
+from ..task_list.task_list_mvp import TaskListMVP
+from ..task_creation.task_creation_mvp import TaskCreationMVP
+from ..game_settings import GameSettingsMVP as GameSettingsWidget
+from ..automation_settings import AutomationSettingsMVP as AutomationSettingsWidget
+from ..log_viewer import LogViewerMVP as LogViewerWidget
+from ..task_execution_history import TaskExecutionHistoryMVP as TaskExecutionHistoryDialog
 
-# from src.ui.monitoring_dashboard import (
-#     MonitoringDashboard, MetricsWidget, StatusIndicator
-# )
+logger = logging.getLogger(__name__)
 
 
-class MainWindowView(QMainWindow, BaseWidget, BaseView):
+class MainWindowView(QMainWindow, BaseView):
+    """主窗口View层
+    
+    负责主窗口UI界面的展示和用户交互
     """
-    主窗口视图类 - 负责主窗口的界面展示和用户交互
-
-    采用MVP模式，只负责界面逻辑，不包含业务逻辑
-    """
-
+    
     # 用户交互信号
-    start_automation_requested = pyqtSignal()
-    stop_automation_requested = pyqtSignal()
-    pause_automation_requested = pyqtSignal()
-    settings_requested = pyqtSignal()
-    task_management_requested = pyqtSignal()
-    monitoring_requested = pyqtSignal()
-    about_requested = pyqtSignal()
-    exit_requested = pyqtSignal()
-
-    # 任务操作信号
-    create_task_requested = pyqtSignal()
-    edit_task_requested = pyqtSignal(int)  # task_id
-    delete_task_requested = pyqtSignal(int)  # task_id
-    execute_task_requested = pyqtSignal(int)  # task_id
-
-    # 配置变更信号
-    config_changed = pyqtSignal(str, Any)  # key, value
-
-    def __init__(self, parent=None):
+    start_automation_requested = pyqtSignal()  # 开始自动化请求
+    stop_automation_requested = pyqtSignal()  # 停止自动化请求
+    tab_changed = pyqtSignal(int)  # 标签页切换 (tab_index)
+    window_state_changed = pyqtSignal(dict)  # 窗口状态变化 (state_dict)
+    
+    # 菜单动作信号
+    import_config_requested = pyqtSignal()  # 导入配置请求
+    export_config_requested = pyqtSignal()  # 导出配置请求
+    show_execution_history_requested = pyqtSignal()  # 显示执行历史请求
+    database_management_requested = pyqtSignal()  # 数据库管理请求
+    log_management_requested = pyqtSignal()  # 日志管理请求
+    settings_requested = pyqtSignal()  # 设置请求
+    about_requested = pyqtSignal()  # 关于请求
+    
+    # 设置变更信号
+    game_settings_changed = pyqtSignal(dict)  # 游戏设置变更 (settings_dict)
+    automation_settings_changed = pyqtSignal(dict)  # 自动化设置变更 (settings_dict)
+    
+    # 日志操作信号
+    log_exported = pyqtSignal(str)  # 日志导出 (file_path)
+    log_cleared = pyqtSignal()  # 日志清空
+    
+    def __init__(self, parent: Optional[QWidget] = None):
         super().__init__(parent)
-
-        # 界面组件
-        self.central_widget = None
-        self.monitoring_dashboard = None
-        self.status_bar = None
-        self.toolbar = None
-
-        # 控制按钮
-        self.start_btn = None
-        self.stop_btn = None
-        self.pause_btn = None
-
-        # 状态指示器
-        self.automation_status_indicator = None
-        self.system_status_indicator = None
-
-        # 快速统计指标
-        self.active_tasks_metric = None
-        self.completed_tasks_metric = None
-        self.error_count_metric = None
-        self.uptime_metric = None
-
-        # 初始化界面
-        self._setup_ui()
-        self.setup_connections()
-
-        logger.info("主窗口视图初始化完成")
-
-    def _update_field_display(self, field_name: str, value: Any):
-        """更新特定字段的显示
-
-        Args:
-            field_name: 字段名
-            value: 新值
-        """
-        try:
-            if field_name == "automation_status":
-                self._update_automation_status(value)
-            elif field_name == "system_status":
-                self._update_system_status(value)
-            elif field_name == "active_tasks":
-                if self.active_tasks_metric:
-                    self.active_tasks_metric.setText(f"活跃任务: {value}")
-            elif field_name == "completed_tasks":
-                if self.completed_tasks_metric:
-                    self.completed_tasks_metric.setText(f"已完成: {value}")
-            elif field_name == "error_count":
-                if self.error_count_metric:
-                    self.error_count_metric.setText(f"错误数: {value}")
-            elif field_name == "uptime":
-                if self.uptime_metric:
-                    self.uptime_metric.setText(f"运行时间: {value}")
-            else:
-                logger.warning(f"未知字段: {field_name}")
-        except Exception as e:
-            logger.error(f"更新字段显示失败: {field_name}, 错误: {e}")
-
-    def connect_signals(self):
-        """连接信号槽"""
-        # 这里可以连接内部信号
-        pass
-
-    def _update_automation_status(self, status: str):
-        """更新自动化状态"""
-        if self.automation_status_indicator:
-            self.automation_status_indicator.setText(f"自动化状态: {status}")
-
-    def _update_system_status(self, status: str):
-        """更新系统状态"""
-        if self.system_status_indicator:
-            self.system_status_indicator.setText(f"系统状态: {status}")
-
-    def _setup_ui(self):
-        """设置用户界面"""
-        self.setWindowTitle("星铁自动化助手")
+        
+        # UI组件
+        self.central_widget: Optional[QWidget] = None
+        self.main_layout: Optional[QVBoxLayout] = None
+        self.main_splitter: Optional[QSplitter] = None
+        
+        # 左侧控制面板
+        self.left_panel: Optional[QWidget] = None
+        self.start_button: Optional[QPushButton] = None
+        self.stop_button: Optional[QPushButton] = None
+        self.status_text: Optional[QTextEdit] = None
+        
+        # 右侧标签页
+        self.tab_widget: Optional[QTabWidget] = None
+        self.task_list_mvp: Optional[TaskListMVP] = None
+        self.task_creation_mvp: Optional[TaskCreationMVP] = None
+        self.game_settings_widget: Optional[GameSettingsWidget] = None
+        self.automation_settings_widget: Optional[AutomationSettingsWidget] = None
+        self.log_viewer_widget: Optional[LogViewerWidget] = None
+        
+        # 菜单和工具栏
+        self.menu_bar: Optional[QMenuBar] = None
+        self.tool_bar: Optional[QToolBar] = None
+        self.status_bar: Optional[QStatusBar] = None
+        
+        # 状态栏标签
+        self.status_label: Optional[QLabel] = None
+        self.task_info_label: Optional[QLabel] = None
+        self.time_label: Optional[QLabel] = None
+        
+        # 菜单动作
+        self.actions: Dict[str, QAction] = {}
+        
+        # 初始化UI
+        self._init_ui()
+        self._connect_signals()
+        
+        logger.debug("MainWindowView 初始化完成")
+    
+    def _init_ui(self):
+        """初始化UI界面"""
+        # 设置窗口属性
+        self.setWindowTitle("星铁自动化工具")
         self.setMinimumSize(1200, 800)
-
-        # 设置应用图标
-        # self.setWindowIcon(QIcon("resources/icons/app.ico"))
-
-        # 创建菜单栏
-        self.create_menu_bar()
-
-        # 创建工具栏
-        self.create_toolbar()
-
+        self.resize(1400, 900)
+        
+        # 设置图标
+        try:
+            self.setWindowIcon(QIcon("resources/icons/app.ico"))
+        except Exception:
+            pass  # 图标文件不存在时忽略
+        
         # 创建中央部件
-        self.create_central_widget()
-
+        self.central_widget = QWidget()
+        self.setCentralWidget(self.central_widget)
+        
+        # 创建主布局
+        self.main_layout = QVBoxLayout(self.central_widget)
+        main_margin = self._get_config_value('ui.main_window.main_layout_margin', 5)
+        main_spacing = self._get_config_value('ui.main_window.main_layout_spacing', 5)
+        self.main_layout.setContentsMargins(main_margin, main_margin, main_margin, main_margin)
+        self.main_layout.setSpacing(main_spacing)
+        
+        # 创建分割器
+        self.main_splitter = QSplitter(Qt.Orientation.Horizontal)
+        self.main_layout.addWidget(self.main_splitter)
+        
+        # 创建左右面板
+        self._create_left_panel()
+        self._create_right_panel()
+        
+        # 设置分割器比例
+        self.main_splitter.setSizes([300, 1100])
+        self.main_splitter.setCollapsible(0, False)
+        self.main_splitter.setCollapsible(1, False)
+        
+        # 创建菜单栏
+        self._create_menu_bar()
+        
+        # 创建工具栏
+        self._create_tool_bar()
+        
         # 创建状态栏
-        self.create_status_bar()
-
-        # 设置样式
-        self.setup_styles()
-
-    def create_menu_bar(self):
-        """创建菜单栏"""
-        menubar = self.menuBar()
-
-        # 文件菜单
-        file_menu = menubar.addMenu("文件(&F)")
-
-        settings_action = QAction("设置(&S)", self)
-        settings_action.setShortcut("Ctrl+S")
-        settings_action.triggered.connect(self.settings_requested.emit)
-        file_menu.addAction(settings_action)
-
-        file_menu.addSeparator()
-
-        exit_action = QAction("退出(&X)", self)
-        exit_action.setShortcut("Ctrl+Q")
-        exit_action.triggered.connect(self.exit_requested.emit)
-        file_menu.addAction(exit_action)
-
-        # 任务菜单
-        task_menu = menubar.addMenu("任务(&T)")
-
-        task_mgmt_action = QAction("任务管理(&M)", self)
-        task_mgmt_action.setShortcut("Ctrl+T")
-        task_mgmt_action.triggered.connect(self.task_management_requested.emit)
-        task_menu.addAction(task_mgmt_action)
-
-        task_menu.addSeparator()
-
-        create_task_action = QAction("新建任务(&N)", self)
-        create_task_action.setShortcut("Ctrl+N")
-        create_task_action.triggered.connect(self.create_task_requested.emit)
-        task_menu.addAction(create_task_action)
-
-        # 监控菜单
-        monitor_menu = menubar.addMenu("监控(&M)")
-
-        monitoring_action = QAction("监控面板(&D)", self)
-        monitoring_action.setShortcut("Ctrl+M")
-        monitoring_action.triggered.connect(self.monitoring_requested.emit)
-        monitor_menu.addAction(monitoring_action)
-
-        # 帮助菜单
-        help_menu = menubar.addMenu("帮助(&H)")
-
-        about_action = QAction("关于(&A)", self)
-        about_action.triggered.connect(self.about_requested.emit)
-        help_menu.addAction(about_action)
-
-    def create_toolbar(self):
-        """创建工具栏"""
-        self.toolbar = self.addToolBar("主工具栏")
-        self.toolbar.setMovable(False)
-
-        # 自动化控制按钮
-        self.start_btn = QPushButton("开始自动化")
-        self.start_btn.setStyleSheet(
-            """
+        self._create_status_bar()
+    
+    def _create_left_panel(self):
+        """创建左侧控制面板"""
+        self.left_panel = QWidget()
+        layout = QVBoxLayout(self.left_panel)
+        left_panel_margin = self._get_config_value('ui.main_window.left_panel_margin', 10)
+        left_panel_spacing = self._get_config_value('ui.main_window.left_panel_spacing', 10)
+        layout.setContentsMargins(left_panel_margin, left_panel_margin, left_panel_margin, left_panel_margin)
+        layout.setSpacing(left_panel_spacing)
+        
+        # 控制按钮
+        self.start_button = QPushButton("开始自动化")
+        start_button_height = self._get_config_value('ui.main_window.start_button_height', 40)
+        self.start_button.setMinimumHeight(start_button_height)
+        self.start_button.setStyleSheet("""
             QPushButton {
                 background-color: #4CAF50;
                 color: white;
                 border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
+                border-radius: 5px;
+                font-size: 14px;
                 font-weight: bold;
             }
             QPushButton:hover {
                 background-color: #45a049;
             }
-            QPushButton:disabled {
-                background-color: #cccccc;
-            }
-        """
-        )
-        self.start_btn.clicked.connect(self.start_automation_requested.emit)
-
-        self.pause_btn = QPushButton("暂停")
-        self.pause_btn.setStyleSheet(
-            """
-            QPushButton {
-                background-color: #FF9800;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #e68900;
+            QPushButton:pressed {
+                background-color: #3d8b40;
             }
             QPushButton:disabled {
                 background-color: #cccccc;
+                color: #666666;
             }
-        """
-        )
-        self.pause_btn.clicked.connect(self.pause_automation_requested.emit)
-        self.pause_btn.setEnabled(False)
-
-        self.stop_btn = QPushButton("停止")
-        self.stop_btn.setStyleSheet(
-            """
+        """)
+        
+        self.stop_button = QPushButton("停止自动化")
+        stop_button_height = self._get_config_value('ui.main_window.stop_button_height', 40)
+        self.stop_button.setMinimumHeight(stop_button_height)
+        self.stop_button.setEnabled(False)
+        self.stop_button.setStyleSheet("""
             QPushButton {
-                background-color: #F44336;
+                background-color: #f44336;
                 color: white;
                 border: none;
-                padding: 8px 16px;
-                border-radius: 4px;
+                border-radius: 5px;
+                font-size: 14px;
                 font-weight: bold;
             }
             QPushButton:hover {
                 background-color: #da190b;
             }
+            QPushButton:pressed {
+                background-color: #c1170a;
+            }
             QPushButton:disabled {
                 background-color: #cccccc;
+                color: #666666;
             }
-        """
-        )
-        self.stop_btn.clicked.connect(self.stop_automation_requested.emit)
-        self.stop_btn.setEnabled(False)
-
-        # 添加到工具栏
-        self.toolbar.addWidget(self.start_btn)
-        self.toolbar.addWidget(self.pause_btn)
-        self.toolbar.addWidget(self.stop_btn)
-
-        self.toolbar.addSeparator()
-
-        # 快速访问按钮
-        task_mgmt_btn = QPushButton("任务管理")
-        task_mgmt_btn.clicked.connect(self.task_management_requested.emit)
-        self.toolbar.addWidget(task_mgmt_btn)
-
-        settings_btn = QPushButton("设置")
-        settings_btn.clicked.connect(self.settings_requested.emit)
-        self.toolbar.addWidget(settings_btn)
-
-    def create_central_widget(self):
-        """创建中央部件"""
-        self.central_widget = QWidget()
-        self.setCentralWidget(self.central_widget)
-
-        layout = QVBoxLayout()
-
-        # 创建主要内容区域
-        main_splitter = self.create_splitter(Qt.Orientation.Horizontal)
-
-        # 左侧控制面板
-        control_panel = self.create_control_panel()
-        main_splitter.addWidget(control_panel)
-
-        # 右侧监控面板
-        # self.monitoring_dashboard = MonitoringDashboard()
-        # main_splitter.addWidget(self.monitoring_dashboard)
-
-        # 临时替代监控面板
-        temp_widget = QWidget()
-        temp_layout = QVBoxLayout()
-        temp_label = QLabel("监控面板 (暂时禁用)")
-        temp_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        temp_layout.addWidget(temp_label)
-        temp_widget.setLayout(temp_layout)
-        main_splitter.addWidget(temp_widget)
-
-        # 设置分割比例
-        main_splitter.setSizes([300, 900])
-
-        layout.addWidget(main_splitter)
-        self.central_widget.setLayout(layout)
-
-    def create_control_panel(self) -> QWidget:
-        """创建控制面板"""
-        panel = QWidget()
-        layout = self.create_vbox_layout()
-
-        # 系统状态组
-        status_group = QGroupBox("系统状态")
-        status_layout = QVBoxLayout()
-
-        # self.automation_status_indicator = StatusIndicator("自动化服务", "stopped")
-        # self.system_status_indicator = StatusIndicator("系统健康", "good")
-
-        # 临时替代状态指示器
-        temp_status_label = QLabel("状态指示器 (暂时禁用)")
-        status_layout.addWidget(temp_status_label)
-        # status_layout.addWidget(self.automation_status_indicator)
-        # status_layout.addWidget(self.system_status_indicator)
-        status_group.setLayout(status_layout)
-
-        # 快速统计组
-        stats_group = QGroupBox("快速统计")
-        stats_layout = QGridLayout()
-
-        # self.active_tasks_metric = MetricsWidget("活跃任务", "0", "个", "#2196F3")
-        # self.completed_tasks_metric = MetricsWidget("已完成", "0", "个", "#4CAF50")
-        # self.error_count_metric = MetricsWidget("错误数", "0", "个", "#F44336")
-        # self.uptime_metric = MetricsWidget("运行时间", "0", "分钟", "#9C27B0")
-
-        # 临时替代指标组件
-        temp_metrics_label = QLabel("指标组件 (暂时禁用)")
-        stats_layout.addWidget(temp_metrics_label, 0, 0, 2, 2)
-        # stats_layout.addWidget(self.active_tasks_metric, 0, 0)
-        # stats_layout.addWidget(self.completed_tasks_metric, 0, 1)
-        # stats_layout.addWidget(self.error_count_metric, 1, 0)
-        # stats_layout.addWidget(self.uptime_metric, 1, 1)
-
-        stats_group.setLayout(stats_layout)
-
-        # 快速操作组
-        actions_group = QGroupBox("快速操作")
-        actions_layout = QVBoxLayout()
-
-        create_task_btn = QPushButton("新建任务")
-        create_task_btn.clicked.connect(self.create_task_requested.emit)
-
-        task_mgmt_btn = QPushButton("任务管理")
-        task_mgmt_btn.clicked.connect(self.task_management_requested.emit)
-
-        monitoring_btn = QPushButton("监控详情")
-        monitoring_btn.clicked.connect(self.monitoring_requested.emit)
-
-        actions_layout.addWidget(create_task_btn)
-        actions_layout.addWidget(task_mgmt_btn)
-        actions_layout.addWidget(monitoring_btn)
-        actions_layout.addStretch()
-
-        actions_group.setLayout(actions_layout)
-
-        # 添加到主布局
-        layout.addWidget(status_group)
-        layout.addWidget(stats_group)
-        layout.addWidget(actions_group)
+        """)
+        
+        layout.addWidget(self.start_button)
+        layout.addWidget(self.stop_button)
+        
+        # 状态信息
+        status_label = QLabel("状态信息:")
+        status_label.setFont(QFont("Arial", 10, QFont.Weight.Bold))
+        layout.addWidget(status_label)
+        
+        self.status_text = QTextEdit()
+        status_text_height = self._get_config_value('ui.main_window.status_text_height', 200)
+        self.status_text.setMaximumHeight(status_text_height)
+        self.status_text.setReadOnly(True)
+        self.status_text.setPlainText("就绪")
+        layout.addWidget(self.status_text)
+        
         layout.addStretch()
-
-        panel.setLayout(layout)
-        return panel
-
-    def create_status_bar(self):
+        
+        self.main_splitter.addWidget(self.left_panel)
+    
+    def _create_right_panel(self):
+        """创建右侧主工作区"""
+        self.tab_widget = QTabWidget()
+        self.tab_widget.setTabPosition(QTabWidget.TabPosition.North)
+        
+        # 创建各个标签页
+        self._create_task_tab()
+        self._create_game_tab()
+        self._create_automation_tab()
+        self._create_log_tab()
+        
+        self.main_splitter.addWidget(self.tab_widget)
+    
+    def _create_task_tab(self):
+        """创建任务管理标签页"""
+        task_widget = QWidget()
+        layout = QHBoxLayout(task_widget)
+        task_tab_margin = self._get_config_value('ui.main_window.task_tab_margin', 5)
+        task_tab_spacing = self._get_config_value('ui.main_window.task_tab_spacing', 5)
+        layout.setContentsMargins(task_tab_margin, task_tab_margin, task_tab_margin, task_tab_margin)
+        layout.setSpacing(task_tab_spacing)
+        
+        # 创建任务分割器
+        task_splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        # 创建任务列表MVP组件
+        self.task_list_mvp = TaskListMVP()
+        task_splitter.addWidget(self.task_list_mvp.get_view())
+        
+        # 创建任务创建MVP组件
+        self.task_creation_mvp = TaskCreationMVP()
+        task_splitter.addWidget(self.task_creation_mvp.get_view())
+        
+        # 设置分割器比例
+        task_splitter.setSizes([800, 400])
+        task_splitter.setCollapsible(0, False)
+        task_splitter.setCollapsible(1, False)
+        
+        layout.addWidget(task_splitter)
+        
+        self.tab_widget.addTab(task_widget, "任务管理")
+    
+    def _create_game_tab(self):
+        """创建游戏设置标签页"""
+        self.game_settings_widget = GameSettingsWidget()
+        self.tab_widget.addTab(self.game_settings_widget, "游戏设置")
+    
+    def _create_automation_tab(self):
+        """创建自动化配置标签页"""
+        self.automation_settings_widget = AutomationSettingsWidget()
+        self.tab_widget.addTab(self.automation_settings_widget, "自动化配置")
+    
+    def _create_log_tab(self):
+        """创建日志查看标签页"""
+        self.log_viewer_widget = LogViewerWidget()
+        self.tab_widget.addTab(self.log_viewer_widget, "执行日志")
+    
+    def _create_menu_bar(self):
+        """创建菜单栏"""
+        self.menu_bar = self.menuBar()
+        
+        # 文件菜单
+        file_menu = self.menu_bar.addMenu("文件")
+        
+        self.actions['import_config'] = QAction("导入配置", self)
+        self.actions['export_config'] = QAction("导出配置", self)
+        self.actions['exit'] = QAction("退出", self)
+        
+        file_menu.addAction(self.actions['import_config'])
+        file_menu.addAction(self.actions['export_config'])
+        file_menu.addSeparator()
+        file_menu.addAction(self.actions['exit'])
+        
+        # 工具菜单
+        tools_menu = self.menu_bar.addMenu("工具")
+        
+        self.actions['execution_history'] = QAction("执行历史", self)
+        self.actions['database_management'] = QAction("数据库管理", self)
+        self.actions['log_management'] = QAction("日志管理", self)
+        self.actions['settings'] = QAction("设置", self)
+        
+        tools_menu.addAction(self.actions['execution_history'])
+        tools_menu.addSeparator()
+        tools_menu.addAction(self.actions['database_management'])
+        tools_menu.addAction(self.actions['log_management'])
+        tools_menu.addSeparator()
+        tools_menu.addAction(self.actions['settings'])
+        
+        # 帮助菜单
+        help_menu = self.menu_bar.addMenu("帮助")
+        
+        self.actions['about'] = QAction("关于", self)
+        help_menu.addAction(self.actions['about'])
+    
+    def _create_tool_bar(self):
+        """创建工具栏"""
+        self.tool_bar = self.addToolBar("主工具栏")
+        self.tool_bar.setToolButtonStyle(Qt.ToolButtonStyle.ToolButtonTextBesideIcon)
+        
+        # 添加工具栏按钮
+        self.tool_bar.addAction(self.actions.get('start', self._create_action("开始", "开始自动化")))
+        self.tool_bar.addAction(self.actions.get('stop', self._create_action("停止", "停止自动化")))
+        self.tool_bar.addSeparator()
+        self.tool_bar.addAction(self.actions['settings'])
+    
+    def _create_action(self, text: str, tooltip: str) -> QAction:
+        """创建动作
+        
+        Args:
+            text: 动作文本
+            tooltip: 工具提示
+        
+        Returns:
+            创建的动作
+        """
+        action = QAction(text, self)
+        action.setToolTip(tooltip)
+        return action
+    
+    def _create_status_bar(self):
         """创建状态栏"""
         self.status_bar = self.statusBar()
-
-        # 默认状态消息
-        self.status_bar.showMessage("就绪")
-
-        # 添加永久部件
-        self.status_bar.addPermanentWidget(QLabel("星铁自动化助手 v1.0"))
-
-    def setup_styles(self):
-        """设置样式"""
-        self.setStyleSheet(
-            """
-            QMainWindow {
-                background-color: #f5f5f5;
-            }
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #cccccc;
-                border-radius: 5px;
-                margin-top: 1ex;
-                padding-top: 10px;
-            }
-            QGroupBox::title {
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px 0 5px;
-            }
-            QPushButton {
-                background-color: #ffffff;
-                border: 1px solid #cccccc;
-                border-radius: 4px;
-                padding: 6px 12px;
-                min-width: 80px;
-            }
-            QPushButton:hover {
-                background-color: #e6e6e6;
-            }
-            QPushButton:pressed {
-                background-color: #d4d4d4;
-            }
+        
+        # 状态标签
+        self.status_label = QLabel("就绪")
+        self.status_bar.addWidget(self.status_label)
+        
+        # 任务信息标签
+        self.task_info_label = QLabel("无任务")
+        self.status_bar.addPermanentWidget(self.task_info_label)
+        
+        # 时间标签
+        self.time_label = QLabel("")
+        self.status_bar.addPermanentWidget(self.time_label)
+    
+    def _connect_signals(self):
+        """连接信号"""
+        # 控制按钮信号
+        if self.start_button:
+            self.start_button.clicked.connect(self.start_automation_requested.emit)
+        if self.stop_button:
+            self.stop_button.clicked.connect(self.stop_automation_requested.emit)
+        
+        # 标签页切换信号
+        if self.tab_widget:
+            self.tab_widget.currentChanged.connect(self.tab_changed.emit)
+        
+        # 菜单动作信号
+        if 'import_config' in self.actions:
+            self.actions['import_config'].triggered.connect(self.import_config_requested.emit)
+        if 'export_config' in self.actions:
+            self.actions['export_config'].triggered.connect(self.export_config_requested.emit)
+        if 'exit' in self.actions:
+            self.actions['exit'].triggered.connect(self.close)
+        if 'execution_history' in self.actions:
+            self.actions['execution_history'].triggered.connect(self.show_execution_history_requested.emit)
+        if 'database_management' in self.actions:
+            self.actions['database_management'].triggered.connect(self.database_management_requested.emit)
+        if 'log_management' in self.actions:
+            self.actions['log_management'].triggered.connect(self.log_management_requested.emit)
+        if 'settings' in self.actions:
+            self.actions['settings'].triggered.connect(self.settings_requested.emit)
+        if 'about' in self.actions:
+            self.actions['about'].triggered.connect(self.about_requested.emit)
+        
+        # 设置组件信号
+        if self.game_settings_widget:
+            self.game_settings_widget.settings_changed.connect(self.game_settings_changed.emit)
+        if self.automation_settings_widget:
+            self.automation_settings_widget.settings_changed.connect(self.automation_settings_changed.emit)
+        if self.log_viewer_widget:
+            self.log_viewer_widget.log_exported.connect(self.log_exported.emit)
+            self.log_viewer_widget.log_cleared.connect(self.log_cleared.emit)
+    
+    # 状态更新方法
+    def update_automation_status(self, is_running: bool):
+        """更新自动化状态
+        
+        Args:
+            is_running: 是否运行中
         """
-        )
-
-    def setup_connections(self):
-        """设置内部信号连接"""
-        # 监控面板的信号连接
-        if self.monitoring_dashboard:
-            self.monitoring_dashboard.alert_received.connect(self.on_alert_received)
-
-    # === 界面更新方法 ===
-
-    def update_automation_status(self, status: str):
-        """更新自动化状态"""
-        if self.automation_status_indicator:
-            self.automation_status_indicator.update_status(status)
-
-        # 更新按钮状态
-        if status == "running":
-            self.start_btn.setEnabled(False)
-            self.pause_btn.setEnabled(True)
-            self.stop_btn.setEnabled(True)
-        elif status == "paused":
-            self.start_btn.setEnabled(True)
-            self.pause_btn.setEnabled(False)
-            self.stop_btn.setEnabled(True)
-        else:  # stopped
-            self.start_btn.setEnabled(True)
-            self.pause_btn.setEnabled(False)
-            self.stop_btn.setEnabled(False)
-
-    def update_system_status(self, status: str):
-        """更新系统状态"""
-        if self.system_status_indicator:
-            self.system_status_indicator.update_status(status)
-
-    def update_task_statistics(self, stats: Dict[str, Any]):
-        """更新任务统计"""
-        if self.active_tasks_metric:
-            self.active_tasks_metric.update_value(str(stats.get("active", 0)), "个")
-
-        if self.completed_tasks_metric:
-            self.completed_tasks_metric.update_value(
-                str(stats.get("completed", 0)), "个"
-            )
-
-        if self.error_count_metric:
-            self.error_count_metric.update_value(str(stats.get("errors", 0)), "个")
-
-    def update_uptime(self, uptime_minutes: int):
-        """更新运行时间"""
-        if self.uptime_metric:
-            if uptime_minutes < 60:
-                self.uptime_metric.update_value(str(uptime_minutes), "分钟")
+        if self.start_button:
+            self.start_button.setEnabled(not is_running)
+        if self.stop_button:
+            self.stop_button.setEnabled(is_running)
+        
+        status_text = "运行中" if is_running else "就绪"
+        if self.status_label:
+            self.status_label.setText(status_text)
+    
+    def update_status_message(self, message: str):
+        """更新状态消息
+        
+        Args:
+            message: 状态消息
+        """
+        if self.status_text:
+            # 限制状态文本长度
+            if len(message) > 1000:
+                lines = message.split('\n')
+                if len(lines) > 20:
+                    message = '\n'.join(lines[-20:])
+            
+            self.status_text.setPlainText(message)
+            # 滚动到底部
+            cursor = self.status_text.textCursor()
+            cursor.movePosition(cursor.MoveOperation.End)
+            self.status_text.setTextCursor(cursor)
+        
+        if self.status_label:
+            # 状态栏显示简短消息
+            short_message = message.split('\n')[-1] if '\n' in message else message
+            if len(short_message) > 50:
+                short_message = short_message[:47] + "..."
+            self.status_label.setText(short_message)
+    
+    def update_current_task(self, task_id: str):
+        """更新当前任务显示
+        
+        Args:
+            task_id: 任务ID
+        """
+        if self.task_info_label:
+            if task_id:
+                self.task_info_label.setText(f"当前任务: {task_id[:8]}...")
             else:
-                hours = uptime_minutes // 60
-                minutes = uptime_minutes % 60
-                self.uptime_metric.update_value(f"{hours}:{minutes:02d}", "小时")
-
-    def show_status_message(self, message: str, timeout: int = 0):
-        """显示状态消息"""
-        if self.status_bar:
-            self.status_bar.showMessage(message, timeout)
-
-    def show_error_message(self, title: str, message: str):
-        """显示错误消息"""
-        from PyQt6.QtWidgets import QMessageBox
-
-        QMessageBox.critical(self, title, message)
-
-    def show_info_message(self, title: str, message: str):
-        """显示信息消息"""
-        from PyQt6.QtWidgets import QMessageBox
-
-        QMessageBox.information(self, title, message)
-
-    def show_warning_message(self, title: str, message: str):
-        """显示警告消息"""
-        from PyQt6.QtWidgets import QMessageBox
-
-        QMessageBox.warning(self, title, message)
-
-    def confirm_action(self, title: str, message: str) -> bool:
-        """确认操作"""
-        from PyQt6.QtWidgets import QMessageBox
-
-        reply = QMessageBox.question(
-            self,
-            title,
-            message,
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
-            QMessageBox.StandardButton.No,
-        )
-        return reply == QMessageBox.StandardButton.Yes
-
-    # === 事件处理方法 ===
-
-    def on_alert_received(self, level: str, message: str, data: Dict[str, Any]):
-        """处理告警"""
-        # 在状态栏显示告警
-        self.show_status_message(f"[{level.upper()}] {message}", 5000)
-
-        # 严重告警弹窗提示
-        if level in ["critical", "error"]:
-            self.show_error_message("系统告警", message)
-
-    def closeEvent(self, event):
-        """窗口关闭事件"""
-        if self.confirm_action("确认退出", "确定要退出星铁自动化助手吗？"):
-            self.exit_requested.emit()
-            event.accept()
-        else:
-            event.ignore()
-
-    # === BaseView接口实现 ===
-
-    def show_loading(self, message: str = "加载中..."):
-        """显示加载状态"""
-        self.show_status_message(message)
-
-    def hide_loading(self):
-        """隐藏加载状态"""
-        self.show_status_message("就绪")
-
-    def show_error(self, error: str):
-        """显示错误"""
-        self.show_error_message("错误", error)
-
+                self.task_info_label.setText("无任务")
+    
+    def update_time_display(self, time_text: str):
+        """更新时间显示
+        
+        Args:
+            time_text: 时间文本
+        """
+        if self.time_label:
+            self.time_label.setText(time_text)
+    
+    def set_current_tab(self, tab_index: int):
+        """设置当前标签页
+        
+        Args:
+            tab_index: 标签页索引
+        """
+        if self.tab_widget and 0 <= tab_index < self.tab_widget.count():
+            self.tab_widget.setCurrentIndex(tab_index)
+    
+    def get_current_tab(self) -> int:
+        """获取当前标签页索引
+        
+        Returns:
+            当前标签页索引
+        """
+        return self.tab_widget.currentIndex() if self.tab_widget else 0
+    
+    # MVP组件访问器
+    def get_task_list_mvp(self) -> Optional[TaskListMVP]:
+        """获取任务列表MVP组件"""
+        return self.task_list_mvp
+    
+    def get_task_creation_mvp(self) -> Optional[TaskCreationMVP]:
+        """获取任务创建MVP组件"""
+        return self.task_creation_mvp
+    
+    def get_game_settings_widget(self) -> Optional[GameSettingsWidget]:
+        """获取游戏设置组件"""
+        return self.game_settings_widget
+    
+    def get_automation_settings_widget(self) -> Optional[AutomationSettingsWidget]:
+        """获取自动化设置组件"""
+        return self.automation_settings_widget
+    
+    def get_log_viewer_widget(self) -> Optional[LogViewerWidget]:
+        """获取日志查看组件"""
+        return self.log_viewer_widget
+    
+    # 对话框显示
+    def show_execution_history_dialog(self):
+        """显示执行历史对话框"""
+        try:
+            dialog = TaskExecutionHistoryDialog(self)
+            dialog.exec()
+        except Exception as e:
+            logger.error(f"显示执行历史对话框失败: {e}")
+            self.show_error_message("错误", f"无法显示执行历史: {e}")
+    
+    def show_about_dialog(self):
+        """显示关于对话框"""
+        QMessageBox.about(self, "关于", 
+                         "星铁自动化工具\n\n"
+                         "版本: 1.0.0\n"
+                         "一个用于崩坏：星穹铁道的自动化工具")
+    
+    # BaseView接口实现
+    def set_loading(self, loading: bool):
+        """设置加载状态
+        
+        Args:
+            loading: 是否加载中
+        """
+        # 可以在这里添加加载指示器
+        self.setEnabled(not loading)
+    
     def update_data(self, data: Dict[str, Any]):
-        """更新数据显示"""
-        # 更新自动化状态
-        if "automation_status" in data:
-            self.update_automation_status(data["automation_status"])
-
-        # 更新系统状态
-        if "system_status" in data:
-            self.update_system_status(data["system_status"])
-
-        # 更新任务统计
-        if "task_statistics" in data:
-            self.update_task_statistics(data["task_statistics"])
-
-        # 更新运行时间
-        if "uptime_minutes" in data:
-            self.update_uptime(data["uptime_minutes"])
-
+        """更新数据显示
+        
+        Args:
+            data: 数据字典
+        """
+        # 根据数据类型更新相应的显示
+        if 'automation_status' in data:
+            self.update_automation_status(data['automation_status'])
+        
+        if 'status_message' in data:
+            self.update_status_message(data['status_message'])
+        
+        if 'current_task' in data:
+            self.update_current_task(data['current_task'])
+        
+        if 'time_display' in data:
+            self.update_time_display(data['time_display'])
+        
+        if 'current_tab' in data:
+            self.set_current_tab(data['current_tab'])
+    
     def set_enabled(self, enabled: bool):
-        """设置启用状态"""
+        """设置启用状态
+        
+        Args:
+            enabled: 是否启用
+        """
         self.setEnabled(enabled)
-
-    def get_user_input(self, prompt: str) -> Optional[str]:
-        """获取用户输入"""
-        from PyQt6.QtWidgets import QInputDialog
-
-        text, ok = QInputDialog.getText(self, "输入", prompt)
-        return text if ok else None
+    
+    def get_user_input(self) -> Dict[str, Any]:
+        """获取用户输入
+        
+        Returns:
+            用户输入数据字典
+        """
+        return {
+            'current_tab': self.get_current_tab(),
+            'window_geometry': self.geometry(),
+            'splitter_sizes': self.main_splitter.sizes() if self.main_splitter else []
+        }
+    
+    def show_message(self, title: str, message: str, message_type: str = "info"):
+        """显示消息
+        
+        Args:
+            title: 标题
+            message: 消息内容
+            message_type: 消息类型 (info, warning, error)
+        """
+        if message_type == "warning":
+            QMessageBox.warning(self, title, message)
+        elif message_type == "error":
+            QMessageBox.critical(self, title, message)
+        else:
+            QMessageBox.information(self, title, message)
+    
+    def show_error_message(self, title: str, message: str):
+        """显示错误消息
+        
+        Args:
+            title: 标题
+            message: 错误消息
+        """
+        self.show_message(title, message, "error")
+    
+    def show_confirmation_dialog(self, title: str, message: str) -> bool:
+        """显示确认对话框
+        
+        Args:
+            title: 标题
+            message: 消息内容
+        
+        Returns:
+            用户是否确认
+        """
+        reply = QMessageBox.question(self, title, message,
+                                   QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                                   QMessageBox.StandardButton.No)
+        return reply == QMessageBox.StandardButton.Yes
+    
+    # 窗口状态管理
+    def get_window_state(self) -> Dict[str, Any]:
+        """获取窗口状态
+        
+        Returns:
+            窗口状态字典
+        """
+        return {
+            'geometry': self.geometry(),
+            'splitter_sizes': self.main_splitter.sizes() if self.main_splitter else [],
+            'current_tab': self.get_current_tab(),
+            'window_state': self.windowState(),
+            'is_maximized': self.isMaximized()
+        }
+    
+    def restore_window_state(self, state: Dict[str, Any]):
+        """恢复窗口状态
+        
+        Args:
+            state: 窗口状态字典
+        """
+        try:
+            if 'geometry' in state:
+                self.setGeometry(state['geometry'])
+            
+            if 'splitter_sizes' in state and self.main_splitter:
+                self.main_splitter.setSizes(state['splitter_sizes'])
+            
+            if 'current_tab' in state:
+                self.set_current_tab(state['current_tab'])
+            
+            if 'is_maximized' in state and state['is_maximized']:
+                self.showMaximized()
+                
+        except Exception as e:
+            logger.warning(f"恢复窗口状态失败: {e}")
+    
+    # 事件处理
+    def closeEvent(self, event):
+        """窗口关闭事件
+        
+        Args:
+            event: 关闭事件
+        """
+        # 发出窗口状态变化信号
+        self.window_state_changed.emit(self.get_window_state())
+        
+        # 调用父类的关闭事件
+        super().closeEvent(event)
+    
+    def resizeEvent(self, event):
+        """窗口大小变化事件
+        
+        Args:
+            event: 大小变化事件
+        """
+        super().resizeEvent(event)
+        
+        # 发出窗口状态变化信号
+        self.window_state_changed.emit(self.get_window_state())
+    
+    # 清理资源
+    def cleanup(self):
+        """清理资源"""
+        try:
+            # 清理MVP组件
+            if self.task_list_mvp:
+                self.task_list_mvp.cleanup()
+            
+            if self.task_creation_mvp:
+                self.task_creation_mvp.cleanup()
+            
+            logger.debug("MainWindowView 资源清理完成")
+            
+        except Exception as e:
+            logger.error(f"清理MainWindowView资源失败: {e}")

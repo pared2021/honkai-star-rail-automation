@@ -1,25 +1,12 @@
 """服务层模块
 
-提供应用服务的统一入口。
+提供UI层和核心层之间的解耦服务。
 """
 
-from .automation_application_service import (
-    AutomationApplicationService,
-    AutomationError,
-    ElementMatch,
-    ElementNotFoundError,
-    OperationTimeoutError,
-    WindowInfo,
-    WindowNotFoundError,
-)
+from .application_service import ApplicationService
+from .ui_service_facade import UIServiceFacade
 
 __all__ = [
-    # 自动化服务
-    "AutomationApplicationService",
-    "AutomationError",
-    "WindowNotFoundError",
-    "ElementNotFoundError",
-    "OperationTimeoutError",
-    "WindowInfo",
-    "ElementMatch",
+    'ApplicationService',
+    'UIServiceFacade'
 ]

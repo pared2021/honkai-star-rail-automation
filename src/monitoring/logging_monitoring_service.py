@@ -128,6 +128,7 @@ class LoggingMonitoringService(QObject):
         performance_monitor: PerformanceMonitor,
         task_monitor: TaskMonitor,
         log_directory: str = "logs",
+        config_manager=None,
     ):
         """初始化日志和监控服务
 
@@ -135,12 +136,14 @@ class LoggingMonitoringService(QObject):
             performance_monitor: 性能监控器
             task_monitor: 任务监控器
             log_directory: 日志目录
+            config_manager: 配置管理器
         """
         super().__init__()
 
         self.performance_monitor = performance_monitor
         self.task_monitor = task_monitor
         self.log_directory = Path(log_directory)
+        self.config_manager = config_manager
 
         # 确保日志目录存在
         self.log_directory.mkdir(exist_ok=True)
@@ -151,10 +154,10 @@ class LoggingMonitoringService(QObject):
         self.system_metrics_history: List[SystemMetrics] = []
 
         # 配置
-        self.max_log_entries = 10000
-        self.max_events = 5000
-        self.max_metrics_history = 1440  # 24小时的分钟数
-        self.metrics_collection_interval = 60  # 秒
+        self.max_log_entries = self._get_config_value('monitoring.max_log_entries', 10000)
+        self.max_events = self._get_config_value('monitoring.max_events', 5000)
+        self.max_metrics_history = self._get_config_value('monitoring.max_metrics_history', 1440)  # 24小时的分钟数
+        self.metrics_collection_interval = self._get_config_value('monitoring.metrics_collection_interval', 60)  # 秒
 
         # 告警配置
         self.alert_rules: Dict[str, Dict[str, Any]] = {}
@@ -166,9 +169,9 @@ class LoggingMonitoringService(QObject):
         self.metrics_timer.timeout.connect(self._collect_system_metrics)
 
         # 文件输出配置
-        self.enable_file_output = True
-        self.log_rotation_size = 10 * 1024 * 1024  # 10MB
-        self.log_retention_days = 30
+        self.enable_file_output = self._get_config_value('monitoring.enable_file_output', True)
+        self.log_rotation_size = self._get_config_value('monitoring.log_rotation_size', 10 * 1024 * 1024)  # 10MB
+        self.log_retention_days = self._get_config_value('monitoring.log_retention_days', 30)
 
         # 初始化
         self._setup_performance_callbacks()
@@ -176,6 +179,20 @@ class LoggingMonitoringService(QObject):
         self._setup_default_alert_rules()
 
         logger.info("日志和监控服务初始化完成")
+
+    def _get_config_value(self, key: str, default_value):
+        """从配置管理器获取配置值
+        
+        Args:
+            key: 配置键
+            default_value: 默认值
+            
+        Returns:
+            配置值或默认值
+        """
+        if self.config_manager:
+            return self.config_manager.get(key, default_value)
+        return default_value
 
     def start(self):
         """启动服务"""

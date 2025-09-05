@@ -113,6 +113,20 @@ class ResourceLimits:
     max_memory_usage: float = 85.0
     max_execution_time: int = 300  # 秒
     priority_boost_threshold: int = 10  # 等待时间超过此值时提升优先级
+    
+    @classmethod
+    def from_config_manager(cls, config_manager, defaults=None):
+        """从配置管理器创建资源限制配置."""
+        if config_manager is None:
+            return cls() if defaults is None else cls(**defaults)
+        
+        return cls(
+            max_concurrent_tasks=config_manager.get("resource_limits.max_concurrent_tasks", 4),
+            max_cpu_usage=config_manager.get("resource_limits.max_cpu_usage", 80.0),
+            max_memory_usage=config_manager.get("resource_limits.max_memory_usage", 85.0),
+            max_execution_time=config_manager.get("resource_limits.max_execution_time", 300),
+            priority_boost_threshold=config_manager.get("resource_limits.priority_boost_threshold", 10)
+        )
 
 
 class ConcurrentTaskQueue:
@@ -156,40 +170,47 @@ class TaskManager:
     """异步任务管理器 - 负责任务的创建、管理和执行"""
 
     def __init__(
-        self, db_manager: DatabaseManager, default_user_id: str = "default_user"
+        self, db_manager: DatabaseManager, default_user_id: str = "default_user", config_manager=None
     ):
         """初始化任务管理器
 
         Args:
             db_manager: 数据库管理器
             default_user_id: 默认用户ID
+            config_manager: 配置管理器
         """
         self.db_manager = db_manager
         self.default_user_id = default_user_id
+        self.config_manager = config_manager
         self.task_executor = TaskExecutor(db_manager)
+        
+        # 从配置管理器获取配置值
         self._connection_pool = {}
-        self._pool_size = 10
-        self._connection_timeout = 30
+        self._pool_size = config_manager.get("task_manager.pool_size", 10) if config_manager else 10
+        self._connection_timeout = config_manager.get("task_manager.connection_timeout", 30) if config_manager else 30
         self._query_cache = {}
-        self._cache_size = 100
-        self._cache_ttl = 300  # 5分钟缓存过期
+        self._cache_size = config_manager.get("task_manager.cache_size", 100) if config_manager else 100
+        self._cache_ttl = config_manager.get("task_manager.cache_ttl", 300) if config_manager else 300  # 5分钟缓存过期
 
         # 状态监控相关
         self._status_monitors = {}  # 任务状态监控器
         self._status_callbacks = {}  # 状态变更回调
         self._monitoring_active = False
-        self._monitor_interval = 5  # 监控间隔（秒）
+        self._monitor_interval = config_manager.get("task_manager.monitor_interval", 5) if config_manager else 5  # 监控间隔（秒）
         self._monitor_task = None
 
         # 调度相关
         self._scheduler_active = False
         self._scheduler_task = None
-        self._scheduler_interval = 10  # 调度间隔（秒）
+        self._scheduler_interval = config_manager.get("task_manager.scheduler_interval", 10) if config_manager else 10  # 调度间隔（秒）
         self._task_dependencies = {}  # 任务依赖关系
-        self._priority_weights = {"low": 1, "medium": 2, "high": 3, "urgent": 4}
+        
+        # 优先级权重从配置获取
+        default_priority_weights = {"low": 1, "medium": 2, "high": 3, "urgent": 4}
+        self._priority_weights = config_manager.get("task_manager.priority_weights", default_priority_weights) if config_manager else default_priority_weights
 
         # 并发执行相关（从MultiTaskManager整合）
-        self._max_concurrent_tasks = 5
+        self._max_concurrent_tasks = config_manager.get("task_manager.max_concurrent_tasks", 5) if config_manager else 5
         self._execution_semaphore = asyncio.Semaphore(self._max_concurrent_tasks)
         self._running_tasks = {}  # 正在运行的任务
         self._concurrent_task_queue = ConcurrentTaskQueue()  # 并发任务队列
@@ -201,14 +222,21 @@ class TaskManager:
         self._completed_executions: Dict[str, TaskExecution] = {}  # 已完成的任务执行
         self._execution_history: List[TaskExecution] = []  # 执行历史
 
-        # 资源限制和配置
+        # 资源限制和配置 - 从配置管理器获取
+        max_cpu_usage = config_manager.get("task_manager.max_cpu_usage", 80.0) if config_manager else 80.0
+        max_memory_usage = config_manager.get("task_manager.max_memory_usage", 80.0) if config_manager else 80.0
+        max_execution_time = config_manager.get("task_manager.max_execution_time", 300) if config_manager else 300
+        
         self._resource_limits = ResourceLimits(
             max_concurrent_tasks=self._max_concurrent_tasks,
-            max_cpu_usage=80.0,
-            max_memory_usage=80.0,
-            max_execution_time=300,
+            max_cpu_usage=max_cpu_usage,
+            max_memory_usage=max_memory_usage,
+            max_execution_time=max_execution_time,
         )
-        self._execution_mode = ExecutionMode.ADAPTIVE
+        
+        # 执行模式从配置获取
+        execution_mode_str = config_manager.get("task_manager.execution_mode", "adaptive") if config_manager else "adaptive"
+        self._execution_mode = ExecutionMode(execution_mode_str)
 
         # 并发管理状态
         self._concurrent_manager_running = False
@@ -334,12 +362,16 @@ class TaskManager:
         self._connection_pool.clear()
         logger.info("所有数据库连接已关闭")
 
-    async def start_status_monitoring(self, interval: int = 5):
+    async def start_status_monitoring(self, interval: int = None):
         """启动任务状态监控"""
         if self._monitoring_active:
             logger.warning("状态监控已经在运行中")
             return
 
+        # 如果没有指定间隔，使用配置管理器的值或默认值
+        if interval is None:
+            interval = self.config_manager.get("task_manager.monitor_interval", 5) if self.config_manager else 5
+            
         self._monitor_interval = interval
         self._monitoring_active = True
         self._monitor_task = asyncio.create_task(self._monitor_task_status())
@@ -417,8 +449,8 @@ class TaskManager:
                     elif isinstance(last_execution, datetime):
                         last_execution = last_execution.timestamp()
 
-                    # 检查是否超时（默认30分钟）
-                    timeout_threshold = 30 * 60  # 30分钟
+                    # 检查是否超时（从配置获取或默认30分钟）
+                    timeout_threshold = self.config_manager.get("task_manager.task_timeout_threshold", 30 * 60) if self.config_manager else 30 * 60  # 30分钟
                     if current_time - last_execution > timeout_threshold:
                         logger.warning(f"任务 {task_id} 可能已超时")
                         await self._trigger_status_callback(
@@ -493,12 +525,16 @@ class TaskManager:
             "monitors": dict(self._status_monitors),
         }
 
-    async def start_scheduler(self, interval: int = 10):
+    async def start_scheduler(self, interval: int = None):
         """启动任务调度器"""
         if self._scheduler_active:
             logger.warning("任务调度器已经在运行中")
             return
 
+        # 如果没有指定间隔，使用配置管理器的值或默认值
+        if interval is None:
+            interval = self.config_manager.get("task_manager.scheduler_interval", 10) if self.config_manager else 10
+            
         self._scheduler_interval = interval
         self._scheduler_active = True
         self._scheduler_task = asyncio.create_task(self._schedule_tasks())
@@ -675,7 +711,7 @@ class TaskManager:
         """检查资源限制"""
         # 检查当前运行的任务数量
         running_tasks = await self.list_tasks(status="running", use_cache=False)
-        max_concurrent = 10  # 最大并发任务数
+        max_concurrent = self.config_manager.get("task_manager.max_concurrent_tasks", 10) if self.config_manager else 10
 
         return len(running_tasks) < max_concurrent
 

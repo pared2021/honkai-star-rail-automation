@@ -72,6 +72,23 @@ class SchedulerConfig:
     auto_pause_on_error: bool = True
     scene_based_scheduling: bool = True
     priority_boost_factor: float = 1.2  # 优先级提升因子
+    
+    @classmethod
+    def from_config_manager(cls, config_manager):
+        """从配置管理器创建调度器配置."""
+        if config_manager is None:
+            return cls()
+        
+        return cls(
+            max_concurrent_tasks=config_manager.get("scheduler.max_concurrent_tasks", 3),
+            task_timeout=config_manager.get("scheduler.task_timeout", 300),
+            retry_delay=config_manager.get("scheduler.retry_delay", 60),
+            max_retry_count=config_manager.get("scheduler.max_retry_count", 3),
+            check_interval=config_manager.get("scheduler.check_interval", 1.0),
+            auto_pause_on_error=config_manager.get("scheduler.auto_pause_on_error", True),
+            scene_based_scheduling=config_manager.get("scheduler.scene_based_scheduling", True),
+            priority_boost_factor=config_manager.get("scheduler.priority_boost_factor", 1.2)
+        )
 
 
 class IntelligentScheduler:
@@ -82,15 +99,18 @@ class IntelligentScheduler:
         task_manager: TaskManager,
         game_detector: GameDetector,
         automation_controller: AutomationController,
+        config: Optional[SchedulerConfig] = None,
+        config_manager=None,
     ):
         """初始化智能任务调度器."""
         self.task_manager = task_manager
         self.game_detector = game_detector
         self.automation_controller = automation_controller
+        self.config_manager = config_manager
+        self.config = config or SchedulerConfig.from_config_manager(config_manager)
 
         # 调度器状态
         self.state = SchedulerState.STOPPED
-        self.config = SchedulerConfig()
 
         # 任务队列
         self.task_queue = PriorityQueue()
@@ -103,8 +123,8 @@ class IntelligentScheduler:
         self.stop_event = threading.Event()
         self.pause_event = threading.Event()
 
-        # 场景任务映射
-        self.scene_task_mapping = {
+        # 场景任务映射 - 从配置获取
+        default_mapping = {
             SceneType.MAIN_MENU: [TaskType.DAILY_MISSION, TaskType.EXPLORATION],
             SceneType.GAME_WORLD: [
                 TaskType.EXPLORATION,
@@ -117,6 +137,12 @@ class IntelligentScheduler:
             SceneType.SHOP: [TaskType.DAILY_MISSION],
             SceneType.MAIL: [TaskType.DAILY_MISSION],
         }
+        
+        if config_manager:
+            # 从配置管理器获取场景任务映射
+            self.scene_task_mapping = config_manager.get("scheduler.scene_task_mapping", default_mapping)
+        else:
+            self.scene_task_mapping = default_mapping
 
         # 回调函数
         self.task_started_callback: Optional[Callable] = None
@@ -125,6 +151,12 @@ class IntelligentScheduler:
         self.scheduler_error_callback: Optional[Callable] = None
 
         logger.info("智能任务调度器初始化完成")
+
+    def _get_config_value(self, key: str, default_value):
+        """从配置管理器获取配置值."""
+        if self.config_manager:
+            return self.config_manager.get(key, default_value)
+        return default_value
 
     def start(self) -> bool:
         """启动调度器."""
@@ -162,7 +194,8 @@ class IntelligentScheduler:
 
             # 等待调度器线程结束
             if self.scheduler_thread and self.scheduler_thread.is_alive():
-                self.scheduler_thread.join(timeout=5.0)
+                timeout = self._get_config_value("scheduler.stop_timeout", 5.0)
+                self.scheduler_thread.join(timeout=timeout)
 
             # 停止所有运行中的任务
             self._stop_all_running_tasks()
@@ -461,7 +494,8 @@ class IntelligentScheduler:
                 return TaskExecutionResult.RETRY
 
             # 等待游戏窗口稳定
-            time.sleep(1.0)
+            wait_time = self._get_config_value("scheduler.game_window_wait_time", 1.0)
+            time.sleep(wait_time)
 
             # 执行任务配置中的操作序列
             for action_data in task.config.get("actions", []):
@@ -484,20 +518,35 @@ class IntelligentScheduler:
 
     def _calculate_task_priority(self, task: Task) -> int:
         """计算任务优先级."""
-        base_priority = {
+        # 从配置获取基础优先级映射
+        default_base_priority = {
             TaskPriority.LOW: 1,
             TaskPriority.MEDIUM: 5,
             TaskPriority.HIGH: 10,
             TaskPriority.URGENT: 20,
-        }.get(task.priority, 5)
+        }
+        
+        if self.config_manager:
+            base_priority_mapping = self.config_manager.get("scheduler.base_priority_mapping", default_base_priority)
+        else:
+            base_priority_mapping = default_base_priority
+            
+        base_priority = base_priority_mapping.get(task.priority, 5)
 
-        # 根据任务类型调整优先级
-        type_bonus = {
+        # 根据任务类型调整优先级 - 从配置获取
+        default_type_bonus = {
             TaskType.DAILY_MISSION: 5,
             TaskType.COMBAT_TRAINING: 3,
             TaskType.EXPLORATION: 2,
             TaskType.CUSTOM: 1,
-        }.get(task.task_type, 1)
+        }
+        
+        if self.config_manager:
+            type_bonus_mapping = self.config_manager.get("scheduler.type_bonus_mapping", default_type_bonus)
+        else:
+            type_bonus_mapping = default_type_bonus
+            
+        type_bonus = type_bonus_mapping.get(task.task_type, 1)
 
         # 根据当前游戏场景调整优先级
         current_scene = self.game_detector.detect_current_scene()
@@ -538,7 +587,8 @@ class IntelligentScheduler:
 
                 # 等待线程结束
                 if thread.is_alive():
-                    thread.join(timeout=2.0)
+                    timeout = self._get_config_value("scheduler.task_stop_timeout", 2.0)
+                    thread.join(timeout=timeout)
 
                 # 更新任务状态
                 self.task_manager.update_task_status(task_id, TaskStatus.CANCELLED)

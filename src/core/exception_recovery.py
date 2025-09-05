@@ -88,11 +88,18 @@ class RecoveryResult:
 class ExceptionDetector:
     """异常检测器"""
 
-    def __init__(self, game_detector: GameDetector):
+    def __init__(self, game_detector: GameDetector, config_manager=None):
         self.game_detector = game_detector
+        self.config_manager = config_manager
         self.last_scene_change = datetime.now()
-        self.scene_stability_threshold = 30  # 秒
-        self.ui_response_timeout = 10  # 秒
+        self.scene_stability_threshold = self._get_config_value("exception_detector.scene_stability_threshold", 30)  # 秒
+        self.ui_response_timeout = self._get_config_value("exception_detector.ui_response_timeout", 10)  # 秒
+
+    def _get_config_value(self, key: str, default_value):
+        """从配置管理器获取配置值"""
+        if self.config_manager:
+            return self.config_manager.get(key, default_value)
+        return default_value
 
     def detect_game_crash(self) -> bool:
         """检测游戏崩溃"""
@@ -119,7 +126,8 @@ class ExceptionDetector:
                     import numpy as np
 
                     diff = cv2.absdiff(screenshot, new_screenshot)
-                    if np.sum(diff) < 1000:  # 阈值可调整
+                    freeze_threshold = self._get_config_value("exception_detector.freeze_detection_threshold", 1000)
+                    if np.sum(diff) < freeze_threshold:
                         return True
 
         return False
@@ -136,20 +144,25 @@ class ExceptionDetector:
 
         for template in error_templates:
             element = self.game_detector.find_ui_element(template)
-            if element and element.confidence > 0.8:
+            confidence_threshold = self._get_config_value("exception_detector.network_error_confidence", 0.8)
+            if element and element.confidence > confidence_threshold:
                 return True
 
         return False
 
-    def detect_ui_not_found(self, expected_ui: str, timeout: int = 10) -> bool:
+    def detect_ui_not_found(self, expected_ui: str, timeout: int = None) -> bool:
         """检测UI元素未找到"""
+        if timeout is None:
+            timeout = self._get_config_value('exception_detector.ui_not_found.timeout', 10)
+        
         start_time = time.time()
+        check_interval = self._get_config_value('exception_detector.ui_not_found.check_interval', 0.5)
 
         while time.time() - start_time < timeout:
             element = self.game_detector.find_ui_element(expected_ui)
             if element:
                 return False
-            time.sleep(0.5)
+            time.sleep(check_interval)
 
         return True
 
@@ -158,8 +171,10 @@ class ExceptionDetector:
         current_scene = self.game_detector.detect_current_scene()
         return current_scene != expected_scene
 
-    def detect_operation_timeout(self, operation_start: datetime, timeout: int) -> bool:
+    def detect_operation_timeout(self, operation_start: datetime, timeout: int = None) -> bool:
         """检测操作超时"""
+        if timeout is None:
+            timeout = self._get_config_value('exception_detector.operation_timeout.default', 30)
         return (datetime.now() - operation_start).seconds > timeout
 
 
@@ -167,11 +182,12 @@ class ExceptionRecovery:
     """异常恢复系统"""
 
     def __init__(
-        self, game_detector: GameDetector, automation_controller: AutomationController
+        self, game_detector: GameDetector, automation_controller: AutomationController, config_manager=None
     ):
         self.game_detector = game_detector
         self.automation_controller = automation_controller
-        self.detector = ExceptionDetector(game_detector)
+        self.config_manager = config_manager
+        self.detector = ExceptionDetector(game_detector, config_manager)
 
         # 恢复策略
         self.recovery_strategies = self._init_recovery_strategies()
@@ -181,8 +197,8 @@ class ExceptionRecovery:
         self.recovery_history: List[RecoveryResult] = []
 
         # 配置
-        self.max_recovery_attempts = 3
-        self.recovery_cooldown = 60  # 秒
+        self.max_recovery_attempts = self._get_config_value("exception_recovery.max_recovery_attempts", 3)
+        self.recovery_cooldown = self._get_config_value("exception_recovery.recovery_cooldown", 60)  # 秒
         self.last_recovery_time = datetime.min
 
         # 回调函数
@@ -192,50 +208,56 @@ class ExceptionRecovery:
 
         logger.info("异常恢复系统初始化完成")
 
+    def _get_config_value(self, key: str, default_value):
+        """从配置管理器获取配置值."""
+        if self.config_manager:
+            return self.config_manager.get(key, default_value)
+        return default_value
+
     def _init_recovery_strategies(self) -> Dict[ExceptionType, RecoveryStrategy]:
         """初始化恢复策略"""
         return {
             ExceptionType.GAME_CRASH: RecoveryStrategy(
                 exception_type=ExceptionType.GAME_CRASH,
                 actions=[RecoveryAction.RESTART_GAME, RecoveryAction.WAIT_AND_RETRY],
-                max_attempts=2,
-                retry_delay=10,
-                timeout=120,
+                max_attempts=self._get_config_value("recovery.game_crash.max_attempts", 2),
+                retry_delay=self._get_config_value("recovery.game_crash.retry_delay", 10),
+                timeout=self._get_config_value("recovery.game_crash.timeout", 120),
             ),
             ExceptionType.GAME_FREEZE: RecoveryStrategy(
                 exception_type=ExceptionType.GAME_FREEZE,
                 actions=[RecoveryAction.FORCE_CLOSE, RecoveryAction.RESTART_GAME],
-                max_attempts=2,
-                retry_delay=5,
-                timeout=60,
+                max_attempts=self._get_config_value("recovery.game_freeze.max_attempts", 2),
+                retry_delay=self._get_config_value("recovery.game_freeze.retry_delay", 5),
+                timeout=self._get_config_value("recovery.game_freeze.timeout", 60),
             ),
             ExceptionType.NETWORK_ERROR: RecoveryStrategy(
                 exception_type=ExceptionType.NETWORK_ERROR,
                 actions=[RecoveryAction.WAIT_AND_RETRY, RecoveryAction.REFRESH_PAGE],
-                max_attempts=3,
-                retry_delay=15,
-                timeout=90,
+                max_attempts=self._get_config_value("recovery.network_error.max_attempts", 3),
+                retry_delay=self._get_config_value("recovery.network_error.retry_delay", 15),
+                timeout=self._get_config_value("recovery.network_error.timeout", 90),
             ),
             ExceptionType.UI_NOT_FOUND: RecoveryStrategy(
                 exception_type=ExceptionType.UI_NOT_FOUND,
                 actions=[RecoveryAction.REFRESH_PAGE, RecoveryAction.RETURN_TO_MAIN],
-                max_attempts=2,
-                retry_delay=3,
-                timeout=30,
+                max_attempts=self._get_config_value("recovery.ui_not_found.max_attempts", 2),
+                retry_delay=self._get_config_value("recovery.ui_not_found.retry_delay", 3),
+                timeout=self._get_config_value("recovery.ui_not_found.timeout", 30),
             ),
             ExceptionType.UNEXPECTED_SCENE: RecoveryStrategy(
                 exception_type=ExceptionType.UNEXPECTED_SCENE,
                 actions=[RecoveryAction.RETURN_TO_MAIN, RecoveryAction.WAIT_AND_RETRY],
-                max_attempts=2,
-                retry_delay=5,
-                timeout=45,
+                max_attempts=self._get_config_value("recovery.unexpected_scene.max_attempts", 2),
+                retry_delay=self._get_config_value("recovery.unexpected_scene.retry_delay", 5),
+                timeout=self._get_config_value("recovery.unexpected_scene.timeout", 45),
             ),
             ExceptionType.OPERATION_TIMEOUT: RecoveryStrategy(
                 exception_type=ExceptionType.OPERATION_TIMEOUT,
                 actions=[RecoveryAction.REFRESH_PAGE, RecoveryAction.WAIT_AND_RETRY],
-                max_attempts=2,
-                retry_delay=5,
-                timeout=30,
+                max_attempts=self._get_config_value("recovery.operation_timeout.max_attempts", 2),
+                retry_delay=self._get_config_value("recovery.operation_timeout.retry_delay", 5),
+                timeout=self._get_config_value("recovery.operation_timeout.timeout", 30),
             ),
         }
 

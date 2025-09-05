@@ -10,8 +10,11 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional
 
 import asyncio
 
+from src.core.service_locator import get_service, ServiceMixin
+
 if TYPE_CHECKING:
-    from src.services import TaskApplicationService, AutomationApplicationService
+    from src.application.task_service import TaskService as TaskApplicationService
+    from src.application.automation_service import AutomationApplicationService
 
 from concurrent.futures import ThreadPoolExecutor
 from enum import Enum
@@ -69,17 +72,25 @@ class RetryPolicy:
 
     def __init__(
         self,
-        max_retries: int = 3,
-        base_delay: float = 1.0,
-        max_delay: float = 60.0,
-        exponential_base: float = 2.0,
-        jitter: bool = True,
+        config_manager=None,
+        max_retries: int = None,
+        base_delay: float = None,
+        max_delay: float = None,
+        exponential_base: float = None,
+        jitter: bool = None,
     ):
-        self.max_retries = max_retries
-        self.base_delay = base_delay
-        self.max_delay = max_delay
-        self.exponential_base = exponential_base
-        self.jitter = jitter
+        self.config_manager = config_manager
+        self.max_retries = max_retries or self._get_config_value('task_executor.retry_policy.max_retries', 3)
+        self.base_delay = base_delay or self._get_config_value('task_executor.retry_policy.base_delay', 1.0)
+        self.max_delay = max_delay or self._get_config_value('task_executor.retry_policy.max_delay', 60.0)
+        self.exponential_base = exponential_base or self._get_config_value('task_executor.retry_policy.exponential_base', 2.0)
+        self.jitter = jitter if jitter is not None else self._get_config_value('task_executor.retry_policy.jitter', True)
+
+    def _get_config_value(self, key: str, default):
+        """从配置管理器获取配置值"""
+        if self.config_manager:
+            return self.config_manager.get(key, default)
+        return default
 
     def should_retry(self, retry_count: int, error: Exception) -> bool:
         """判断是否应该重试"""
@@ -109,7 +120,7 @@ class RetryPolicy:
         return delay
 
 
-class TaskExecutor:
+class TaskExecutor(ServiceMixin):
     """任务执行引擎
 
     负责任务的调度、执行、状态管理和错误处理。
@@ -118,16 +129,17 @@ class TaskExecutor:
     def __init__(
         self,
         event_bus: EventBus,
-        task_service: "TaskApplicationService",
-        automation_service: "AutomationApplicationService",
-        max_concurrent_tasks: int = 5,
-        default_timeout: float = 300.0,  # 5分钟
+        max_concurrent_tasks: int = None,
+        default_timeout: float = None,
+        config_manager=None,
     ):
         self.event_bus = event_bus
-        self.task_service = task_service
-        self.automation_service = automation_service
-        self.max_concurrent_tasks = max_concurrent_tasks
-        self.default_timeout = default_timeout
+        # 使用服务定位器延迟获取服务，避免循环依赖
+        self._task_service = None
+        self._automation_service = None
+        self._config_manager = config_manager
+        self.max_concurrent_tasks = max_concurrent_tasks or self._get_config_value('task_executor.max_concurrent_tasks', 5)
+        self.default_timeout = default_timeout or self._get_config_value('task_executor.default_timeout', 300.0)
 
         # 执行器状态
         self.status = ExecutorStatus.STOPPED
@@ -137,7 +149,13 @@ class TaskExecutor:
         self._scheduler_task: Optional[asyncio.Task] = None
 
         # 重试策略
-        self.retry_policy = RetryPolicy()
+        self.retry_policy = RetryPolicy(config_manager)
+
+    def _get_config_value(self, key: str, default):
+        """从配置管理器获取配置值"""
+        if self._config_manager:
+            return self._config_manager.get(key, default)
+        return default
 
         # 线程池用于CPU密集型任务
         self.thread_pool = ThreadPoolExecutor(max_workers=2)
@@ -148,6 +166,22 @@ class TaskExecutor:
             TaskType.SCHEDULED: self._execute_scheduled_task,
             TaskType.MANUAL: self._execute_manual_task,
         }
+    
+    @property
+    def task_service(self) -> "TaskApplicationService":
+        """延迟获取任务服务"""
+        if self._task_service is None:
+            from src.application.task_service import TaskService
+            self._task_service = get_service(TaskService)
+        return self._task_service
+    
+    @property
+    def automation_service(self) -> "AutomationApplicationService":
+        """延迟获取自动化服务"""
+        if self._automation_service is None:
+            from src.application.automation_service import AutomationApplicationService
+            self._automation_service = get_service(AutomationApplicationService)
+        return self._automation_service
 
     async def start(self) -> bool:
         """启动执行引擎"""
@@ -179,10 +213,13 @@ class TaskExecutor:
             self.status = ExecutorStatus.STOPPED
             return False
 
-    async def stop(self, timeout: float = 30.0) -> bool:
+    async def stop(self, timeout: float = None) -> bool:
         """停止执行引擎"""
         if self.status == ExecutorStatus.STOPPED:
             return True
+
+        if timeout is None:
+            timeout = self._get_config_value('task_executor.stop_timeout', 30.0)
 
         try:
             self.status = ExecutorStatus.STOPPING
@@ -197,7 +234,8 @@ class TaskExecutor:
             if self._scheduler_task:
                 self._scheduler_task.cancel()
                 try:
-                    await asyncio.wait_for(self._scheduler_task, timeout=5.0)
+                    scheduler_timeout = self._get_config_value('task_executor.scheduler_stop_timeout', 5.0)
+                    await asyncio.wait_for(self._scheduler_task, timeout=scheduler_timeout)
                 except (asyncio.CancelledError, asyncio.TimeoutError):
                     pass
 
@@ -300,6 +338,9 @@ class TaskExecutor:
     async def _scheduler_loop(self):
         """调度器循环"""
         logger.info("调度器循环启动")
+        
+        scheduler_interval = self._get_config_value('task_executor.scheduler_interval', 10.0)
+        error_retry_interval = self._get_config_value('task_executor.error_retry_interval', 5.0)
 
         try:
             while self.status != ExecutorStatus.STOPPING:
@@ -308,13 +349,13 @@ class TaskExecutor:
                     await self._check_scheduled_tasks()
 
                     # 等待一段时间后再次检查
-                    await asyncio.sleep(10.0)
+                    await asyncio.sleep(scheduler_interval)
 
                 except asyncio.CancelledError:
                     break
                 except Exception as e:
                     logger.error(f"调度器循环错误: {e}")
-                    await asyncio.sleep(5.0)
+                    await asyncio.sleep(error_retry_interval)
 
         except asyncio.CancelledError:
             pass
@@ -324,18 +365,21 @@ class TaskExecutor:
     async def _worker_loop(self, worker_id: int):
         """工作线程循环"""
         logger.info(f"工作线程 {worker_id} 启动")
+        
+        queue_timeout = self._get_config_value('task_executor.queue_timeout', 1.0)
+        worker_sleep_interval = self._get_config_value('task_executor.worker_sleep_interval', 1.0)
 
         try:
             while self.status != ExecutorStatus.STOPPING:
                 try:
                     # 等待任务
-                    task = await asyncio.wait_for(self._task_queue.get(), timeout=1.0)
+                    task = await asyncio.wait_for(self._task_queue.get(), timeout=queue_timeout)
 
                     # 检查执行器状态
                     if self.status == ExecutorStatus.PAUSED:
                         # 暂停状态下重新放回队列
                         await self._task_queue.put(task)
-                        await asyncio.sleep(1.0)
+                        await asyncio.sleep(worker_sleep_interval)
                         continue
 
                     # 执行任务
@@ -348,7 +392,7 @@ class TaskExecutor:
                     break
                 except Exception as e:
                     logger.error(f"工作线程 {worker_id} 错误: {e}")
-                    await asyncio.sleep(1.0)
+                    await asyncio.sleep(worker_sleep_interval)
 
         except asyncio.CancelledError:
             pass
@@ -536,7 +580,8 @@ class TaskExecutor:
         logger.info(f"执行手动任务: {task.task_id}")
 
         # 模拟一些处理时间
-        await asyncio.sleep(1.0)
+        processing_delay = self._get_config_value('task_executor.manual_task_processing_delay', 1.0)
+        await asyncio.sleep(processing_delay)
 
         return {"task_type": "manual", "execution_time": context.elapsed_time}
 

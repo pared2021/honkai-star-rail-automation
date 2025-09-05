@@ -159,12 +159,12 @@ class ImageCache:
 class PerformanceOptimizer:
     """性能优化器"""
 
-    def __init__(self):
-        self.image_cache = ImageCache()
+    def __init__(self, detection_interval: float = 0.1, max_templates_per_detection: int = 10, max_cache_size: int = 100):
+        self.image_cache = ImageCache(max_size=max_cache_size)
         self.optimization_enabled = True
         self.current_image_scale = 1.0
-        self.detection_interval = 0.1  # 秒
-        self.max_templates_per_detection = 10
+        self.detection_interval = detection_interval
+        self.max_templates_per_detection = max_templates_per_detection
 
     def optimize_image_processing(
         self, image: np.ndarray, performance_level: PerformanceLevel
@@ -223,17 +223,24 @@ class PerformanceOptimizer:
 class PerformanceMonitor:
     """性能监控系统"""
 
-    def __init__(self, monitoring_interval: float = 1.0, history_size: int = 300):
-        self.monitoring_interval = monitoring_interval
-        self.history_size = history_size
+    def __init__(self, config_manager=None, monitoring_interval: float = None, history_size: int = None):
+        self._config_manager = config_manager
+        
+        # 从配置管理器获取配置或使用默认值
+        if config_manager:
+            self.monitoring_interval = monitoring_interval or config_manager.get('performance_monitor.monitoring_interval', 1.0)
+            self.history_size = history_size or config_manager.get('performance_monitor.history_size', 300)
+        else:
+            self.monitoring_interval = monitoring_interval or 1.0
+            self.history_size = history_size or 300
 
         # 性能数据
-        self.metrics_history: deque = deque(maxlen=history_size)
+        self.metrics_history: deque = deque(maxlen=self.history_size)
         self.image_metrics = ImageProcessingMetrics()
 
         # 配置
-        self.thresholds = PerformanceThresholds()
-        self.optimizer = PerformanceOptimizer()
+        self.thresholds = self._create_thresholds()
+        self.optimizer = self._create_optimizer()
 
         # 监控状态
         self.monitoring_active = False
@@ -248,6 +255,32 @@ class PerformanceMonitor:
         self.process = psutil.Process()
 
         logger.info("性能监控系统初始化完成")
+
+    def _create_thresholds(self) -> PerformanceThresholds:
+        """创建性能阈值配置"""
+        if self._config_manager:
+            return PerformanceThresholds(
+                cpu_warning=self._config_manager.get('performance_monitor.cpu_warning', 70.0),
+                cpu_critical=self._config_manager.get('performance_monitor.cpu_critical', 90.0),
+                memory_warning=self._config_manager.get('performance_monitor.memory_warning', 80.0),
+                memory_critical=self._config_manager.get('performance_monitor.memory_critical', 95.0),
+                response_time_warning=self._config_manager.get('performance_monitor.response_time_warning', 1.0),
+                response_time_critical=self._config_manager.get('performance_monitor.response_time_critical', 3.0),
+                fps_warning=self._config_manager.get('performance_monitor.fps_warning', 15.0),
+                fps_critical=self._config_manager.get('performance_monitor.fps_critical', 5.0)
+            )
+        else:
+            return PerformanceThresholds()
+
+    def _create_optimizer(self) -> PerformanceOptimizer:
+        """创建性能优化器配置"""
+        if self._config_manager:
+            detection_interval = self._config_manager.get('performance_optimizer.detection_interval', 0.1)
+            max_templates_per_detection = self._config_manager.get('performance_optimizer.max_templates_per_detection', 10)
+            max_cache_size = self._config_manager.get('performance_optimizer.max_cache_size', 100)
+            return PerformanceOptimizer(detection_interval, max_templates_per_detection, max_cache_size)
+        else:
+            return PerformanceOptimizer()
 
     def start_monitoring(self):
         """开始性能监控"""
@@ -266,7 +299,8 @@ class PerformanceMonitor:
         """停止性能监控"""
         self.monitoring_active = False
         if self.monitor_thread and self.monitor_thread.is_alive():
-            self.monitor_thread.join(timeout=5)
+            timeout = self._config_manager.get('performance_monitor.thread_stop_timeout', 5.0) if self._config_manager else 5.0
+            self.monitor_thread.join(timeout=timeout)
         logger.info("性能监控已停止")
 
     def _monitoring_loop(self):
@@ -352,9 +386,11 @@ class PerformanceMonitor:
             return PerformanceLevel.CRITICAL
         elif any(warning_conditions):
             return PerformanceLevel.POOR
-        elif metrics.cpu_percent > 50 or metrics.memory_percent > 50:
+        elif (metrics.cpu_percent > self._get_config_value('performance_monitor.fair_cpu_threshold', 50) or 
+              metrics.memory_percent > self._get_config_value('performance_monitor.fair_memory_threshold', 50)):
             return PerformanceLevel.FAIR
-        elif metrics.cpu_percent > 30 or metrics.memory_percent > 30:
+        elif (metrics.cpu_percent > self._get_config_value('performance_monitor.good_cpu_threshold', 30) or 
+              metrics.memory_percent > self._get_config_value('performance_monitor.good_memory_threshold', 30)):
             return PerformanceLevel.GOOD
         else:
             return PerformanceLevel.EXCELLENT
@@ -423,7 +459,8 @@ class PerformanceMonitor:
         recent_metrics = [m for m in self.metrics_history if m.timestamp >= cutoff_time]
 
         if not recent_metrics:
-            recent_metrics = list(self.metrics_history)[-10:]  # 至少取最近10个数据点
+            min_data_points = self._get_config_value('performance_monitor.min_data_points', 10)
+            recent_metrics = list(self.metrics_history)[-min_data_points:]  # 至少取最近N个数据点
 
         # 计算统计信息
         cpu_values = [m.cpu_percent for m in recent_metrics]
@@ -518,7 +555,9 @@ class PerformanceMonitor:
 
         # 图像处理优化建议
         cache_hit_rate = self.image_metrics.get_cache_hit_rate()
-        if cache_hit_rate < 0.5 and self.image_metrics.templates_processed > 100:
+        min_cache_hit_rate = self._get_config_value('performance_monitor.min_cache_hit_rate', 0.5)
+        min_templates_threshold = self._get_config_value('performance_monitor.min_templates_threshold', 100)
+        if cache_hit_rate < min_cache_hit_rate and self.image_metrics.templates_processed > min_templates_threshold:
             recommendations.append(
                 {
                     "type": "image_processing",
@@ -577,6 +616,15 @@ class PerformanceMonitor:
                 setattr(self.thresholds, key, value)
                 logger.info(f"性能阈值已更新: {key} = {value}")
 
+    def _get_config_value(self, key: str, default_value: Any) -> Any:
+        """从配置管理器获取配置值"""
+        if self._config_manager:
+            try:
+                return self._config_manager.get(key, default_value)
+            except Exception:
+                return default_value
+        return default_value
+    
     def reset_image_metrics(self):
         """重置图像处理指标"""
         self.image_metrics = ImageProcessingMetrics()

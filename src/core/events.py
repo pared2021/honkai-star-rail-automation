@@ -269,11 +269,12 @@ class EventBus:
     负责事件的订阅、发布和分发。
     """
 
-    def __init__(self):
+    def __init__(self, config_manager=None):
         self._handlers: Dict[str, List[EventHandler]] = {}
         self._event_queue: asyncio.Queue = asyncio.Queue()
         self._processor_task: Optional[asyncio.Task] = None
         self._running = False
+        self._config_manager = config_manager
 
     async def start(self):
         """启动事件总线"""
@@ -366,7 +367,10 @@ class EventBus:
             while self._running:
                 try:
                     # 等待事件
-                    event = await asyncio.wait_for(self._event_queue.get(), timeout=1.0)
+                    timeout = 1.0
+                    if self._config_manager:
+                        timeout = self._config_manager.get('event_bus.queue_timeout', 1.0)
+                    event = await asyncio.wait_for(self._event_queue.get(), timeout=timeout)
 
                     # 分发事件
                     await self._dispatch_event(event)

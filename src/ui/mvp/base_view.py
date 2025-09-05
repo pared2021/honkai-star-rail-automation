@@ -8,7 +8,7 @@ from abc import ABC, ABCMeta, abstractmethod
 import logging
 from typing import Any, Callable, Dict, Optional
 
-from ...gui.common.gui_components import (
+from ..common.ui_components import (
     QMessageBox,
     QWidget,
     pyqtSignal,

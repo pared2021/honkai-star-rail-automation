@@ -695,9 +695,9 @@ class HealthChecker(QObject):
         system_config = HealthCheckConfig(
             name="system_resources",
             component_type=ComponentType.CPU,
-            check_interval_seconds=30,
-            warning_threshold=80.0,
-            critical_threshold=95.0,
+            check_interval_seconds=self._get_config_value("health_checker.system_check_interval", 30),
+            warning_threshold=self._get_config_value("health_checker.system_warning_threshold", 80.0),
+            critical_threshold=self._get_config_value("health_checker.system_critical_threshold", 95.0),
         )
         self.add_health_check(
             "system_resources", SystemResourceHealthCheck(system_config)
@@ -708,25 +708,25 @@ class HealthChecker(QObject):
             db_config = HealthCheckConfig(
                 name="database",
                 component_type=ComponentType.DATABASE,
-                check_interval_seconds=60,
-                timeout_seconds=10,
+                check_interval_seconds=self._get_config_value("health_checker.database_check_interval", 60),
+                timeout_seconds=self._get_config_value("health_checker.database_timeout", 10),
             )
             self.add_health_check(
                 "database", DatabaseHealthCheck(db_config, self.db_manager)
             )
 
         # 文件系统检查
-        important_paths = [
+        important_paths = self._get_config_value("health_checker.important_paths", [
             "./",  # 当前目录
             "./logs",  # 日志目录
             "./data",  # 数据目录
             "./config",  # 配置目录
-        ]
+        ])
 
         fs_config = HealthCheckConfig(
             name="filesystem",
             component_type=ComponentType.FILESYSTEM,
-            check_interval_seconds=120,
+            check_interval_seconds=self._get_config_value("health_checker.filesystem_check_interval", 120),
         )
         self.add_health_check(
             "filesystem", FileSystemHealthCheck(fs_config, important_paths)
@@ -800,9 +800,10 @@ class HealthChecker(QObject):
         self.check_results[name].append(result)
 
         # 限制历史记录大小
-        if len(self.check_results[name]) > self.max_history_size:
+        max_history = self._get_config_value("health_checker.max_history_size", self.max_history_size)
+        if len(self.check_results[name]) > max_history:
             self.check_results[name] = self.check_results[name][
-                -self.max_history_size :
+                -max_history :
             ]
 
         # 更新统计信息

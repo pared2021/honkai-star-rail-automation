@@ -13,6 +13,8 @@ import asyncio
 
 from .action_executor import ActionExecutor, ClickType, KeyAction
 from .config_manager import ConfigManager
+from .interfaces.i_action_config_service import IActionConfigService
+from .services.action_config_service import ActionConfigService
 from .enums import ActionType, TaskType
 from .game_detector import GameDetector, SceneType, UIElement
 from .logger import get_logger
@@ -70,12 +72,17 @@ class GameOperations:
     def __init__(
         self,
         game_detector: GameDetector,
-        action_executor: ActionExecutor,
         config_manager: ConfigManager,
+        action_config_service: IActionConfigService = None,
     ):
         self.game_detector = game_detector
-        self.action_executor = action_executor
         self.config_manager = config_manager
+        
+        # 创建ActionExecutor实例，注入配置服务
+        if action_config_service is None:
+            action_config_service = ActionConfigService(config_manager)
+        self.action_executor = ActionExecutor(action_config_service)
+        
         self.operation_config = OperationConfig()
         self.is_running = False
 

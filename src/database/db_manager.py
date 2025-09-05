@@ -8,12 +8,14 @@ from datetime import datetime
 from pathlib import Path
 import sqlite3
 from typing import Any, Dict, List, Optional, Tuple
+from ..core.dependency_injection import Injectable
+from ..core.interfaces import IDatabaseManager
 import uuid
 
 from loguru import logger
 
 
-class DatabaseManager:
+class DatabaseManager(Injectable, IDatabaseManager):
     """数据库管理器类"""
 
     def __init__(self, db_path: Optional[str] = None):

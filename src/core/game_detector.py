@@ -71,10 +71,17 @@ class TemplateInfo:
 class TemplateMatcher:
     """模板匹配器"""
     
-    def __init__(self, templates_dir: str = "assets/templates"):
-        self.templates_dir = Path(templates_dir)
+    def __init__(self, config_manager=None, templates_dir: str = None):
+        self.config_manager = config_manager
+        self.templates_dir = Path(templates_dir) if templates_dir else Path(self._get_config_value('template_matcher.templates_dir', 'assets/templates'))
         self.templates_cache = {}
         self.load_templates()
+    
+    def _get_config_value(self, key: str, default_value):
+        """获取配置值"""
+        if self.config_manager:
+            return self.config_manager.get(key, default_value)
+        return default_value
     
     def load_templates(self):
         """加载所有模板"""
@@ -102,11 +109,12 @@ class TemplateMatcher:
                 template = cv2.imread(str(template_file), cv2.IMREAD_COLOR)
             
             if template is not None:
+                default_threshold = self._get_config_value('template_matcher.default_threshold', 0.8)
                 self.templates_cache[template_name] = {
                     "image": template,
                     "path": str(template_file),
                     "category": category,
-                    "threshold": 0.8,  # 默认阈值
+                    "threshold": default_threshold,
                     "original_size": template.shape[:2]  # 保存原始尺寸
                 }
                 logger.debug(f"Loaded template: {template_name}")
@@ -193,19 +201,31 @@ class TemplateMatcher:
         template_h, template_w = template_size
         
         # 基于屏幕分辨率计算缩放因子
-        base_scales = [1.0]  # 原始尺寸
+        base_scales = self._get_config_value('template_matcher.base_scales', [1.0])  # 原始尺寸
+        
+        # 从配置获取额外的缩放因子
+        extra_scales = self._get_config_value('template_matcher.scale_factors', [0.8, 1.2, 1.5])
         
         # 常见分辨率适配
-        if screen_w >= 1920:  # 1920x1080及以上
-            base_scales.extend([0.8, 1.2, 1.5])
-        elif screen_w >= 1366:  # 1366x768
-            base_scales.extend([0.7, 0.9, 1.1])
-        else:  # 更小分辨率
-            base_scales.extend([0.5, 0.6, 0.8])
+        resolution_scales = self._get_config_value('template_matcher.resolution_scales', {
+            'high': {'min_width': 1920, 'scales': extra_scales},
+            'medium': {'min_width': 1366, 'max_width': 1919, 'scales': [0.7, 0.9, 1.1]},
+            'low': {'max_width': 1365, 'scales': [0.5, 0.6, 0.8]}
+        })
+        
+        additional_scales = []
+        for res_name, res_config in resolution_scales.items():
+            min_width = res_config.get('min_width', 0)
+            max_width = res_config.get('max_width', float('inf'))
+            if min_width <= screen_w <= max_width:
+                additional_scales.extend(res_config.get('scales', []))
+                break
+        
+        all_scales = base_scales + additional_scales
         
         # 过滤掉会导致模板过大或过小的缩放因子
         valid_scales = []
-        for scale in base_scales:
+        for scale in all_scales:
             scaled_w = int(template_w * scale)
             scaled_h = int(template_h * scale)
             
@@ -249,9 +269,16 @@ class TemplateMatcher:
 class WindowManager:
     """窗口管理器"""
     
-    def __init__(self, target_window_title: str = "崩坏：星穹铁道"):
-        self.target_window_title = target_window_title
+    def __init__(self, target_window_title: str = None, config_manager=None):
+        self.config_manager = config_manager
+        self.target_window_title = target_window_title or self._get_config_value('window_manager.target_window_title', "崩坏：星穹铁道")
         self.current_window = None
+    
+    def _get_config_value(self, key: str, default_value):
+        """获取配置值"""
+        if self.config_manager:
+            return self.config_manager.get(key, default_value)
+        return default_value
     
     def find_game_window(self) -> Optional[GameWindow]:
         """查找游戏窗口"""
@@ -358,24 +385,64 @@ class WindowManager:
 class GameDetector:
     """游戏检测器 - 统一的游戏窗口检测和场景识别"""
     
-    def __init__(self, config_manager: ConfigManager, game_title: str = "崩坏：星穹铁道"):
+    def __init__(self, config_manager: ConfigManager = None, game_title: str = None):
         self.config_manager = config_manager
-        self.game_title = game_title
-        self.window_manager = WindowManager()
-        self.template_matcher = TemplateMatcher()
+        self.game_title = game_title or self._get_game_title() if config_manager else "崩坏：星穹铁道"
+        self.window_manager = WindowManager(self.game_title, config_manager)
+        self.template_matcher = TemplateMatcher(config_manager=config_manager)
         self.current_scene = SceneType.UNKNOWN
         self.last_screenshot = None
         
         # 场景检测模板映射 - 使用实际创建的模板
-        self.scene_templates = {
-            SceneType.MAIN_MENU: ["main_menu_start_game", "main_menu_settings_button", "main_menu_exit_button"],
-            SceneType.COMBAT: ["combat_attack_button", "combat_skill_button"],
-            SceneType.INVENTORY: ["inventory_bag_icon", "inventory_item_slot"],
-            SceneType.SHOP: ["shop_shop_icon", "shop_buy_button"],
-            SceneType.MISSION: ["mission_mission_icon", "mission_complete_mark"],
-            SceneType.MAIL: ["mail_mail_icon", "mail_claim_button"],
-            SceneType.GAME_WORLD: []  # 游戏世界场景通过排除法确定
-        }
+        self.scene_templates = self._get_scene_templates()
+        
+    def _get_game_title(self) -> str:
+        """获取游戏标题"""
+        if self.config_manager:
+            return self.config_manager.get('game_detector.game_title', '崩坏：星穹铁道')
+        return '崩坏：星穹铁道'
+    
+    def _get_config_value(self, key: str, default_value):
+        """获取配置值"""
+        if self.config_manager:
+            return self.config_manager.get(key, default_value)
+        return default_value
+    
+    def _get_scene_templates(self) -> Dict[SceneType, List[str]]:
+        """获取场景模板映射"""
+        if self.config_manager:
+            # 从配置管理器获取场景模板映射
+            templates = self.config_manager.get('game_detector.scene_templates', {})
+            if templates:
+                result = {}
+                for scene_name, template_list in templates.items():
+                    try:
+                        scene_type = SceneType(scene_name)
+                        result[scene_type] = template_list
+                    except ValueError:
+                        logger.warning(f"Unknown scene type: {scene_name}")
+                return result
+        
+        # 从配置管理器获取默认场景模板映射
+        default_templates = self._get_config_value('game_detector.default_scene_templates', {
+            'MAIN_MENU': ["main_menu_start_game", "main_menu_settings_button", "main_menu_exit_button"],
+            'COMBAT': ["combat_attack_button", "combat_skill_button"],
+            'INVENTORY': ["inventory_bag_icon", "inventory_item_slot"],
+            'SHOP': ["shop_shop_icon", "shop_buy_button"],
+            'MISSION': ["mission_mission_icon", "mission_complete_mark"],
+            'MAIL': ["mail_mail_icon", "mail_claim_button"],
+            'GAME_WORLD': []  # 游戏世界场景通过排除法确定
+        })
+        
+        # 转换为SceneType枚举
+        result = {}
+        for scene_name, template_list in default_templates.items():
+            try:
+                scene_type = SceneType(scene_name)
+                result[scene_type] = template_list
+            except ValueError:
+                logger.warning(f"Unknown scene type: {scene_name}")
+        return result
     
     def detect_game_window(self) -> Optional[GameWindow]:
         """检测游戏窗口 - 支持多种查找方式"""
@@ -429,8 +496,11 @@ class GameDetector:
         return screenshot
     
     def detect_current_scene(self, screenshot: Optional[np.ndarray] = None, 
-                           confidence_threshold: float = 0.7) -> SceneType:
+                           confidence_threshold: float = None) -> SceneType:
         """检测当前游戏场景，使用增强的检测逻辑"""
+        if confidence_threshold is None:
+            confidence_threshold = self._get_config_value('game_detector.scene_confidence_threshold', 0.7)
+            
         if screenshot is None:
             screenshot = self.capture_screenshot()
             if screenshot is None:
@@ -486,9 +556,14 @@ class GameDetector:
         
         return self.template_matcher.match_multiple_templates(screenshot, template_names)
     
-    def wait_for_ui_element(self, template_name: str, timeout: float = 10.0,
-                           check_interval: float = 0.5) -> Optional[UIElement]:
+    def wait_for_ui_element(self, template_name: str, timeout: float = None,
+                           check_interval: float = None) -> Optional[UIElement]:
         """等待UI元素出现"""
+        if timeout is None:
+            timeout = self._get_config_value('game_detector.ui_element_timeout', 10.0)
+        if check_interval is None:
+            check_interval = self._get_config_value('game_detector.check_interval', 0.5)
+            
         start_time = time.time()
         
         while time.time() - start_time < timeout:
@@ -500,9 +575,14 @@ class GameDetector:
         logger.warning(f"UI element not found within timeout: {template_name}")
         return None
     
-    def wait_for_template(self, template_paths: List[str], timeout: float = 10.0, 
-                         check_interval: float = 0.5) -> Optional[Tuple[str, UIElement]]:
+    def wait_for_template(self, template_paths: List[str], timeout: float = None, 
+                         check_interval: float = None) -> Optional[Tuple[str, UIElement]]:
         """等待模板出现在屏幕上"""
+        if timeout is None:
+            timeout = self._get_config_value('game_detector.template_timeout', 10.0)
+        if check_interval is None:
+            check_interval = self._get_config_value('game_detector.check_interval', 0.5)
+            
         start_time = time.time()
         
         while time.time() - start_time < timeout:
@@ -513,8 +593,9 @@ class GameDetector:
                 
             # 检查每个模板
             for template_name in template_paths:
+                threshold = self._get_config_value('game_detector.template_threshold', 0.8)
                 element = self.template_matcher.match_template(
-                    screenshot, template_name, threshold=0.8
+                    screenshot, template_name, threshold=threshold
                 )
                 if element:
                     return (template_name, element)

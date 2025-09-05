@@ -1,388 +1,433 @@
-# -*- coding: utf-8 -*-
-"""
-主窗口Model
+"""主窗口Model层
 
-管理主窗口的数据状态，包括应用程序状态、任务统计等。
+管理主窗口的数据状态和业务逻辑
 """
 
+from typing import Optional, Dict, Any, List
+from PyQt6.QtCore import QObject, pyqtSignal, QTimer
 from datetime import datetime
 import logging
-from typing import Any, Dict, List
 
-from ...application.automation_application_service import AutomationApplicationService
-from ...application.task_application_service import TaskApplicationService
-from ...core.config_manager import ConfigManager
-from ...core.enums import TaskStatus, TaskType
-from ..mvp.base_model import BaseModel
+from ...core.models.task import Task, TaskStatus
+from ...services.ui_service_facade import IUIServiceFacade
 
 logger = logging.getLogger(__name__)
 
 
-class MainWindowModel(BaseModel):
-    """主窗口数据模型
-
-    管理主窗口相关的所有数据状态
+class MainWindowModel(QObject):
+    """主窗口Model层
+    
+    管理主窗口的数据状态和业务逻辑
     """
-
-    def __init__(
-        self,
-        task_service: TaskApplicationService,
-        automation_service: AutomationApplicationService,
-        config_manager: ConfigManager,
-    ):
+    
+    # 数据变化信号
+    automation_status_changed = pyqtSignal(bool)  # 自动化状态变化 (is_running)
+    current_task_changed = pyqtSignal(str)  # 当前任务变化 (task_id)
+    status_message_changed = pyqtSignal(str)  # 状态消息变化 (message)
+    tab_changed = pyqtSignal(int)  # 标签页变化 (tab_index)
+    window_state_changed = pyqtSignal(dict)  # 窗口状态变化 (state_dict)
+    
+    # 错误信号
+    error_occurred = pyqtSignal(str, str)  # 错误发生 (operation, error_message)
+    
+    def __init__(self, ui_service: Optional[IUIServiceFacade] = None):
         super().__init__()
-
-        self._task_service = task_service
-        self._automation_service = automation_service
-        self._config_manager = config_manager
-
-        # 初始化数据字段
-        self._initialize_fields()
-
-        # 设置验证器
-        self._setup_validators()
-
-        logger.debug("主窗口Model初始化完成")
-
-    def _initialize_fields(self):
-        """初始化数据字段"""
-        self._data.update(
-            {
-                # 应用状态
-                "app_status": "idle",  # idle, running, paused, error
-                "automation_enabled": False,
-                "last_update_time": None,
-                # 任务统计
-                "total_tasks": 0,
-                "pending_tasks": 0,
-                "running_tasks": 0,
-                "completed_tasks": 0,
-                "failed_tasks": 0,
-                # 任务类型统计
-                "daily_mission_count": 0,
-                "weekly_mission_count": 0,
-                "event_mission_count": 0,
-                "custom_task_count": 0,
-                # 系统信息
-                "game_detected": False,
-                "game_window_title": "",
-                "automation_running": False,
-                "last_automation_time": None,
-                # 配置信息
-                "auto_start_enabled": False,
-                "notification_enabled": True,
-                "log_level": "INFO",
-                # 最近任务
-                "recent_tasks": [],
-                # 错误信息
-                "last_error": None,
-                "error_count": 0,
-            }
-        )
-
-    def _setup_validators(self):
-        """设置验证器"""
-        # 应用状态验证
-        self.add_validator(
-            "app_status", lambda x: x in ["idle", "running", "paused", "error"]
-        )
-
-        # 日志级别验证
-        self.add_validator(
-            "log_level", lambda x: x in ["DEBUG", "INFO", "WARNING", "ERROR"]
-        )
-
-        # 数值验证
-        for field in [
-            "total_tasks",
-            "pending_tasks",
-            "running_tasks",
-            "completed_tasks",
-            "failed_tasks",
-            "error_count",
-        ]:
-            self.add_validator(field, lambda x: isinstance(x, int) and x >= 0)
-
-    async def load_data(self) -> bool:
-        """加载数据
-
+        
+        # 依赖注入
+        self.ui_service = ui_service
+        
+        # 状态数据
+        self._is_automation_running = False
+        self._current_task_id: Optional[str] = None
+        self._status_message = "就绪"
+        self._current_tab_index = 0
+        self._window_state = {
+            'geometry': None,
+            'splitter_sizes': None,
+            'tab_index': 0
+        }
+        
+        # 状态历史
+        self._status_history: List[Dict[str, Any]] = []
+        self._max_history_size = 100
+        
+        # 定时器
+        self._status_timer = QTimer()
+        self._status_timer.timeout.connect(self._update_periodic_status)
+        
+        logger.debug("MainWindowModel 初始化完成")
+    
+    # 属性访问器
+    @property
+    def is_automation_running(self) -> bool:
+        """获取自动化运行状态"""
+        return self._is_automation_running
+    
+    @property
+    def current_task_id(self) -> Optional[str]:
+        """获取当前任务ID"""
+        return self._current_task_id
+    
+    @property
+    def status_message(self) -> str:
+        """获取状态消息"""
+        return self._status_message
+    
+    @property
+    def current_tab_index(self) -> int:
+        """获取当前标签页索引"""
+        return self._current_tab_index
+    
+    @property
+    def window_state(self) -> Dict[str, Any]:
+        """获取窗口状态"""
+        return self._window_state.copy()
+    
+    # 状态设置方法
+    def set_automation_running(self, running: bool):
+        """设置自动化运行状态
+        
+        Args:
+            running: 是否运行中
+        """
+        if self._is_automation_running != running:
+            self._is_automation_running = running
+            self.automation_status_changed.emit(running)
+            
+            # 更新状态消息
+            status_msg = "运行中" if running else "就绪"
+            self.set_status_message(status_msg)
+            
+            # 记录状态历史
+            self._add_status_history("automation_status", {
+                'running': running,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            logger.info(f"自动化状态变更: {'运行中' if running else '停止'}")
+    
+    def set_current_task(self, task_id: Optional[str]):
+        """设置当前任务
+        
+        Args:
+            task_id: 任务ID，None表示无任务
+        """
+        if self._current_task_id != task_id:
+            old_task_id = self._current_task_id
+            self._current_task_id = task_id
+            self.current_task_changed.emit(task_id or "")
+            
+            # 记录状态历史
+            self._add_status_history("current_task", {
+                'old_task_id': old_task_id,
+                'new_task_id': task_id,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            logger.info(f"当前任务变更: {old_task_id} -> {task_id}")
+    
+    def set_status_message(self, message: str):
+        """设置状态消息
+        
+        Args:
+            message: 状态消息
+        """
+        if self._status_message != message:
+            self._status_message = message
+            self.status_message_changed.emit(message)
+            
+            # 记录状态历史
+            self._add_status_history("status_message", {
+                'message': message,
+                'timestamp': datetime.now().isoformat()
+            })
+            
+            logger.debug(f"状态消息变更: {message}")
+    
+    def set_current_tab(self, tab_index: int):
+        """设置当前标签页
+        
+        Args:
+            tab_index: 标签页索引
+        """
+        if self._current_tab_index != tab_index:
+            self._current_tab_index = tab_index
+            self._window_state['tab_index'] = tab_index
+            self.tab_changed.emit(tab_index)
+            
+            logger.debug(f"标签页变更: {tab_index}")
+    
+    def set_window_state(self, state: Dict[str, Any]):
+        """设置窗口状态
+        
+        Args:
+            state: 窗口状态字典
+        """
+        self._window_state.update(state)
+        self.window_state_changed.emit(self._window_state.copy())
+        
+        logger.debug(f"窗口状态更新: {state}")
+    
+    # 业务逻辑方法
+    def start_automation(self, task_name: str = "自动化任务") -> Optional[str]:
+        """启动自动化
+        
+        Args:
+            task_name: 任务名称
+        
         Returns:
-            是否加载成功
+            创建的任务ID，失败返回None
         """
         try:
-            logger.info("开始加载主窗口数据")
-
-            # 加载任务统计
-            await self._load_task_statistics()
-
-            # 加载系统状态
-            await self._load_system_status()
-
-            # 加载配置信息
-            await self._load_configuration()
-
-            # 加载最近任务
-            await self._load_recent_tasks()
-
-            # 更新最后更新时间
-            self.set_data("last_update_time", datetime.now(), validate=False)
-
-            logger.info("主窗口数据加载完成")
-            return True
-
-        except Exception as e:
-            logger.error(f"加载主窗口数据失败: {e}")
-            self.set_data("last_error", str(e), validate=False)
-            return False
-
-    async def save_data(self) -> bool:
-        """保存数据
-
-        Returns:
-            是否保存成功
-        """
-        try:
-            logger.info("开始保存主窗口数据")
-
-            # 保存配置信息
-            await self._save_configuration()
-
-            logger.info("主窗口数据保存完成")
-            return True
-
-        except Exception as e:
-            logger.error(f"保存主窗口数据失败: {e}")
-            self.set_data("last_error", str(e), validate=False)
-            return False
-
-    async def _load_task_statistics(self):
-        """加载任务统计"""
-        try:
-            # 获取所有任务
-            all_tasks = await self._task_service.get_all_tasks()
-
-            # 统计总数
-            self.set_data("total_tasks", len(all_tasks), validate=False)
-
-            # 按状态统计
-            status_counts = {}
-            for task in all_tasks:
-                status = task.status
-                status_counts[status] = status_counts.get(status, 0) + 1
-
-            self.set_data(
-                "pending_tasks",
-                status_counts.get(TaskStatus.PENDING, 0),
-                validate=False,
-            )
-            self.set_data(
-                "running_tasks",
-                status_counts.get(TaskStatus.RUNNING, 0),
-                validate=False,
-            )
-            self.set_data(
-                "completed_tasks",
-                status_counts.get(TaskStatus.COMPLETED, 0),
-                validate=False,
-            )
-            self.set_data(
-                "failed_tasks", status_counts.get(TaskStatus.FAILED, 0), validate=False
-            )
-
-            # 按类型统计
-            type_counts = {}
-            for task in all_tasks:
-                task_type = task.task_type
-                type_counts[task_type] = type_counts.get(task_type, 0) + 1
-
-            self.set_data(
-                "daily_mission_count",
-                type_counts.get(TaskType.DAILY_MISSION, 0),
-                validate=False,
-            )
-            self.set_data(
-                "weekly_mission_count",
-                type_counts.get(TaskType.WEEKLY_MISSION, 0),
-                validate=False,
-            )
-            self.set_data(
-                "event_mission_count",
-                type_counts.get(TaskType.DAILY_MISSIONS, 0),
-                validate=False,
-            )
-            self.set_data(
-                "custom_task_count", type_counts.get(TaskType.CUSTOM, 0), validate=False
-            )
-
-            logger.debug("任务统计加载完成")
-
-        except Exception as e:
-            logger.error(f"加载任务统计失败: {e}")
-            raise
-
-    async def _load_system_status(self):
-        """加载系统状态"""
-        try:
-            # 检查游戏检测状态
-            game_detected = await self._automation_service.is_game_detected()
-            self.set_data("game_detected", game_detected, validate=False)
-
-            if game_detected:
-                game_info = await self._automation_service.get_game_info()
-                self.set_data(
-                    "game_window_title",
-                    game_info.get("window_title", ""),
-                    validate=False,
-                )
-
-            # 检查自动化状态
-            automation_running = await self._automation_service.is_automation_running()
-            self.set_data("automation_running", automation_running, validate=False)
-
-            if automation_running:
-                last_run_time = await self._automation_service.get_last_run_time()
-                self.set_data("last_automation_time", last_run_time, validate=False)
-
-            # 设置应用状态
-            if automation_running:
-                self.set_data("app_status", "running", validate=False)
-            elif game_detected:
-                self.set_data("app_status", "idle", validate=False)
+            if self._is_automation_running:
+                logger.warning("自动化已在运行中")
+                return None
+            
+            # 创建新任务
+            if self.ui_service:
+                task_id = self.ui_service.create_simple_task(task_name)
             else:
-                self.set_data("app_status", "paused", validate=False)
-
-            logger.debug("系统状态加载完成")
-
+                # 生成临时任务ID
+                import uuid
+                task_id = str(uuid.uuid4())
+            
+            # 更新状态
+            self.set_current_task(task_id)
+            self.set_automation_running(True)
+            
+            logger.info(f"自动化启动成功: {task_id}")
+            return task_id
+            
         except Exception as e:
-            logger.error(f"加载系统状态失败: {e}")
-            raise
-
-    async def _load_configuration(self):
-        """加载配置信息"""
+            error_msg = f"启动自动化失败: {e}"
+            logger.error(error_msg)
+            self.error_occurred.emit("start_automation", str(e))
+            return None
+    
+    def stop_automation(self) -> bool:
+        """停止自动化
+        
+        Returns:
+            是否成功停止
+        """
         try:
-            # 加载自动化配置
-            automation_config = self._config_manager.get_automation_config()
-            self.set_data(
-                "automation_enabled",
-                automation_config.get("enabled", False),
-                validate=False,
-            )
-            self.set_data(
-                "auto_start_enabled",
-                automation_config.get("auto_start", False),
-                validate=False,
-            )
-
-            # 加载UI配置
-            ui_config = self._config_manager.get_ui_config()
-            self.set_data(
-                "notification_enabled",
-                ui_config.get("notifications", True),
-                validate=False,
-            )
-
-            # 加载日志配置
-            log_config = self._config_manager.get_log_config()
-            self.set_data("log_level", log_config.get("level", "INFO"), validate=False)
-
-            logger.debug("配置信息加载完成")
-
+            if not self._is_automation_running:
+                logger.warning("自动化未在运行")
+                return True
+            
+            # 更新任务状态
+            if self._current_task_id and self.ui_service:
+                self.ui_service.toggle_task_status(self._current_task_id, "cancelled")
+            
+            # 更新状态
+            task_id = self._current_task_id
+            self.set_automation_running(False)
+            self.set_current_task(None)
+            
+            logger.info(f"自动化停止成功: {task_id}")
+            return True
+            
         except Exception as e:
-            logger.error(f"加载配置信息失败: {e}")
-            raise
-
-    async def _load_recent_tasks(self):
-        """加载最近任务"""
+            error_msg = f"停止自动化失败: {e}"
+            logger.error(error_msg)
+            self.error_occurred.emit("stop_automation", str(e))
+            return False
+    
+    def get_current_task(self) -> Optional[Task]:
+        """获取当前任务对象
+        
+        Returns:
+            当前任务对象，如果没有则返回None
+        """
+        if not self._current_task_id or not self.ui_service:
+            return None
+        
         try:
-            # 获取最近10个任务
-            recent_tasks = await self._task_service.get_recent_tasks(limit=10)
-
-            # 转换为显示格式
-            task_list = []
-            for task in recent_tasks:
-                task_info = {
-                    "id": task.id,
-                    "name": task.name,
-                    "type": task.task_type.value,
-                    "status": task.status.value,
-                    "created_time": task.created_at,
-                    "updated_time": task.updated_at,
+            # 通过服务门面获取任务摘要，然后转换为Task对象
+            task_summary = self.ui_service.get_task_summary()
+            # 这里需要根据实际的Task类结构来构造对象
+            # 暂时返回None，具体实现需要根据Task类的构造函数调整
+            return None
+        except Exception as e:
+            logger.error(f"获取当前任务失败: {e}")
+            return None
+    
+    def update_task_status(self, task_id: str, status: TaskStatus):
+        """更新任务状态
+        
+        Args:
+            task_id: 任务ID
+            status: 新状态
+        """
+        try:
+            if self.ui_service:
+                self.ui_service.toggle_task_status(task_id, status.value)
+            
+            # 如果是当前任务，更新相关状态
+            if task_id == self._current_task_id:
+                if status in [TaskStatus.COMPLETED, TaskStatus.FAILED, TaskStatus.CANCELLED]:
+                    self.set_automation_running(False)
+                    self.set_current_task(None)
+            
+            logger.debug(f"任务状态更新: {task_id} -> {status.value}")
+            
+        except Exception as e:
+            error_msg = f"更新任务状态失败: {e}"
+            logger.error(error_msg)
+            self.error_occurred.emit("update_task_status", str(e))
+    
+    # 状态历史管理
+    def _add_status_history(self, event_type: str, data: Dict[str, Any]):
+        """添加状态历史记录
+        
+        Args:
+            event_type: 事件类型
+            data: 事件数据
+        """
+        history_entry = {
+            'event_type': event_type,
+            'data': data,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        self._status_history.append(history_entry)
+        
+        # 限制历史记录大小
+        if len(self._status_history) > self._max_history_size:
+            self._status_history = self._status_history[-self._max_history_size:]
+    
+    def get_status_history(self, limit: int = 50) -> List[Dict[str, Any]]:
+        """获取状态历史
+        
+        Args:
+            limit: 返回记录数量限制
+        
+        Returns:
+            状态历史记录列表
+        """
+        return self._status_history[-limit:] if limit > 0 else self._status_history.copy()
+    
+    def clear_status_history(self):
+        """清除状态历史"""
+        self._status_history.clear()
+        logger.debug("状态历史已清除")
+    
+    # 定时器控制
+    def start_status_timer(self, interval: int = 1000):
+        """启动状态定时器
+        
+        Args:
+            interval: 更新间隔（毫秒）
+        """
+        self._status_timer.start(interval)
+        logger.debug(f"状态定时器启动，间隔: {interval}ms")
+    
+    def stop_status_timer(self):
+        """停止状态定时器"""
+        self._status_timer.stop()
+        logger.debug("状态定时器停止")
+    
+    def _update_periodic_status(self):
+        """定期状态更新"""
+        try:
+            # 更新时间显示
+            current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            
+            # 如果自动化正在运行，可以在这里添加更多状态检查
+            if self._is_automation_running:
+                # 检查任务状态等
+                pass
+            
+        except Exception as e:
+            logger.error(f"定期状态更新失败: {e}")
+    
+    # 配置管理
+    def save_window_config(self):
+        """保存窗口配置"""
+        try:
+            if self.ui_service:
+                config_data = {
+                    'window_state': self._window_state,
+                    'current_tab': self._current_tab_index
                 }
-                task_list.append(task_info)
-
-            self.set_data("recent_tasks", task_list, validate=False)
-
-            logger.debug(f"加载了 {len(task_list)} 个最近任务")
-
+                self.ui_service.update_ui_config('main_window', config_data)
+                logger.debug("窗口配置已保存")
+                
         except Exception as e:
-            logger.error(f"加载最近任务失败: {e}")
-            raise
-
-    async def _save_configuration(self):
-        """保存配置信息"""
+            logger.error(f"保存窗口配置失败: {e}")
+    
+    def load_window_config(self) -> Dict[str, Any]:
+        """加载窗口配置
+        
+        Returns:
+            窗口配置字典
+        """
         try:
-            # 保存自动化配置
-            automation_config = {
-                "enabled": self.get_data("automation_enabled", False),
-                "auto_start": self.get_data("auto_start_enabled", False),
-            }
-            self._config_manager.update_automation_config(automation_config)
-
-            # 保存UI配置
-            ui_config = {"notifications": self.get_data("notification_enabled", True)}
-            self._config_manager.update_ui_config(ui_config)
-
-            # 保存日志配置
-            log_config = {"level": self.get_data("log_level", "INFO")}
-            self._config_manager.update_log_config(log_config)
-
-            logger.debug("配置信息保存完成")
-
+            if self.ui_service:
+                config_data = self.ui_service.get_ui_config('main_window', {})
+                
+                # 恢复窗口状态
+                if 'window_state' in config_data:
+                    self.set_window_state(config_data['window_state'])
+                
+                # 恢复标签页
+                if 'current_tab' in config_data:
+                    self.set_current_tab(config_data['current_tab'])
+                
+                logger.debug("窗口配置已加载")
+                return config_data
+                
         except Exception as e:
-            logger.error(f"保存配置信息失败: {e}")
-            raise
-
-    async def refresh_data(self):
-        """刷新数据"""
-        logger.info("刷新主窗口数据")
-        return await self.load_data()
-
-    def get_task_summary(self) -> Dict[str, Any]:
-        """获取任务摘要
-
+            logger.error(f"加载窗口配置失败: {e}")
+        
+        return {}
+    
+    # 统计信息
+    def get_statistics(self) -> Dict[str, Any]:
+        """获取统计信息
+        
         Returns:
-            任务摘要信息
+            统计信息字典
         """
-        return {
-            "total": self.get_data("total_tasks", 0),
-            "pending": self.get_data("pending_tasks", 0),
-            "running": self.get_data("running_tasks", 0),
-            "completed": self.get_data("completed_tasks", 0),
-            "failed": self.get_data("failed_tasks", 0),
-        }
-
-    def get_type_summary(self) -> Dict[str, Any]:
-        """获取类型摘要
-
-        Returns:
-            任务类型摘要信息
-        """
-        return {
-            "daily_mission": self.get_data("daily_mission_count", 0),
-            "weekly_mission": self.get_data("weekly_mission_count", 0),
-            "event_mission": self.get_data("event_mission_count", 0),
-            "custom_task": self.get_data("custom_task_count", 0),
-        }
-
-    def get_system_summary(self) -> Dict[str, Any]:
-        """获取系统摘要
-
-        Returns:
-            系统状态摘要信息
-        """
-        return {
-            "app_status": self.get_data("app_status", "idle"),
-            "game_detected": self.get_data("game_detected", False),
-            "automation_running": self.get_data("automation_running", False),
-            "automation_enabled": self.get_data("automation_enabled", False),
-        }
+        try:
+            stats = {
+                'automation_running': self._is_automation_running,
+                'current_task_id': self._current_task_id,
+                'status_message': self._status_message,
+                'current_tab': self._current_tab_index,
+                'history_count': len(self._status_history),
+                'timer_active': self._status_timer.isActive()
+            }
+            
+            # 如果有服务门面，获取任务统计
+            if self.ui_service:
+                try:
+                    task_summary = self.ui_service.get_task_summary()
+                    stats['task_summary'] = task_summary
+                except Exception as e:
+                    logger.warning(f"获取任务统计失败: {e}")
+            
+            return stats
+            
+        except Exception as e:
+            logger.error(f"获取统计信息失败: {e}")
+            return {}
+    
+    # 清理资源
+    def cleanup(self):
+        """清理资源"""
+        try:
+            # 停止定时器
+            self.stop_status_timer()
+            
+            # 保存配置
+            self.save_window_config()
+            
+            # 如果自动化正在运行，停止它
+            if self._is_automation_running:
+                self.stop_automation()
+            
+            logger.debug("MainWindowModel 资源清理完成")
+            
+        except Exception as e:
+            logger.error(f"清理MainWindowModel资源失败: {e}")

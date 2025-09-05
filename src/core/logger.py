@@ -33,19 +33,26 @@ class InterceptHandler(logging.Handler):
         )
 
 
-def setup_logger(log_dir: Optional[Path] = None, level: str = "INFO") -> logger:
+def setup_logger(log_dir: Optional[Path] = None, level: str = "INFO", config_manager=None) -> logger:
     """设置日志系统
 
     Args:
         log_dir: 日志文件目录，默认为项目根目录下的logs文件夹
         level: 日志级别
+        config_manager: 配置管理器实例
 
     Returns:
         配置好的logger实例
     """
+    def _get_config_value(key: str, default_value):
+        """获取配置值"""
+        if config_manager:
+            return config_manager.get(key, default_value)
+        return default_value
+    
     if log_dir is None:
         project_root = Path(__file__).parent.parent.parent
-        log_dir = project_root / "logs"
+        log_dir = project_root / _get_config_value('logger.log_dir', 'logs')
 
     log_dir = Path(log_dir)
     log_dir.mkdir(parents=True, exist_ok=True)
@@ -54,7 +61,7 @@ def setup_logger(log_dir: Optional[Path] = None, level: str = "INFO") -> logger:
     logger.remove()
 
     # 控制台输出格式
-    console_format = (
+    console_format = _get_config_value('logger.console_format', 
         "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | "
         "<level>{level: <8}</level> | "
         "<cyan>{name}</cyan>:<cyan>{function}</cyan>:<cyan>{line}</cyan> - "
@@ -62,7 +69,7 @@ def setup_logger(log_dir: Optional[Path] = None, level: str = "INFO") -> logger:
     )
 
     # 文件输出格式
-    file_format = (
+    file_format = _get_config_value('logger.file_format',
         "{time:YYYY-MM-DD HH:mm:ss} | "
         "{level: <8} | "
         "{name}:{function}:{line} - "
@@ -74,57 +81,59 @@ def setup_logger(log_dir: Optional[Path] = None, level: str = "INFO") -> logger:
         sys.stdout,
         format=console_format,
         level=level,
-        colorize=True,
-        backtrace=True,
-        diagnose=True,
+        colorize=_get_config_value('logger.console_colorize', True),
+        backtrace=_get_config_value('logger.console_backtrace', True),
+        diagnose=_get_config_value('logger.console_diagnose', True),
     )
 
     # 添加文件处理器 - 所有日志
     logger.add(
-        log_dir / "app_{time:YYYY-MM-DD}.log",
+        log_dir / _get_config_value('logger.app_log_filename', "app_{time:YYYY-MM-DD}.log"),
         format=file_format,
-        level="DEBUG",
-        rotation="1 day",
-        retention="30 days",
-        compression="zip",
-        encoding="utf-8",
-        backtrace=True,
-        diagnose=True,
+        level=_get_config_value('logger.app_log_level', "DEBUG"),
+        rotation=_get_config_value('logger.app_log_rotation', "1 day"),
+        retention=_get_config_value('logger.app_log_retention', "30 days"),
+        compression=_get_config_value('logger.app_log_compression', "zip"),
+        encoding=_get_config_value('logger.file_encoding', "utf-8"),
+        backtrace=_get_config_value('logger.file_backtrace', True),
+        diagnose=_get_config_value('logger.file_diagnose', True),
     )
 
     # 添加错误日志文件处理器
     logger.add(
-        log_dir / "error_{time:YYYY-MM-DD}.log",
+        log_dir / _get_config_value('logger.error_log_filename', "error_{time:YYYY-MM-DD}.log"),
         format=file_format,
-        level="ERROR",
-        rotation="1 day",
-        retention="90 days",
-        compression="zip",
-        encoding="utf-8",
-        backtrace=True,
-        diagnose=True,
+        level=_get_config_value('logger.error_log_level', "ERROR"),
+        rotation=_get_config_value('logger.error_log_rotation', "1 day"),
+        retention=_get_config_value('logger.error_log_retention', "90 days"),
+        compression=_get_config_value('logger.error_log_compression', "zip"),
+        encoding=_get_config_value('logger.file_encoding', "utf-8"),
+        backtrace=_get_config_value('logger.file_backtrace', True),
+        diagnose=_get_config_value('logger.file_diagnose', True),
     )
 
     # 添加自动化操作日志文件处理器
     logger.add(
-        log_dir / "automation_{time:YYYY-MM-DD}.log",
+        log_dir / _get_config_value('logger.automation_log_filename', "automation_{time:YYYY-MM-DD}.log"),
         format=file_format,
-        level="INFO",
-        rotation="1 day",
-        retention="7 days",
-        compression="zip",
-        encoding="utf-8",
+        level=_get_config_value('logger.automation_log_level', "INFO"),
+        rotation=_get_config_value('logger.automation_log_rotation', "1 day"),
+        retention=_get_config_value('logger.automation_log_retention', "7 days"),
+        compression=_get_config_value('logger.automation_log_compression', "zip"),
+        encoding=_get_config_value('logger.file_encoding', "utf-8"),
         filter=lambda record: "automation" in record["extra"],
-        backtrace=True,
-        diagnose=True,
+        backtrace=_get_config_value('logger.file_backtrace', True),
+        diagnose=_get_config_value('logger.file_diagnose', True),
     )
 
     # 拦截标准库日志
     logging.basicConfig(handlers=[InterceptHandler()], level=0, force=True)
 
     # 设置第三方库日志级别
-    for name in ["PyQt6", "urllib3", "requests"]:
-        logging.getLogger(name).setLevel(logging.WARNING)
+    third_party_libs = _get_config_value('logger.third_party_libs', ["PyQt6", "urllib3", "requests"])
+    third_party_level = _get_config_value('logger.third_party_log_level', logging.WARNING)
+    for name in third_party_libs:
+        logging.getLogger(name).setLevel(third_party_level)
 
     logger.info("日志系统初始化完成")
     return logger

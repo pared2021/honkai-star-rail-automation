@@ -9,7 +9,6 @@ from loguru import logger
 
 from src.core.config_manager import (
     AlertingConfig,
-    ConfigManager as MonitoringConfigManager,
     ConfigType,
     DashboardConfig,
     HealthCheckConfig as ConfigHealthCheckConfig,
@@ -20,6 +19,7 @@ from src.core.config_manager import (
     PerformanceConfig,
     SystemConfig,
 )
+from src.core.interfaces.config_interface import IConfigManager
 from src.monitoring.alert_manager import (
     Alert,
     AlertChannel,
@@ -65,7 +65,7 @@ class MonitoringSystem:
     """监控系统主类 - 整合所有监控功能"""
 
     def __init__(
-        self, event_bus=None, db_manager=None, config_directory: str = "./config"
+        self, event_bus=None, db_manager=None, config_directory: str = "./config", config_manager: IConfigManager = None
     ):
         """
         初始化监控系统
@@ -74,12 +74,17 @@ class MonitoringSystem:
             event_bus: 事件总线实例
             db_manager: 数据库管理器实例
             config_directory: 配置文件目录
+            config_manager: 配置管理器实例
         """
         self.event_bus = event_bus
         self.db_manager = db_manager
 
         # 初始化配置管理器
-        self.config_manager = MonitoringConfigManager()
+        if config_manager is None:
+            from src.core.dependency_injection import ServiceLocator
+            self.config_manager = ServiceLocator.resolve(IConfigManager)
+        else:
+            self.config_manager = config_manager
 
         # 获取监控配置
         self.config = self.config_manager.get_monitoring_config()

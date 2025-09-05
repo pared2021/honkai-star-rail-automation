@@ -94,6 +94,7 @@ class ErrorRecoveryCoordinator:
         retry_manager: TaskRetryManager,
         error_service: ErrorHandlingService,
         event_bus: EventBus,
+        config_manager,
         logger: Optional[logging.Logger] = None,
     ):
 
@@ -101,6 +102,7 @@ class ErrorRecoveryCoordinator:
         self.retry_manager = retry_manager
         self.error_service = error_service
         self.event_bus = event_bus
+        self.config_manager = config_manager
         self.logger = logger or get_logger(self.__class__.__name__)
 
         # 恢复会话管理
@@ -114,7 +116,9 @@ class ErrorRecoveryCoordinator:
         # 协调器状态
         self.is_running = False
         self.worker_tasks: List[asyncio.Task] = []
-        self.max_concurrent_recoveries = 5
+        self.max_concurrent_recoveries = self.config_manager.get(
+            'error_recovery.max_concurrent_recoveries', 5
+        )
 
         # 统计信息
         self.stats = {
@@ -128,14 +132,14 @@ class ErrorRecoveryCoordinator:
             "by_status": {status.value: 0 for status in RecoveryStatus},
         }
 
-        # 配置
+        # 从配置管理器加载配置
         self.config = {
-            "session_timeout": 300.0,  # 5分钟
-            "escalation_threshold": 3,  # 失败3次后升级
-            "cleanup_interval": 3600.0,  # 1小时清理一次
-            "max_session_history": 1000,
-            "enable_auto_escalation": True,
-            "enable_dependency_tracking": True,
+            "session_timeout": self.config_manager.get('error_recovery.session_timeout', 300.0),
+            "escalation_threshold": self.config_manager.get('error_recovery.escalation_threshold', 3),
+            "cleanup_interval": self.config_manager.get('error_recovery.cleanup_interval', 3600.0),
+            "max_session_history": self.config_manager.get('error_recovery.max_session_history', 1000),
+            "enable_auto_escalation": self.config_manager.get('error_recovery.enable_auto_escalation', True),
+            "enable_dependency_tracking": self.config_manager.get('error_recovery.enable_dependency_tracking', True),
         }
 
         self._setup_event_handlers()

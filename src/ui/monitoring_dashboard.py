@@ -9,7 +9,7 @@ from typing import Any, Dict, List, Optional
 
 from PyQt6.QtCharts import QChart, QChartView, QDateTimeAxis, QLineSeries, QValueAxis
 from PyQt6.QtGui import QColor, QPainter, QPalette, QPixmap
-from ..gui.common.gui_components import (
+from .common.ui_components import (
     BaseWidget,
     QCheckBox,
     QComboBox,

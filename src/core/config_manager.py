@@ -1,1279 +1,813 @@
-# -*- coding: utf-8 -*-
-"""
-配置管理器 - 支持配置的导入、导出、验证和备份
+"""配置管理器实现
+
+提供统一的配置管理功能。
 """
 
-from configparser import ConfigParser
-from dataclasses import asdict, dataclass, field
-from datetime import datetime
-from enum import Enum
 import json
+import yaml
+import configparser
 import os
+from typing import Any, Dict, List, Optional, Callable, Set
 from pathlib import Path
-import shutil
-from typing import Any, Dict, List, Optional, Union
-import uuid
-
-import jsonschema
-from jsonschema import ValidationError, validate
+from dataclasses import dataclass, field
+from datetime import datetime
 from loguru import logger
 
+from .interfaces.config_interface import IConfigManager, ConfigFormat, ConfigScope
+from .dependency_injection import Injectable
 
 @dataclass
-class LoggingConfig:
-    """日志配置"""
+class ConfigChangeEvent:
+    """配置变更事件"""
+    key: str
+    old_value: Any
+    new_value: Any
+    scope: ConfigScope
+    timestamp: datetime = field(default_factory=datetime.now)
 
-    level: str = "INFO"
-    format: str = (
-        "%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s"
-    )
-    file_enabled: bool = True
-    console_enabled: bool = True
-    max_file_size: str = "10MB"
-    backup_count: int = 5
-    log_dir: str = "logs"
-    rotation: str = "1 day"
-    retention: str = "30 days"
-    compression: str = "gz"
-
-
-@dataclass
-class MonitoringConfig:
-    """监控配置"""
-
-    enabled: bool = True
-    interval: int = 60
-    metrics_retention_days: int = 30
-    alert_threshold_cpu: float = 80.0
-    alert_threshold_memory: float = 85.0
-    alert_threshold_disk: float = 90.0
-    collect_system_metrics: bool = True
-    collect_application_metrics: bool = True
-    export_prometheus: bool = False
-    prometheus_port: int = 9090
-
-
-@dataclass
-class AlertingConfig:
-    """告警配置"""
-
-    enabled: bool = True
-    email_enabled: bool = False
-    webhook_enabled: bool = False
-    email_smtp_server: str = ""
-    email_smtp_port: int = 587
-    email_username: str = ""
-    email_password: str = ""
-    email_recipients: List[str] = field(default_factory=list)
-    webhook_url: str = ""
-    webhook_timeout: int = 30
-    alert_cooldown: int = 300
-
-
-@dataclass
-class PerformanceConfig:
-    """性能配置"""
-
-    max_cpu_usage: float = 80.0
-    max_memory_usage: float = 85.0
-    max_disk_usage: float = 90.0
-    thread_pool_size: int = 4
-    connection_pool_size: int = 10
-    cache_size: int = 1000
-    enable_profiling: bool = False
-    profiling_interval: int = 300
-
-
-@dataclass
-class HealthCheckConfig:
-    """健康检查配置"""
-
-    enabled: bool = True
-    interval: int = 30
-    timeout: int = 10
-    retry_count: int = 3
-    endpoints: List[str] = field(default_factory=list)
-    check_database: bool = True
-    check_external_services: bool = True
-    failure_threshold: int = 3
-
-
-@dataclass
-class NotificationConfig:
-    """通知配置"""
-
-    enabled: bool = True
-    channels: List[str] = field(default_factory=lambda: ["email", "webhook"])
-    email_template: str = "default"
-    webhook_template: str = "default"
-    rate_limit: int = 10
-    rate_limit_window: int = 3600
-    priority_levels: List[str] = field(
-        default_factory=lambda: ["low", "medium", "high", "critical"]
-    )
-
-
-@dataclass
-class DashboardConfig:
-    """仪表板配置"""
-
-    enabled: bool = True
-    port: int = 8080
-    host: str = "localhost"
-    auto_refresh: bool = True
-    refresh_interval: int = 30
-    theme: str = "dark"
-    show_system_metrics: bool = True
-    show_application_metrics: bool = True
-    chart_history_hours: int = 24
-
-
-@dataclass
-class SystemConfig:
-    """系统配置"""
-
-    debug_mode: bool = False
-    max_workers: int = 4
-    timeout: int = 30
-    retry_attempts: int = 3
-    backup_enabled: bool = True
-    backup_interval: int = 3600
-    cleanup_enabled: bool = True
-    cleanup_interval: int = 86400
-
-
-@dataclass
-class MonitoringSystemConfig:
-    """监控系统配置聚合"""
-
-    logging: LoggingConfig = field(default_factory=LoggingConfig)
-    monitoring: MonitoringConfig = field(default_factory=MonitoringConfig)
-    alerting: AlertingConfig = field(default_factory=AlertingConfig)
-    performance: PerformanceConfig = field(default_factory=PerformanceConfig)
-    health_check: HealthCheckConfig = field(default_factory=HealthCheckConfig)
-    notification: NotificationConfig = field(default_factory=NotificationConfig)
-    dashboard: DashboardConfig = field(default_factory=DashboardConfig)
-    system: SystemConfig = field(default_factory=SystemConfig)
-
-
-class ConfigType(Enum):
-    """配置类型"""
-
-    GAME_SETTINGS = "game_settings"
-    AUTOMATION_CONFIG = "automation_config"
-    UI_PREFERENCES = "ui_preferences"
-    TASK_CONFIG = "task_config"
-    PERFORMANCE_CONFIG = "performance_config"
-    SYSTEM_CONFIG = "system_config"
-    LOGGING = "logging"
-    MONITORING = "monitoring"
-    ALERTING = "alerting"
-    HEALTH_CHECK = "health_check"
-    NOTIFICATION = "notification"
-    DASHBOARD = "dashboard"
-
-
-class ValidationLevel(Enum):
-    """验证级别"""
-
-    STRICT = "strict"  # 严格验证，所有字段必须符合规范
-    NORMAL = "normal"  # 正常验证，允许部分字段缺失
-    LOOSE = "loose"  # 宽松验证，只检查关键字段
-
-
-@dataclass
-class ConfigValidationResult:
-    """配置验证结果"""
-
-    is_valid: bool
-    errors: List[str]
-    warnings: List[str]
-    missing_fields: List[str]
-    invalid_values: Dict[str, str]
-    suggestions: List[str]
-
-
-@dataclass
-class ConfigBackup:
-    """配置备份信息"""
-
-    backup_id: str
-    timestamp: datetime
-    config_type: ConfigType
-    file_path: str
-    description: str
-    size: int
-
-
-class ConfigSchema:
-    """配置模式定义"""
-
-    # 游戏设置模式
-    GAME_SETTINGS_SCHEMA = {
-        "type": "object",
-        "properties": {
-            "game_path": {"type": "string", "minLength": 1},
-            "game_resolution": {
-                "type": "object",
-                "properties": {
-                    "width": {"type": "integer", "minimum": 800},
-                    "height": {"type": "integer", "minimum": 600},
-                },
-                "required": ["width", "height"],
-            },
-            "window_mode": {
-                "type": "string",
-                "enum": ["fullscreen", "windowed", "borderless"],
-            },
-            "language": {"type": "string", "enum": ["zh_CN", "en_US", "ja_JP"]},
-            "auto_start": {"type": "boolean"},
-            "close_game_on_exit": {"type": "boolean"},
-        },
-        "required": ["game_path", "game_resolution", "window_mode"],
-    }
-
-    # 自动化配置模式
-    AUTOMATION_CONFIG_SCHEMA = {
-        "type": "object",
-        "properties": {
-            "click_delay": {"type": "number", "minimum": 0.1, "maximum": 5.0},
-            "operation_timeout": {"type": "integer", "minimum": 5, "maximum": 300},
-            "retry_count": {"type": "integer", "minimum": 1, "maximum": 10},
-            "screenshot_interval": {"type": "number", "minimum": 0.5, "maximum": 10.0},
-            "safety_mode": {"type": "boolean"},
-            "auto_recovery": {"type": "boolean"},
-            "log_level": {
-                "type": "string",
-                "enum": ["DEBUG", "INFO", "WARNING", "ERROR"],
-            },
-            "performance_mode": {
-                "type": "string",
-                "enum": ["high", "balanced", "power_save"],
-            },
-        },
-        "required": ["click_delay", "operation_timeout", "retry_count"],
-    }
-
-    # UI偏好设置模式
-    UI_PREFERENCES_SCHEMA = {
-        "type": "object",
-        "properties": {
-            "theme": {"type": "string", "enum": ["light", "dark", "auto"]},
-            "window_size": {
-                "type": "object",
-                "properties": {
-                    "width": {"type": "integer", "minimum": 800},
-                    "height": {"type": "integer", "minimum": 600},
-                },
-            },
-            "window_position": {
-                "type": "object",
-                "properties": {"x": {"type": "integer"}, "y": {"type": "integer"}},
-            },
-            "auto_save_interval": {"type": "integer", "minimum": 30, "maximum": 3600},
-            "show_notifications": {"type": "boolean"},
-            "minimize_to_tray": {"type": "boolean"},
-            "language": {"type": "string"},
-        },
-    }
-
-    # 任务配置模式
-    TASK_CONFIG_SCHEMA = {
-        "type": "object",
-        "properties": {
-            "max_concurrent_tasks": {"type": "integer", "minimum": 1, "maximum": 10},
-            "task_timeout": {"type": "integer", "minimum": 60, "maximum": 3600},
-            "auto_schedule": {"type": "boolean"},
-            "priority_boost": {"type": "boolean"},
-            "failure_retry_count": {"type": "integer", "minimum": 0, "maximum": 5},
-            "task_history_limit": {"type": "integer", "minimum": 100, "maximum": 10000},
-        },
-    }
-
-    # 性能配置模式
-    PERFORMANCE_CONFIG_SCHEMA = {
-        "type": "object",
-        "properties": {
-            "cpu_limit": {"type": "number", "minimum": 10.0, "maximum": 100.0},
-            "memory_limit": {"type": "number", "minimum": 10.0, "maximum": 100.0},
-            "image_cache_size": {"type": "integer", "minimum": 10, "maximum": 1000},
-            "optimization_level": {
-                "type": "string",
-                "enum": ["none", "basic", "aggressive"],
-            },
-            "monitoring_interval": {"type": "number", "minimum": 1.0, "maximum": 60.0},
-        },
-    }
-
-    @classmethod
-    def get_schema(cls, config_type: ConfigType) -> Dict[str, Any]:
-        """获取指定类型的配置模式"""
-        schema_map = {
-            ConfigType.GAME_SETTINGS: cls.GAME_SETTINGS_SCHEMA,
-            ConfigType.AUTOMATION_CONFIG: cls.AUTOMATION_CONFIG_SCHEMA,
-            ConfigType.UI_PREFERENCES: cls.UI_PREFERENCES_SCHEMA,
-            ConfigType.TASK_CONFIG: cls.TASK_CONFIG_SCHEMA,
-            ConfigType.PERFORMANCE_CONFIG: cls.PERFORMANCE_CONFIG_SCHEMA,
+class ConfigManager(Injectable, IConfigManager):
+    """配置管理器实现
+    
+    提供多格式、多作用域的配置管理功能。
+    """
+    
+    def __init__(self, config_dir: Optional[str] = None):
+        # 从环境变量或参数获取配置目录
+        default_config_dir = os.getenv('XINGTIE_CONFIG_DIR', 'config')
+        self._config_dir = Path(config_dir or default_config_dir)
+        self._configs: Dict[ConfigScope, Dict[str, Any]] = {
+            scope: {} for scope in ConfigScope
         }
-        return schema_map.get(config_type, {})
-
-
-class ConfigManager:
-    """配置管理器"""
-
-    def __init__(self, config_dir: str = "config", backup_dir: str = "config/backups"):
-        self.config_dir = Path(config_dir)
-        self.backup_dir = Path(backup_dir)
-
-        # 确保目录存在
-        self.config_dir.mkdir(parents=True, exist_ok=True)
-        self.backup_dir.mkdir(parents=True, exist_ok=True)
-
-        # 配置缓存
-        self.config_cache: Dict[ConfigType, Dict[str, Any]] = {}
-
-        # 备份记录
-        self.backup_records: List[ConfigBackup] = []
-        self._load_backup_records()
-
-        # INI配置支持（兼容简单配置）
-        self.config_file = self.config_dir / "app_config.ini"
-        self.user_config_file = self.config_dir / "user_config.json"
-        self._config = ConfigParser()
-        self._user_config = {}
-
-        self._load_default_config()
-        self._load_ini_config()
-        self._load_user_config()
-
-        logger.info(f"配置管理器初始化完成，配置目录: {self.config_dir}")
-
-    def export_config(
-        self,
-        config_type: ConfigType,
-        config_data: Dict[str, Any],
-        file_path: Optional[str] = None,
-        include_metadata: bool = True,
-    ) -> str:
-        """导出配置到JSON文件"""
-        try:
-            # 验证配置
-            validation_result = self.validate_config(config_type, config_data)
-            if not validation_result.is_valid:
-                logger.warning(f"配置验证失败，但仍将导出: {validation_result.errors}")
-
-            # 确定文件路径
-            if file_path is None:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                file_path = self.config_dir / f"{config_type.value}_{timestamp}.json"
-            else:
-                file_path = Path(file_path)
-
-            # 准备导出数据
-            export_data = {"config_type": config_type.value, "data": config_data}
-
-            # 添加元数据
-            if include_metadata:
-                export_data["metadata"] = {
-                    "export_time": datetime.now().isoformat(),
-                    "version": "1.0",
-                    "application": "星铁自动化助手",
-                    "validation_result": {
-                        "is_valid": validation_result.is_valid,
-                        "error_count": len(validation_result.errors),
-                        "warning_count": len(validation_result.warnings),
-                    },
-                }
-
-            # 写入文件
-            with open(file_path, "w", encoding="utf-8") as f:
-                json.dump(export_data, f, ensure_ascii=False, indent=2)
-
-            logger.info(f"配置已导出到: {file_path}")
-            return str(file_path)
-
-        except Exception as e:
-            logger.error(f"导出配置失败: {e}")
-            raise
-
-    def import_config(
-        self,
-        file_path: str,
-        validation_level: ValidationLevel = ValidationLevel.NORMAL,
-        auto_backup: bool = True,
-    ) -> Dict[str, Any]:
-        """从JSON文件导入配置"""
-        try:
-            file_path = Path(file_path)
-            if not file_path.exists():
-                raise FileNotFoundError(f"配置文件不存在: {file_path}")
-
-            # 读取文件
-            with open(file_path, "r", encoding="utf-8") as f:
-                import_data = json.load(f)
-
-            # 检查文件格式
-            if "config_type" not in import_data or "data" not in import_data:
-                raise ValueError("无效的配置文件格式")
-
-            config_type_str = import_data["config_type"]
-            config_data = import_data["data"]
-
-            # 解析配置类型
-            try:
-                config_type = ConfigType(config_type_str)
-            except ValueError:
-                raise ValueError(f"不支持的配置类型: {config_type_str}")
-
-            # 验证配置
-            validation_result = self.validate_config(
-                config_type, config_data, validation_level
-            )
-
-            if (
-                validation_level == ValidationLevel.STRICT
-                and not validation_result.is_valid
-            ):
-                raise ValueError(f"配置验证失败: {validation_result.errors}")
-
-            # 自动备份当前配置
-            if auto_backup:
-                current_config = self.get_config(config_type)
-                if current_config:
-                    self.create_backup(config_type, current_config, "导入前自动备份")
-
-            # 缓存配置
-            self.config_cache[config_type] = config_data
-
-            # 保存到默认位置
-            default_path = self.config_dir / f"{config_type.value}.json"
-            self.export_config(
-                config_type, config_data, str(default_path), include_metadata=True
-            )
-
-            logger.info(f"配置已导入: {config_type.value}")
-
-            if validation_result.warnings:
-                logger.warning(f"导入时发现警告: {validation_result.warnings}")
-
-            return {
-                "config_type": config_type.value,
-                "data": config_data,
-                "validation_result": validation_result,
-                "metadata": import_data.get("metadata", {}),
-            }
-
-        except Exception as e:
-            logger.error(f"导入配置失败: {e}")
-            raise
-
-    def validate_config(
-        self,
-        config_type: ConfigType,
-        config_data: Dict[str, Any],
-        validation_level: ValidationLevel = ValidationLevel.NORMAL,
-    ) -> ConfigValidationResult:
-        """验证配置数据"""
-        errors = []
-        warnings = []
-        missing_fields = []
-        invalid_values = {}
-        suggestions = []
-
-        try:
-            # 获取配置模式
-            schema = ConfigSchema.get_schema(config_type)
-            if not schema:
-                warnings.append(f"未找到配置类型 {config_type.value} 的验证模式")
-                return ConfigValidationResult(
-                    is_valid=True,
-                    errors=errors,
-                    warnings=warnings,
-                    missing_fields=missing_fields,
-                    invalid_values=invalid_values,
-                    suggestions=suggestions,
-                )
-
-            # JSON Schema 验证
-            try:
-                validate(instance=config_data, schema=schema)
-            except ValidationError as e:
-                if validation_level == ValidationLevel.STRICT:
-                    errors.append(f"模式验证失败: {e.message}")
-                else:
-                    warnings.append(f"模式验证警告: {e.message}")
-
-            # 检查必需字段
-            required_fields = schema.get("required", [])
-            for field in required_fields:
-                if field not in config_data:
-                    missing_fields.append(field)
-                    if validation_level != ValidationLevel.LOOSE:
-                        errors.append(f"缺少必需字段: {field}")
-
-            # 特定类型的验证
-            self._validate_specific_config(
-                config_type,
-                config_data,
-                errors,
-                warnings,
-                invalid_values,
-                suggestions,
-                validation_level,
-            )
-
-        except Exception as e:
-            errors.append(f"验证过程出错: {str(e)}")
-
-        is_valid = len(errors) == 0
-
-        return ConfigValidationResult(
-            is_valid=is_valid,
-            errors=errors,
-            warnings=warnings,
-            missing_fields=missing_fields,
-            invalid_values=invalid_values,
-            suggestions=suggestions,
-        )
-
-    def _validate_specific_config(
-        self,
-        config_type: ConfigType,
-        config_data: Dict[str, Any],
-        errors: List[str],
-        warnings: List[str],
-        invalid_values: Dict[str, str],
-        suggestions: List[str],
-        validation_level: ValidationLevel,
-    ):
-        """特定配置类型的验证逻辑"""
-        if config_type == ConfigType.GAME_SETTINGS:
-            # 验证游戏路径
-            game_path = config_data.get("game_path")
-            if game_path and not os.path.exists(game_path):
-                invalid_values["game_path"] = "游戏路径不存在"
-                if validation_level == ValidationLevel.STRICT:
-                    errors.append(f"游戏路径不存在: {game_path}")
-                else:
-                    warnings.append(f"游戏路径不存在: {game_path}")
-                suggestions.append("请检查游戏安装路径是否正确")
-
-        elif config_type == ConfigType.AUTOMATION_CONFIG:
-            # 验证延迟设置
-            click_delay = config_data.get("click_delay")
-            if click_delay and click_delay < 0.1:
-                invalid_values["click_delay"] = "点击延迟过短可能导致操作失败"
-                warnings.append("建议点击延迟不少于0.1秒")
-                suggestions.append("适当增加点击延迟可以提高操作成功率")
-
-        elif config_type == ConfigType.PERFORMANCE_CONFIG:
-            # 验证资源限制
-            cpu_limit = config_data.get("cpu_limit")
-            memory_limit = config_data.get("memory_limit")
-
-            if cpu_limit and cpu_limit > 90:
-                warnings.append("CPU限制过高可能影响系统稳定性")
-                suggestions.append("建议CPU使用率限制在80%以下")
-
-            if memory_limit and memory_limit > 90:
-                warnings.append("内存限制过高可能影响系统稳定性")
-                suggestions.append("建议内存使用率限制在85%以下")
-
-    def create_backup(
-        self,
-        config_type: ConfigType,
-        config_data: Dict[str, Any],
-        description: str = "",
-    ) -> str:
-        """创建配置备份"""
-        try:
-            timestamp = datetime.now()
-            backup_id = f"{config_type.value}_{timestamp.strftime('%Y%m%d_%H%M%S')}"
-            backup_file = self.backup_dir / f"{backup_id}.json"
-
-            # 准备备份数据
-            backup_data = {
-                "backup_id": backup_id,
-                "config_type": config_type.value,
-                "timestamp": timestamp.isoformat(),
-                "description": description,
-                "data": config_data,
-            }
-
-            # 写入备份文件
-            with open(backup_file, "w", encoding="utf-8") as f:
-                json.dump(backup_data, f, ensure_ascii=False, indent=2)
-
-            # 记录备份信息
-            backup_info = ConfigBackup(
-                backup_id=backup_id,
-                timestamp=timestamp,
-                config_type=config_type,
-                file_path=str(backup_file),
-                description=description,
-                size=backup_file.stat().st_size,
-            )
-
-            self.backup_records.append(backup_info)
-            self._save_backup_records()
-
-            logger.info(f"配置备份已创建: {backup_id}")
-            return backup_id
-
-        except Exception as e:
-            logger.error(f"创建配置备份失败: {e}")
-            raise
-
-    def restore_backup(self, backup_id: str) -> Dict[str, Any]:
-        """恢复配置备份"""
-        try:
-            # 查找备份记录
-            backup_info = None
-            for backup in self.backup_records:
-                if backup.backup_id == backup_id:
-                    backup_info = backup
-                    break
-
-            if not backup_info:
-                raise ValueError(f"未找到备份: {backup_id}")
-
-            # 读取备份文件
-            backup_file = Path(backup_info.file_path)
-            if not backup_file.exists():
-                raise FileNotFoundError(f"备份文件不存在: {backup_file}")
-
-            with open(backup_file, "r", encoding="utf-8") as f:
-                backup_data = json.load(f)
-
-            config_data = backup_data["data"]
-            config_type = ConfigType(backup_data["config_type"])
-
-            # 创建当前配置的备份
-            current_config = self.get_config(config_type)
-            if current_config:
-                self.create_backup(
-                    config_type, current_config, f"恢复前自动备份 (恢复到 {backup_id})"
-                )
-
-            # 恢复配置
-            self.config_cache[config_type] = config_data
-
-            # 保存到默认位置
-            default_path = self.config_dir / f"{config_type.value}.json"
-            self.export_config(config_type, config_data, str(default_path))
-
-            logger.info(f"配置已恢复: {backup_id}")
-            return config_data
-
-        except Exception as e:
-            logger.error(f"恢复配置备份失败: {e}")
-            raise
-
-    def list_backups(
-        self, config_type: Optional[ConfigType] = None
-    ) -> List[Dict[str, Any]]:
-        """列出配置备份"""
-        backups = self.backup_records
-
-        if config_type:
-            backups = [b for b in backups if b.config_type == config_type]
-
-        return [
-            {
-                "backup_id": backup.backup_id,
-                "config_type": backup.config_type.value,
-                "timestamp": backup.timestamp.isoformat(),
-                "description": backup.description,
-                "size": backup.size,
-                "file_path": backup.file_path,
-            }
-            for backup in sorted(backups, key=lambda x: x.timestamp, reverse=True)
-        ]
-
-    def delete_backup(self, backup_id: str) -> bool:
-        """删除配置备份"""
-        try:
-            # 查找备份记录
-            backup_info = None
-            for i, backup in enumerate(self.backup_records):
-                if backup.backup_id == backup_id:
-                    backup_info = backup
-                    del self.backup_records[i]
-                    break
-
-            if not backup_info:
-                logger.warning(f"未找到备份记录: {backup_id}")
-                return False
-
-            # 删除备份文件
-            backup_file = Path(backup_info.file_path)
-            if backup_file.exists():
-                backup_file.unlink()
-
-            self._save_backup_records()
-
-            logger.info(f"配置备份已删除: {backup_id}")
-            return True
-
-        except Exception as e:
-            logger.error(f"删除配置备份失败: {e}")
-            return False
-
-    def get_config(self, config_type: ConfigType) -> Optional[Dict[str, Any]]:
-        """获取配置"""
-        # 先检查缓存
-        if config_type in self.config_cache:
-            return self.config_cache[config_type]
-
-        # 从文件加载
-        config_file = self.config_dir / f"{config_type.value}.json"
-        if config_file.exists():
-            try:
-                with open(config_file, "r", encoding="utf-8") as f:
-                    file_data = json.load(f)
-
-                config_data = file_data.get("data", file_data)
-                self.config_cache[config_type] = config_data
-                return config_data
-
-            except Exception as e:
-                logger.error(f"加载配置文件失败: {e}")
-
-        return None
-
-    def save_config(
-        self,
-        config_type: ConfigType,
-        config_data: Dict[str, Any],
-        auto_backup: bool = True,
-    ) -> bool:
-        """保存配置"""
-        try:
-            # 验证配置
-            validation_result = self.validate_config(config_type, config_data)
-            if not validation_result.is_valid:
-                logger.warning(f"配置验证失败，但仍将保存: {validation_result.errors}")
-
-            # 自动备份
-            if auto_backup:
-                current_config = self.get_config(config_type)
-                if current_config:
-                    self.create_backup(config_type, current_config, "保存前自动备份")
-
-            # 更新缓存
-            self.config_cache[config_type] = config_data
-
-            # 保存到文件
-            config_file = self.config_dir / f"{config_type.value}.json"
-            self.export_config(config_type, config_data, str(config_file))
-
-            logger.info(f"配置已保存: {config_type.value}")
-            return True
-
-        except Exception as e:
-            logger.error(f"保存配置失败: {e}")
-            return False
-
-    def _load_backup_records(self):
-        """加载备份记录"""
-        records_file = self.backup_dir / "backup_records.json"
-        if records_file.exists():
-            try:
-                with open(records_file, "r", encoding="utf-8") as f:
-                    records_data = json.load(f)
-
-                for record in records_data:
-                    backup = ConfigBackup(
-                        backup_id=record["backup_id"],
-                        timestamp=datetime.fromisoformat(record["timestamp"]),
-                        config_type=ConfigType(record["config_type"]),
-                        file_path=record["file_path"],
-                        description=record["description"],
-                        size=record["size"],
-                    )
-                    self.backup_records.append(backup)
-
-            except Exception as e:
-                logger.error(f"加载备份记录失败: {e}")
-
-    def _save_backup_records(self):
-        """保存备份记录"""
-        records_file = self.backup_dir / "backup_records.json"
-        try:
-            records_data = [
-                {
-                    "backup_id": backup.backup_id,
-                    "timestamp": backup.timestamp.isoformat(),
-                    "config_type": backup.config_type.value,
-                    "file_path": backup.file_path,
-                    "description": backup.description,
-                    "size": backup.size,
-                }
-                for backup in self.backup_records
+        # 配置作用域优先级可通过环境变量配置
+        priority_env = os.getenv('XINGTIE_CONFIG_PRIORITY')
+        if priority_env:
+            priority_names = priority_env.split(',')
+            self._scope_priority = [ConfigScope(name.strip()) for name in priority_names if name.strip() in [s.value for s in ConfigScope]]
+        else:
+            self._scope_priority = [
+                ConfigScope.RUNTIME,
+                ConfigScope.USER,
+                ConfigScope.PROJECT,
+                ConfigScope.SYSTEM,
+                ConfigScope.DEFAULT
             ]
-
-            with open(records_file, "w", encoding="utf-8") as f:
-                json.dump(records_data, f, ensure_ascii=False, indent=2)
-
-        except Exception as e:
-            logger.error(f"保存备份记录失败: {e}")
-
-    def cleanup_old_backups(
-        self, max_backups_per_type: int = 10, max_age_days: int = 30
-    ):
-        """清理旧备份"""
+        self._change_listeners: List[Callable[[ConfigChangeEvent], None]] = []
+        self._validation_rules: Dict[str, Callable[[Any], bool]] = {}
+        self._validation_errors: Dict[str, str] = {}
+        self._config_info: Dict[ConfigScope, Dict[str, Any]] = {
+            scope: {} for scope in ConfigScope
+        }
+        self._backup_configs: Dict[str, Dict[ConfigScope, Dict[str, Any]]] = {}
+        # 缓存TTL可通过环境变量配置
+        self._cache_ttl = int(os.getenv('XINGTIE_CONFIG_CACHE_TTL', '300'))  # 默认5分钟缓存
+        
+        # 确保配置目录存在
+        self._config_dir.mkdir(parents=True, exist_ok=True)
+        
+        # 加载默认配置
+        self._load_default_configs()
+    
+    def load_config(self, file_path: str, scope: ConfigScope = ConfigScope.PROJECT,
+                   format_type: ConfigFormat = ConfigFormat.AUTO) -> bool:
+        """加载配置文件
+        
+        Args:
+            file_path: 配置文件路径
+            scope: 配置作用域
+            format_type: 配置格式
+            
+        Returns:
+            是否加载成功
+        """
         try:
-            current_time = datetime.now()
-
-            # 按配置类型分组
-            backups_by_type = {}
-            for backup in self.backup_records:
-                config_type = backup.config_type
-                if config_type not in backups_by_type:
-                    backups_by_type[config_type] = []
-                backups_by_type[config_type].append(backup)
-
-            deleted_count = 0
-
-            for config_type, backups in backups_by_type.items():
-                # 按时间排序（最新的在前）
-                backups.sort(key=lambda x: x.timestamp, reverse=True)
-
-                # 删除超过数量限制的备份
-                if len(backups) > max_backups_per_type:
-                    for backup in backups[max_backups_per_type:]:
-                        if self.delete_backup(backup.backup_id):
-                            deleted_count += 1
-
-                # 删除超过时间限制的备份
-                for backup in backups[:max_backups_per_type]:  # 只检查保留的备份
-                    age = current_time - backup.timestamp
-                    if age.days > max_age_days:
-                        if self.delete_backup(backup.backup_id):
-                            deleted_count += 1
-
-            logger.info(f"清理完成，删除了 {deleted_count} 个旧备份")
-
-        except Exception as e:
-            logger.error(f"清理旧备份失败: {e}")
-
-    def get_setting(
-        self, config_type: ConfigType, key: str, default_value: Any = None
-    ) -> Any:
-        """获取特定配置项的值"""
-        try:
-            config_data = self.get_config(config_type)
+            path = Path(file_path)
+            if not path.exists():
+                logger.warning(f"配置文件不存在: {file_path}")
+                return False
+            
+            # 自动检测格式
+            if format_type == ConfigFormat.AUTO:
+                format_type = self._detect_format(path)
+            
+            # 读取配置
+            config_data = self._read_config_file(path, format_type)
             if config_data is None:
-                return default_value
-
-            # 支持嵌套键（如 "section.subsection.key"）
-            keys = key.split(".")
-            value = config_data
-
+                return False
+            
+            # 合并到指定作用域
+            old_config = self._configs[scope].copy()
+            self._configs[scope].update(config_data)
+            
+            # 记录配置信息
+            self._config_info[scope][str(path)] = {
+                'file_path': str(path),
+                'format': format_type.value,
+                'loaded_at': datetime.now(),
+                'size': path.stat().st_size
+            }
+            
+            # 通知变更
+            self._notify_config_changes(old_config, self._configs[scope], scope)
+            
+            logger.info(f"配置文件已加载: {file_path} -> {scope.value}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"加载配置文件失败: {file_path}, 错误: {e}")
+            return False
+    
+    def save_config(self, file_path: str, scope: ConfigScope = ConfigScope.PROJECT,
+                   format_type: ConfigFormat = ConfigFormat.JSON) -> bool:
+        """保存配置到文件
+        
+        Args:
+            file_path: 配置文件路径
+            scope: 配置作用域
+            format_type: 配置格式
+            
+        Returns:
+            是否保存成功
+        """
+        try:
+            path = Path(file_path)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            
+            config_data = self._configs[scope]
+            self._write_config_file(path, config_data, format_type)
+            
+            # 更新配置信息
+            self._config_info[scope][str(path)] = {
+                'file_path': str(path),
+                'format': format_type.value,
+                'saved_at': datetime.now(),
+                'size': path.stat().st_size
+            }
+            
+            logger.info(f"配置已保存: {scope.value} -> {file_path}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"保存配置失败: {file_path}, 错误: {e}")
+            return False
+    
+    def get(self, key: str, default: Any = None, scope: Optional[ConfigScope] = None) -> Any:
+        """获取配置值
+        
+        Args:
+            key: 配置键，支持点号分隔的嵌套键
+            default: 默认值
+            scope: 指定作用域，None表示按优先级查找
+            
+        Returns:
+            配置值
+        """
+        if scope:
+            return self._get_from_scope(key, scope, default)
+        
+        # 按优先级查找
+        for scope in self._scope_priority:
+            value = self._get_from_scope(key, scope, None)
+            if value is not None:
+                return value
+        
+        return default
+    
+    def set(self, key: str, value: Any, scope: ConfigScope = ConfigScope.RUNTIME) -> bool:
+        """设置配置值
+        
+        Args:
+            key: 配置键
+            value: 配置值
+            scope: 配置作用域
+            
+        Returns:
+            是否设置成功
+        """
+        try:
+            # 验证配置
+            if not self._validate_config_value(key, value):
+                return False
+            
+            old_value = self._get_from_scope(key, scope, None)
+            self._set_in_scope(key, value, scope)
+            
+            # 通知变更
+            change_event = ConfigChangeEvent(
+                key=key,
+                old_value=old_value,
+                new_value=value,
+                scope=scope
+            )
+            self._notify_change_listeners(change_event)
+            
+            logger.debug(f"配置已设置: {key} = {value} ({scope.value})")
+            return True
+            
+        except Exception as e:
+            logger.error(f"设置配置失败: {key}, 错误: {e}")
+            return False
+    
+    def delete(self, key: str, scope: ConfigScope = ConfigScope.RUNTIME) -> bool:
+        """删除配置项
+        
+        Args:
+            key: 配置键
+            scope: 配置作用域
+            
+        Returns:
+            是否删除成功
+        """
+        try:
+            old_value = self._get_from_scope(key, scope, None)
+            if old_value is None:
+                return False
+            
+            self._delete_from_scope(key, scope)
+            
+            # 通知变更
+            change_event = ConfigChangeEvent(
+                key=key,
+                old_value=old_value,
+                new_value=None,
+                scope=scope
+            )
+            self._notify_change_listeners(change_event)
+            
+            logger.debug(f"配置已删除: {key} ({scope.value})")
+            return True
+            
+        except Exception as e:
+            logger.error(f"删除配置失败: {key}, 错误: {e}")
+            return False
+    
+    def exists(self, key: str, scope: Optional[ConfigScope] = None) -> bool:
+        """检查配置项是否存在
+        
+        Args:
+            key: 配置键
+            scope: 指定作用域，None表示在所有作用域中查找
+            
+        Returns:
+            是否存在
+        """
+        if scope:
+            return self._get_from_scope(key, scope, None) is not None
+        
+        for scope in self._scope_priority:
+            if self._get_from_scope(key, scope, None) is not None:
+                return True
+        
+        return False
+    
+    def get_all(self, scope: Optional[ConfigScope] = None) -> Dict[str, Any]:
+        """获取所有配置
+        
+        Args:
+            scope: 指定作用域，None表示合并所有作用域
+            
+        Returns:
+            配置字典
+        """
+        if scope:
+            return self._configs[scope].copy()
+        
+        # 合并所有作用域（按优先级）
+        merged_config = {}
+        for scope in reversed(self._scope_priority):
+            merged_config.update(self._configs[scope])
+        
+        return merged_config
+    
+    def get_section(self, section: str, scope: Optional[ConfigScope] = None) -> Dict[str, Any]:
+        """获取配置段
+        
+        Args:
+            section: 配置段名称
+            scope: 指定作用域
+            
+        Returns:
+            配置段字典
+        """
+        all_config = self.get_all(scope)
+        return {k: v for k, v in all_config.items() if k.startswith(f"{section}.")}
+    
+    def merge_config(self, config: Dict[str, Any], scope: ConfigScope = ConfigScope.RUNTIME) -> bool:
+        """合并配置
+        
+        Args:
+            config: 要合并的配置
+            scope: 目标作用域
+            
+        Returns:
+            是否合并成功
+        """
+        try:
+            old_config = self._configs[scope].copy()
+            
+            # 深度合并
+            self._deep_merge(self._configs[scope], config)
+            
+            # 通知变更
+            self._notify_config_changes(old_config, self._configs[scope], scope)
+            
+            logger.debug(f"配置已合并到 {scope.value}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"合并配置失败: {e}")
+            return False
+    
+    def clear(self, scope: ConfigScope = ConfigScope.RUNTIME) -> bool:
+        """清空配置
+        
+        Args:
+            scope: 配置作用域
+            
+        Returns:
+            是否清空成功
+        """
+        try:
+            old_config = self._configs[scope].copy()
+            self._configs[scope].clear()
+            
+            # 通知变更
+            self._notify_config_changes(old_config, {}, scope)
+            
+            logger.debug(f"配置已清空: {scope.value}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"清空配置失败: {e}")
+            return False
+    
+    def get_keys(self, scope: Optional[ConfigScope] = None) -> List[str]:
+        """获取所有配置键
+        
+        Args:
+            scope: 指定作用域
+            
+        Returns:
+            配置键列表
+        """
+        if scope:
+            return list(self._configs[scope].keys())
+        
+        keys = set()
+        for scope in ConfigScope:
+            keys.update(self._configs[scope].keys())
+        
+        return list(keys)
+    
+    def get_sections(self, scope: Optional[ConfigScope] = None) -> List[str]:
+        """获取所有配置段
+        
+        Args:
+            scope: 指定作用域
+            
+        Returns:
+            配置段列表
+        """
+        keys = self.get_keys(scope)
+        sections = set()
+        
+        for key in keys:
+            if '.' in key:
+                section = key.split('.')[0]
+                sections.add(section)
+        
+        return list(sections)
+    
+    def add_validation_rule(self, key: str, validator: Callable[[Any], bool]) -> None:
+        """添加验证规则
+        
+        Args:
+            key: 配置键
+            validator: 验证函数
+        """
+        self._validation_rules[key] = validator
+    
+    def remove_validation_rule(self, key: str) -> bool:
+        """移除验证规则
+        
+        Args:
+            key: 配置键
+            
+        Returns:
+            是否移除成功
+        """
+        return self._validation_rules.pop(key, None) is not None
+    
+    def validate_config(self, config: Optional[Dict[str, Any]] = None, 
+                       scope: Optional[ConfigScope] = None) -> bool:
+        """验证配置
+        
+        Args:
+            config: 要验证的配置，None表示验证当前配置
+            scope: 指定作用域
+            
+        Returns:
+            是否验证通过
+        """
+        if config is None:
+            config = self.get_all(scope)
+        
+        self._validation_errors.clear()
+        is_valid = True
+        
+        for key, value in config.items():
+            if not self._validate_config_value(key, value):
+                is_valid = False
+        
+        return is_valid
+    
+    def get_validation_errors(self) -> Dict[str, str]:
+        """获取验证错误
+        
+        Returns:
+            验证错误字典
+        """
+        return self._validation_errors.copy()
+    
+    def add_change_listener(self, listener: Callable[[ConfigChangeEvent], None]) -> None:
+        """添加配置变更监听器
+        
+        Args:
+            listener: 监听器函数
+        """
+        self._change_listeners.append(listener)
+    
+    def remove_change_listener(self, listener: Callable[[ConfigChangeEvent], None]) -> bool:
+        """移除配置变更监听器
+        
+        Args:
+            listener: 监听器函数
+            
+        Returns:
+            是否移除成功
+        """
+        try:
+            self._change_listeners.remove(listener)
+            return True
+        except ValueError:
+            return False
+    
+    def reload_config(self, scope: Optional[ConfigScope] = None) -> bool:
+        """重新加载配置
+        
+        Args:
+            scope: 指定作用域，None表示重新加载所有
+            
+        Returns:
+            是否重新加载成功
+        """
+        try:
+            scopes_to_reload = [scope] if scope else list(ConfigScope)
+            
+            for scope in scopes_to_reload:
+                if scope == ConfigScope.DEFAULT:
+                    continue  # 默认配置不需要重新加载
+                
+                # 重新加载文件配置
+                for file_info in self._config_info[scope].values():
+                    if 'file_path' in file_info:
+                        self.load_config(file_info['file_path'], scope)
+            
+            logger.info("配置重新加载完成")
+            return True
+            
+        except Exception as e:
+            logger.error(f"重新加载配置失败: {e}")
+            return False
+    
+    def backup_config(self, backup_name: str, scope: Optional[ConfigScope] = None) -> bool:
+        """备份配置
+        
+        Args:
+            backup_name: 备份名称
+            scope: 指定作用域，None表示备份所有
+            
+        Returns:
+            是否备份成功
+        """
+        try:
+            if scope:
+                self._backup_configs[backup_name] = {scope: self._configs[scope].copy()}
+            else:
+                self._backup_configs[backup_name] = {
+                    scope: config.copy() for scope, config in self._configs.items()
+                }
+            
+            logger.info(f"配置已备份: {backup_name}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"备份配置失败: {e}")
+            return False
+    
+    def restore_config(self, backup_name: str, scope: Optional[ConfigScope] = None) -> bool:
+        """恢复配置
+        
+        Args:
+            backup_name: 备份名称
+            scope: 指定作用域，None表示恢复所有
+            
+        Returns:
+            是否恢复成功
+        """
+        try:
+            if backup_name not in self._backup_configs:
+                logger.warning(f"备份不存在: {backup_name}")
+                return False
+            
+            backup = self._backup_configs[backup_name]
+            
+            if scope:
+                if scope in backup:
+                    old_config = self._configs[scope].copy()
+                    self._configs[scope] = backup[scope].copy()
+                    self._notify_config_changes(old_config, self._configs[scope], scope)
+            else:
+                for scope, config in backup.items():
+                    old_config = self._configs[scope].copy()
+                    self._configs[scope] = config.copy()
+                    self._notify_config_changes(old_config, self._configs[scope], scope)
+            
+            logger.info(f"配置已恢复: {backup_name}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"恢复配置失败: {e}")
+            return False
+    
+    def get_config_info(self, scope: Optional[ConfigScope] = None) -> Dict[str, Any]:
+        """获取配置信息
+        
+        Args:
+            scope: 指定作用域
+            
+        Returns:
+            配置信息字典
+        """
+        if scope:
+            return self._config_info[scope].copy()
+        
+        return {scope.value: info for scope, info in self._config_info.items()}
+    
+    def get_scope_priority(self) -> List[ConfigScope]:
+        """获取作用域优先级
+        
+        Returns:
+            作用域优先级列表
+        """
+        return self._scope_priority.copy()
+    
+    def set_scope_priority(self, priority: List[ConfigScope]) -> bool:
+        """设置作用域优先级
+        
+        Args:
+            priority: 作用域优先级列表
+            
+        Returns:
+            是否设置成功
+        """
+        try:
+            # 验证优先级列表
+            if set(priority) != set(ConfigScope):
+                logger.error("优先级列表必须包含所有作用域")
+                return False
+            
+            self._scope_priority = priority.copy()
+            logger.info(f"作用域优先级已更新: {[s.value for s in priority]}")
+            return True
+            
+        except Exception as e:
+            logger.error(f"设置作用域优先级失败: {e}")
+            return False
+    
+    # 私有方法
+    
+    def _load_default_configs(self):
+        """加载默认配置"""
+        # 尝试从默认配置文件加载
+        default_config_path = self._config_dir / "default.json"
+        if default_config_path.exists():
+            try:
+                with open(default_config_path, 'r', encoding='utf-8') as f:
+                    config_data = json.load(f)
+                    # 转换为扁平化格式
+                    default_config = self._flatten_config(config_data)
+                    self._configs[ConfigScope.DEFAULT] = default_config
+                    return
+            except Exception as e:
+                logger.warning(f"加载默认配置文件失败: {e}，使用内置默认配置")
+        
+        # 如果配置文件不存在，使用内置默认配置
+        default_config = self._get_builtin_default_config()
+        self._configs[ConfigScope.DEFAULT] = default_config
+        
+        # 创建默认配置文件
+        self._create_default_config_file(default_config_path, self._unflatten_config(default_config))
+    
+    def _get_builtin_default_config(self) -> Dict[str, Any]:
+        """获取内置默认配置
+        
+        支持从环境变量覆盖默认值
+        """
+        return {
+            'app.name': os.getenv('XINGTIE_APP_NAME', '星铁自动化助手'),
+            'app.version': os.getenv('XINGTIE_APP_VERSION', '1.0.0'),
+            'app.debug': os.getenv('XINGTIE_APP_DEBUG', 'false').lower() == 'true',
+            'app.log_level': os.getenv('XINGTIE_LOG_LEVEL', 'INFO'),
+            'database.pool_size': int(os.getenv('XINGTIE_DB_POOL_SIZE', '10')),
+            'database.timeout': int(os.getenv('XINGTIE_DB_TIMEOUT', '30')),
+            'cache.ttl': int(os.getenv('XINGTIE_CACHE_TTL', '3600')),
+            'cache.max_size': int(os.getenv('XINGTIE_CACHE_MAX_SIZE', '1000')),
+            'scheduler.max_concurrent_tasks': int(os.getenv('XINGTIE_SCHEDULER_MAX_TASKS', '3')),
+            'scheduler.check_interval': float(os.getenv('XINGTIE_SCHEDULER_CHECK_INTERVAL', '1.0')),
+            'monitor.check_interval': float(os.getenv('XINGTIE_MONITOR_CHECK_INTERVAL', '5.0')),
+            'resource.memory_limit': os.getenv('XINGTIE_RESOURCE_MEMORY_LIMIT', '1GB'),
+            'resource.cpu_limit': int(os.getenv('XINGTIE_RESOURCE_CPU_LIMIT', '80')),
+            'automation.action_delay': float(os.getenv('XINGTIE_AUTOMATION_ACTION_DELAY', '0.1')),
+            'automation.template_threshold': float(os.getenv('XINGTIE_AUTOMATION_TEMPLATE_THRESHOLD', '0.8')),
+            'game.window_title': os.getenv('XINGTIE_GAME_WINDOW_TITLE', '崩坏：星穹铁道'),
+            'game.process_name': os.getenv('XINGTIE_GAME_PROCESS_NAME', 'StarRail.exe')
+        }
+    
+    def _create_default_config_file(self, config_path: Path, config_data: Dict[str, Any]):
+        """创建默认配置文件."""
+        try:
+            config_path.parent.mkdir(parents=True, exist_ok=True)
+            with open(config_path, 'w', encoding='utf-8') as f:
+                json.dump(config_data, f, indent=2, ensure_ascii=False)
+            logger.info(f"已创建默认配置文件: {config_path}")
+        except Exception as e:
+            logger.error(f"创建默认配置文件失败: {e}")
+    
+    def _flatten_config(self, config_data: Dict[str, Any], prefix: str = '') -> Dict[str, Any]:
+        """将嵌套配置转换为扁平化格式."""
+        result = {}
+        for key, value in config_data.items():
+            full_key = f"{prefix}.{key}" if prefix else key
+            if isinstance(value, dict):
+                result.update(self._flatten_config(value, full_key))
+            else:
+                result[full_key] = value
+        return result
+    
+    def _unflatten_config(self, flat_config: Dict[str, Any]) -> Dict[str, Any]:
+        """将扁平化配置转换为嵌套格式."""
+        result = {}
+        for key, value in flat_config.items():
+            keys = key.split('.')
+            current = result
+            for k in keys[:-1]:
+                if k not in current:
+                    current[k] = {}
+                current = current[k]
+            current[keys[-1]] = value
+        return result
+    
+    def _detect_format(self, path: Path) -> ConfigFormat:
+        """检测配置文件格式"""
+        suffix = path.suffix.lower()
+        if suffix in ['.json']:
+            return ConfigFormat.JSON
+        elif suffix in ['.yaml', '.yml']:
+            return ConfigFormat.YAML
+        elif suffix in ['.ini', '.cfg']:
+            return ConfigFormat.INI
+        else:
+            return ConfigFormat.JSON
+    
+    def _read_config_file(self, path: Path, format_type: ConfigFormat) -> Optional[Dict[str, Any]]:
+        """读取配置文件"""
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                if format_type == ConfigFormat.JSON:
+                    return json.load(f)
+                elif format_type == ConfigFormat.YAML:
+                    return yaml.safe_load(f)
+                elif format_type == ConfigFormat.INI:
+                    parser = configparser.ConfigParser()
+                    parser.read_string(f.read())
+                    return {f"{section}.{key}": value 
+                           for section in parser.sections() 
+                           for key, value in parser[section].items()}
+        except Exception as e:
+            logger.error(f"读取配置文件失败: {path}, 错误: {e}")
+            return None
+    
+    def _write_config_file(self, path: Path, config: Dict[str, Any], format_type: ConfigFormat):
+        """写入配置文件"""
+        with open(path, 'w', encoding='utf-8') as f:
+            if format_type == ConfigFormat.JSON:
+                json.dump(config, f, indent=2, ensure_ascii=False)
+            elif format_type == ConfigFormat.YAML:
+                yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+            elif format_type == ConfigFormat.INI:
+                parser = configparser.ConfigParser()
+                for key, value in config.items():
+                    if '.' in key:
+                        section, option = key.split('.', 1)
+                        if section not in parser:
+                            parser.add_section(section)
+                        parser.set(section, option, str(value))
+                parser.write(f)
+    
+    def _get_from_scope(self, key: str, scope: ConfigScope, default: Any) -> Any:
+        """从指定作用域获取配置值"""
+        config = self._configs[scope]
+        
+        # 支持点号分隔的嵌套键
+        if '.' in key:
+            keys = key.split('.')
+            value = config
             for k in keys:
                 if isinstance(value, dict) and k in value:
                     value = value[k]
                 else:
-                    return default_value
-
+                    return default
             return value
-        except Exception as e:
-            logger.error(f"获取配置项失败: {config_type.value}.{key}, 错误: {e}")
-            return default_value
-
-    def get_ui_config(self) -> Dict[str, Any]:
-        """获取UI相关配置
-
-        Returns:
-            Dict[str, Any]: UI配置字典
-        """
-        ui_config = self.get_config(ConfigType.UI_PREFERENCES)
-        if ui_config is None:
-            # 返回默认UI配置
-            return {
-                "theme": "dark",
-                "language": "zh_CN",
-                "window_width": 1200,
-                "window_height": 800,
-                "remember_window_state": True,
-                "auto_save": True,
-                "show_tooltips": True,
-            }
-        return ui_config
-
-    def get_log_config(self) -> Dict[str, Any]:
-        """获取日志配置
-
-        Returns:
-            Dict[str, Any]: 日志配置字典
-        """
-        try:
-            log_config = self.get_config(ConfigType.SYSTEM_CONFIG)
-            if log_config is None:
-                # 返回默认日志配置
-                return {
-                    "level": "INFO",
-                    "format": "%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s",
-                    "file_enabled": True,
-                    "console_enabled": True,
-                    "max_file_size": "10MB",
-                    "backup_count": 5,
-                }
-            return log_config.get(
-                "logging",
-                {
-                    "level": "INFO",
-                    "format": "%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s",
-                    "file_enabled": True,
-                    "console_enabled": True,
-                    "max_file_size": "10MB",
-                    "backup_count": 5,
-                },
-            )
-        except Exception as e:
-            logger.error(f"获取日志配置失败: {e}")
-            return {
-                "level": "INFO",
-                "format": "%(asctime)s | %(levelname)-8s | %(name)s:%(funcName)s:%(lineno)d - %(message)s",
-                "file_enabled": True,
-                "console_enabled": True,
-                "max_file_size": "10MB",
-                "backup_count": 5,
-            }
-
-    def set_setting(
-        self, config_type: ConfigType, key: str, value: Any, auto_save: bool = True
-    ) -> bool:
-        """设置特定配置项的值"""
-        try:
-            config_data = self.get_config(config_type) or {}
-
-            # 支持嵌套键（如 "section.subsection.key"）
-            keys = key.split(".")
-            current = config_data
-
-            # 创建嵌套结构
+        else:
+            return config.get(key, default)
+    
+    def _set_in_scope(self, key: str, value: Any, scope: ConfigScope):
+        """在指定作用域设置配置值"""
+        config = self._configs[scope]
+        
+        # 支持点号分隔的嵌套键
+        if '.' in key:
+            keys = key.split('.')
+            current = config
             for k in keys[:-1]:
-                if k not in current or not isinstance(current[k], dict):
+                if k not in current:
                     current[k] = {}
                 current = current[k]
-
-            # 设置值
             current[keys[-1]] = value
-
-            # 自动保存
-            if auto_save:
-                return self.save_config(config_type, config_data)
-            else:
-                self.config_cache[config_type] = config_data
-                return True
-
-        except Exception as e:
-            logger.error(f"设置配置项失败 {config_type.value}.{key}: {e}")
-            return False
-
-    def get_config_summary(self) -> Dict[str, Any]:
-        """获取配置摘要"""
-        summary = {
-            "config_types": [],
-            "total_backups": len(self.backup_records),
-            "backup_size_total": sum(b.size for b in self.backup_records),
-            "last_backup_time": None,
-        }
-
-        # 统计各类型配置
-        for config_type in ConfigType:
-            config_data = self.get_config(config_type)
-            type_backups = [
-                b for b in self.backup_records if b.config_type == config_type
-            ]
-
-            type_info = {
-                "type": config_type.value,
-                "has_config": config_data is not None,
-                "backup_count": len(type_backups),
-                "last_backup": (
-                    max(type_backups, key=lambda x: x.timestamp).timestamp.isoformat()
-                    if type_backups
-                    else None
-                ),
-            }
-            summary["config_types"].append(type_info)
-
-        # 最后备份时间
-        if self.backup_records:
-            latest_backup = max(self.backup_records, key=lambda x: x.timestamp)
-            summary["last_backup_time"] = latest_backup.timestamp.isoformat()
-
-        return summary
-
-    def get_game_config(self) -> Dict[str, Any]:
-        """获取游戏相关配置"""
-        return {
-            "resolution": self.get_setting(
-                ConfigType.GAME_SETTINGS, "resolution", "1920x1080"
-            ),
-            "game_path": self.get_setting(ConfigType.GAME_SETTINGS, "game_path", ""),
-            "window_title": self.get_setting(
-                ConfigType.GAME_SETTINGS, "window_title", "崩坏：星穹铁道"
-            ),
-            "detection_timeout": self.get_setting(
-                ConfigType.GAME_SETTINGS, "detection_timeout", 30
-            ),
-        }
-
-    def get_automation_config(self) -> Dict[str, Any]:
-        """获取自动化相关配置"""
-        return {
-            "click_delay": self.get_setting(
-                ConfigType.AUTOMATION_CONFIG, "click_delay", 1.0
-            ),
-            "detection_threshold": self.get_setting(
-                ConfigType.AUTOMATION_CONFIG, "detection_threshold", 0.8
-            ),
-            "max_retry_count": self.get_setting(
-                ConfigType.AUTOMATION_CONFIG, "max_retry_count", 3
-            ),
-            "operation_timeout": self.get_setting(
-                ConfigType.AUTOMATION_CONFIG, "operation_timeout", 60
-            ),
-        }
-
-    # INI配置支持方法（兼容简单配置）
-    def _load_default_config(self):
-        """加载默认配置"""
-        self._config.read_dict(
-            {
-                "game": {
-                    "resolution": "1920x1080",
-                    "game_path": "",
-                    "window_title": "崩坏：星穹铁道",
-                    "detection_timeout": "30",
-                },
-                "automation": {
-                    "click_delay": "1.0",
-                    "detection_threshold": "0.8",
-                    "max_retry_count": "3",
-                    "operation_timeout": "60",
-                },
-                "security": {
-                    "enable_verification": "true",
-                    "max_login_attempts": "3",
-                    "session_timeout": "3600",
-                },
-                "ui": {
-                    "theme": "dark",
-                    "language": "zh_CN",
-                    "window_width": "1200",
-                    "window_height": "800",
-                    "remember_window_state": "true",
-                },
-                "logging": {
-                    "level": "INFO",
-                    "file_enabled": "true",
-                    "console_enabled": "true",
-                    "max_file_size": "10MB",
-                    "backup_count": "5",
-                },
-            }
-        )
-
-    def _load_ini_config(self):
-        """加载INI配置文件"""
-        if self.config_file.exists():
+        else:
+            config[key] = value
+    
+    def _delete_from_scope(self, key: str, scope: ConfigScope):
+        """从指定作用域删除配置项"""
+        config = self._configs[scope]
+        
+        # 支持点号分隔的嵌套键
+        if '.' in key:
+            keys = key.split('.')
+            current = config
+            for k in keys[:-1]:
+                if k not in current:
+                    return
+                current = current[k]
+            if keys[-1] in current:
+                del current[keys[-1]]
+        else:
+            if key in config:
+                del config[key]
+    
+    def _validate_config_value(self, key: str, value: Any) -> bool:
+        """验证配置值"""
+        if key in self._validation_rules:
             try:
-                self._config.read(self.config_file, encoding="utf-8")
-                logger.info(f"已加载配置文件: {self.config_file}")
+                if not self._validation_rules[key](value):
+                    self._validation_errors[key] = f"验证失败: {key} = {value}"
+                    return False
             except Exception as e:
-                logger.error(f"加载配置文件失败: {e}")
-
-    def _load_user_config(self):
-        """加载用户配置"""
-        if self.user_config_file.exists():
-            try:
-                with open(self.user_config_file, "r", encoding="utf-8") as f:
-                    self._user_config = json.load(f)
-                logger.info(f"已加载用户配置: {self.user_config_file}")
-            except Exception as e:
-                logger.error(f"加载用户配置失败: {e}")
-
-    def save_ini_config(self) -> bool:
-        """保存INI配置到文件"""
-        try:
-            with open(self.config_file, "w", encoding="utf-8") as f:
-                self._config.write(f)
-            logger.info(f"配置已保存到: {self.config_file}")
-            return True
-        except Exception as e:
-            logger.error(f"保存配置失败: {e}")
-            return False
-
-    def save_user_config(self) -> bool:
-        """保存用户配置"""
-        try:
-            with open(self.user_config_file, "w", encoding="utf-8") as f:
-                json.dump(self._user_config, f, ensure_ascii=False, indent=2)
-            logger.info(f"用户配置已保存到: {self.user_config_file}")
-            return True
-        except Exception as e:
-            logger.error(f"保存用户配置失败: {e}")
-            return False
-
-    def get_ini_value(self, section: str, key: str, fallback: str = "") -> str:
-        """获取INI配置值"""
-        return self._config.get(section, key, fallback=fallback)
-
-    def set_ini_value(self, section: str, key: str, value: str) -> bool:
-        """设置INI配置值"""
-        try:
-            if not self._config.has_section(section):
-                self._config.add_section(section)
-            self._config.set(section, key, value)
-            return True
-        except Exception as e:
-            logger.error(f"设置配置值失败 [{section}]{key}: {e}")
-            return False
-
-    def get_user_setting(self, key: str, default_value: Any = None) -> Any:
-        """获取用户设置"""
-        return self._user_config.get(key, default_value)
-
-    def set_user_setting(self, key: str, value: Any) -> bool:
-        """设置用户设置"""
-        try:
-            self._user_config[key] = value
-            return True
-        except Exception as e:
-            logger.error(f"设置用户设置失败 {key}: {e}")
-            return False
-
-    # 监控配置管理方法
-    def get_monitoring_config(self) -> MonitoringSystemConfig:
-        """获取监控系统配置"""
-        try:
-            config_data = self.get_config(ConfigType.MONITORING)
-            if config_data:
-                return MonitoringSystemConfig(**config_data)
-            return MonitoringSystemConfig()
-        except Exception as e:
-            logger.error(f"获取监控配置失败: {e}")
-            return MonitoringSystemConfig()
-
-    def save_monitoring_config(self, config: MonitoringSystemConfig) -> bool:
-        """保存监控系统配置"""
-        try:
-            config_data = asdict(config)
-            return self.save_config(ConfigType.MONITORING, config_data)
-        except Exception as e:
-            logger.error(f"保存监控配置失败: {e}")
-            return False
-
-    def get_logging_config_detailed(self) -> LoggingConfig:
-        """获取详细日志配置"""
-        try:
-            monitoring_config = self.get_monitoring_config()
-            return monitoring_config.logging
-        except Exception as e:
-            logger.error(f"获取详细日志配置失败: {e}")
-            return LoggingConfig()
-
-    def get_performance_config_detailed(self) -> PerformanceConfig:
-        """获取详细性能配置"""
-        try:
-            monitoring_config = self.get_monitoring_config()
-            return monitoring_config.performance
-        except Exception as e:
-            logger.error(f"获取详细性能配置失败: {e}")
-            return PerformanceConfig()
-
-    def update_monitoring_section(
-        self, section: str, config_data: Dict[str, Any]
-    ) -> bool:
-        """更新监控配置的特定部分"""
-        try:
-            monitoring_config = self.get_monitoring_config()
-
-            if section == "logging":
-                monitoring_config.logging = LoggingConfig(**config_data)
-            elif section == "monitoring":
-                monitoring_config.monitoring = MonitoringConfig(**config_data)
-            elif section == "alerting":
-                monitoring_config.alerting = AlertingConfig(**config_data)
-            elif section == "performance":
-                monitoring_config.performance = PerformanceConfig(**config_data)
-            elif section == "health_check":
-                monitoring_config.health_check = HealthCheckConfig(**config_data)
-            elif section == "notification":
-                monitoring_config.notification = NotificationConfig(**config_data)
-            elif section == "dashboard":
-                monitoring_config.dashboard = DashboardConfig(**config_data)
-            elif section == "system":
-                monitoring_config.system = SystemConfig(**config_data)
-            else:
-                logger.error(f"未知的监控配置部分: {section}")
+                self._validation_errors[key] = f"验证异常: {e}"
                 return False
-
-            return self.save_monitoring_config(monitoring_config)
-        except Exception as e:
-            logger.error(f"更新监控配置部分失败 {section}: {e}")
-            return False
-
-    def reset_monitoring_config(self) -> bool:
-        """重置监控配置为默认值"""
-        try:
-            default_config = MonitoringSystemConfig()
-            return self.save_monitoring_config(default_config)
-        except Exception as e:
-            logger.error(f"重置监控配置失败: {e}")
-            return False
-
-    def validate_monitoring_config(self, config: MonitoringSystemConfig) -> List[str]:
-        """验证监控配置"""
-        errors = []
-
-        try:
-            # 验证日志配置
-            if config.logging.level not in [
-                "DEBUG",
-                "INFO",
-                "WARNING",
-                "ERROR",
-                "CRITICAL",
-            ]:
-                errors.append("日志级别无效")
-
-            if config.logging.backup_count < 0:
-                errors.append("日志备份数量不能为负数")
-
-            # 验证监控配置
-            if config.monitoring.interval < 1:
-                errors.append("监控间隔不能小于1秒")
-
-            if not (0 <= config.monitoring.alert_threshold_cpu <= 100):
-                errors.append("CPU告警阈值必须在0-100之间")
-
-            if not (0 <= config.monitoring.alert_threshold_memory <= 100):
-                errors.append("内存告警阈值必须在0-100之间")
-
-            # 验证性能配置
-            if config.performance.thread_pool_size < 1:
-                errors.append("线程池大小不能小于1")
-
-            if config.performance.connection_pool_size < 1:
-                errors.append("连接池大小不能小于1")
-
-            # 验证健康检查配置
-            if config.health_check.interval < 1:
-                errors.append("健康检查间隔不能小于1秒")
-
-            if config.health_check.timeout < 1:
-                errors.append("健康检查超时不能小于1秒")
-
-            # 验证仪表板配置
-            if not (1024 <= config.dashboard.port <= 65535):
-                errors.append("仪表板端口必须在1024-65535之间")
-
-        except Exception as e:
-            errors.append(f"验证过程中发生错误: {e}")
-
-        return errors
+        return True
+    
+    def _deep_merge(self, target: Dict[str, Any], source: Dict[str, Any]):
+        """深度合并字典"""
+        for key, value in source.items():
+            if key in target and isinstance(target[key], dict) and isinstance(value, dict):
+                self._deep_merge(target[key], value)
+            else:
+                target[key] = value
+    
+    def _notify_config_changes(self, old_config: Dict[str, Any], 
+                              new_config: Dict[str, Any], scope: ConfigScope):
+        """通知配置变更"""
+        # 找出变更的键
+        all_keys = set(old_config.keys()) | set(new_config.keys())
+        
+        for key in all_keys:
+            old_value = old_config.get(key)
+            new_value = new_config.get(key)
+            
+            if old_value != new_value:
+                change_event = ConfigChangeEvent(
+                    key=key,
+                    old_value=old_value,
+                    new_value=new_value,
+                    scope=scope
+                )
+                self._notify_change_listeners(change_event)
+    
+    def _notify_change_listeners(self, change_event: ConfigChangeEvent):
+        """通知变更监听器"""
+        for listener in self._change_listeners:
+            try:
+                listener(change_event)
+            except Exception as e:
+                logger.error(f"配置变更监听器异常: {e}")

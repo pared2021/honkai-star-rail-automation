@@ -19,7 +19,7 @@ from typing import Any, Callable, Coroutine, Dict, List, Optional, Union
 import asyncio
 
 try:
-    from src.gui.common.gui_components import QApplication, QObject, QTimer, pyqtSignal
+    from src.ui.common.ui_components import QApplication, QObject, QTimer, pyqtSignal
 
     PYQT6_AVAILABLE = True
 except ImportError:
@@ -180,13 +180,14 @@ class SyncAdapter(QObject if PYQT6_AVAILABLE else object):
         task_progress = pyqtSignal(str, float)  # task_id, progress
         status_changed = pyqtSignal(str)  # status
 
-    def __init__(self, max_workers: int = 4, max_queue_size: int = 1000):
+    def __init__(self, max_workers: int = 4, max_queue_size: int = 1000, config_manager=None):
         if PYQT6_AVAILABLE:
             super().__init__()
 
         # 基础配置
         self.max_workers = max_workers
         self.max_queue_size = max_queue_size
+        self._config_manager = config_manager
 
         # 状态管理
         self._status = AdapterStatus.STOPPED
@@ -337,6 +338,8 @@ class SyncAdapter(QObject if PYQT6_AVAILABLE else object):
 
         # 等待事件循环启动
         timeout = 5.0
+        if self._config_manager:
+            timeout = self._config_manager.get('sync_adapter.loop_start_timeout', 5.0)
         start_time = time.time()
         while self._loop is None and (time.time() - start_time) < timeout:
             time.sleep(0.01)
@@ -373,7 +376,10 @@ class SyncAdapter(QObject if PYQT6_AVAILABLE else object):
                 try:
                     # 获取回调任务（带超时）
                     try:
-                        callback_task = self._callback_queue.get(timeout=1.0)
+                        timeout = 1.0
+                        if self._config_manager:
+                            timeout = self._config_manager.get('sync_adapter.callback_timeout', 1.0)
+                        callback_task = self._callback_queue.get(timeout=timeout)
                     except queue.Empty:
                         continue
 
@@ -1061,13 +1067,19 @@ class CallbackManager:
         """停止处理回调"""
         self._processing = False
         if self._callback_thread:
-            self._callback_thread.join(timeout=5.0)
+            timeout = 5.0
+            if self._config_manager:
+                timeout = self._config_manager.get('sync_adapter.thread_stop_timeout', 5.0)
+            self._callback_thread.join(timeout=timeout)
 
     def _process_callbacks(self):
         """处理回调队列"""
         while self._processing:
             try:
-                callback_task = self._callback_queue.get(timeout=1.0)
+                timeout = 1.0
+                if hasattr(self, '_config_manager') and self._config_manager:
+                    timeout = self._config_manager.get('sync_adapter.callback_timeout', 1.0)
+                callback_task = self._callback_queue.get(timeout=timeout)
                 callback_task()
             except queue.Empty:
                 continue
@@ -1092,8 +1104,9 @@ class AsyncToSyncAdapter:
     将异步操作转换为同步操作，适用于GUI线程调用。
     """
 
-    def __init__(self, max_workers: int = 4):
+    def __init__(self, max_workers: int = 4, config_manager=None):
         self.max_workers = max_workers
+        self._config_manager = config_manager
         self._executor = ThreadPoolExecutor(max_workers=max_workers)
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._loop_thread: Optional[threading.Thread] = None
@@ -1125,7 +1138,10 @@ class AsyncToSyncAdapter:
             self._loop.call_soon_threadsafe(self._loop.stop)
 
         if self._loop_thread:
-            self._loop_thread.join(timeout=5.0)
+            timeout = 5.0
+            if self._config_manager:
+                timeout = self._config_manager.get('async_adapter.thread_stop_timeout', 5.0)
+            self._loop_thread.join(timeout=timeout)
 
         self._executor.shutdown(wait=True)
         logger.info("异步到同步适配器已停止")

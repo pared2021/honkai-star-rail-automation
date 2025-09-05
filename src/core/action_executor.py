@@ -18,6 +18,7 @@ import win32con
 import win32gui
 
 from .enums import ActionType, ClickType, LoopType, WaitType
+from .interfaces.i_action_config_service import IActionConfigService
 
 
 @dataclass
@@ -31,70 +32,141 @@ class ActionResult:
     error: Optional[Exception] = None
 
 
-@dataclass
 class ClickAction:
     """点击操作配置"""
 
-    x: int
-    y: int
-    click_type: Union[ClickType, str] = ClickType.SINGLE
-    button: str = "left"  # left, right, middle
-    delay_before: float = 0.1
-    delay_after: float = 0.1
-    count: int = 1  # 连续点击次数
-    interval: float = 0.1  # 连续点击间隔
-    area_radius: int = 5  # 区域点击半径
-    randomize: bool = True  # 是否随机化位置
-
-    def __post_init__(self):
+    def __init__(self, x: int, y: int, config_service: IActionConfigService = None, **kwargs):
+        self.x = x
+        self.y = y
+        
+        # 从配置服务获取默认值
+        if config_service:
+            default_config = config_service.get_click_config()
+            self.click_type = default_config['click_type']
+            self.button = default_config['button']
+            self.delay_before = default_config['delay_before']
+            self.delay_after = default_config['delay_after']
+            self.count = default_config['count']
+            self.interval = default_config['interval']
+            self.area_radius = default_config['area_radius']
+            self.randomize = default_config['randomize']
+        else:
+            # 如果没有配置服务，使用最小默认值
+            self.click_type = ClickType.SINGLE
+            self.button = 'left'
+            self.delay_before = 0.1
+            self.delay_after = 0.1
+            self.count = 1
+            self.interval = 0.1
+            self.area_radius = 5
+            self.randomize = True
+        
+        # 应用传入的参数覆盖默认值
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        
+        # 处理字符串类型的click_type
         if isinstance(self.click_type, str):
             self.click_type = ClickType(self.click_type)
 
 
-@dataclass
 class KeyAction:
     """键盘操作配置"""
 
-    keys: Union[str, List[str]]
-    action_type: str = "press"  # press, down, up, combination
-    delay_before: float = 0.1
-    delay_after: float = 0.1
-    hold_duration: float = 0.05
-    interval: float = 0.05  # 按键间隔
+    def __init__(self, keys: Union[str, List[str]], config_service: IActionConfigService = None, **kwargs):
+        self.keys = keys
+        
+        # 从配置服务获取默认值
+        if config_service:
+            default_config = config_service.get_key_config()
+            self.action_type = default_config['action_type']
+            self.delay_before = default_config['delay_before']
+            self.delay_after = default_config['delay_after']
+            self.hold_duration = default_config['hold_duration']
+            self.interval = default_config['interval']
+        else:
+            # 如果没有配置服务，使用最小默认值
+            self.action_type = 'press'
+            self.delay_before = 0.1
+            self.delay_after = 0.1
+            self.hold_duration = 0.05
+            self.interval = 0.05
+        
+        # 应用传入的参数覆盖默认值
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
-@dataclass
 class WaitAction:
     """等待操作配置"""
 
-    wait_type: Union[WaitType, str]
-    duration: float = 1.0
-    min_duration: float = 0.5
-    max_duration: float = 2.0
-    condition_func: Optional[Callable[[], bool]] = None
-    timeout: float = 30.0
-    check_interval: float = 0.1
-
-    def __post_init__(self):
+    def __init__(self, wait_type: Union[WaitType, str], config_service: IActionConfigService = None, **kwargs):
+        self.wait_type = wait_type
+        
+        # 从配置服务获取默认值
+        if config_service:
+            default_config = config_service.get_wait_config()
+            self.duration = default_config['duration']
+            self.min_duration = default_config['min_duration']
+            self.max_duration = default_config['max_duration']
+            self.condition_func = default_config['condition_func']
+            self.timeout = default_config['timeout']
+            self.check_interval = default_config['check_interval']
+        else:
+            # 如果没有配置服务，使用最小默认值
+            self.duration = 1.0
+            self.min_duration = 0.5
+            self.max_duration = 2.0
+            self.condition_func = None
+            self.timeout = 30.0
+            self.check_interval = 0.1
+        
+        # 应用传入的参数覆盖默认值
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        
+        # 处理字符串类型的wait_type
         if isinstance(self.wait_type, str):
             self.wait_type = WaitType(self.wait_type)
 
 
-@dataclass
 class LoopAction:
     """循环操作配置"""
 
-    loop_type: Union[LoopType, str]
-    count: int = 1
-    condition_func: Optional[Callable[[], bool]] = None
-    actions: List[Dict[str, Any]] = None
-    max_iterations: int = 1000
-    break_on_error: bool = True
-    delay_between_iterations: float = 0.1
-
-    def __post_init__(self):
+    def __init__(self, loop_type: Union[LoopType, str], config_service: IActionConfigService = None, **kwargs):
+        self.loop_type = loop_type
+        
+        # 从配置服务获取默认值
+        if config_service:
+            default_config = config_service.get_loop_config()
+            self.count = default_config['count']
+            self.condition_func = default_config['condition_func']
+            self.actions = default_config['actions']
+            self.max_iterations = default_config['max_iterations']
+            self.break_on_error = default_config['break_on_error']
+            self.delay_between_iterations = default_config['delay_between_iterations']
+        else:
+            # 如果没有配置服务，使用最小默认值
+            self.count = 1
+            self.condition_func = None
+            self.actions = []
+            self.max_iterations = 1000
+            self.break_on_error = True
+            self.delay_between_iterations = 0.1
+        
+        # 应用传入的参数覆盖默认值
+        for key, value in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+        
+        # 处理字符串类型的loop_type
         if isinstance(self.loop_type, str):
             self.loop_type = LoopType(self.loop_type)
+        
+        # 确保actions不为None
         if self.actions is None:
             self.actions = []
 
@@ -109,13 +181,13 @@ class ActionExecutor:
     4. 循环控制（次数循环、条件循环、异常处理）
     """
 
-    def __init__(self, config_manager=None):
+    def __init__(self, config_service: IActionConfigService = None):
         """初始化操作执行器
 
         Args:
-            config_manager: 配置管理器实例
+            config_service: 配置服务实例
         """
-        self.config_manager = config_manager
+        self._config_service = config_service
         self.is_running = False
         self.current_action = None
         self.execution_stats = {
@@ -126,12 +198,23 @@ class ActionExecutor:
         }
 
         # 初始化pyautogui设置
-        pyautogui.FAILSAFE = True
-        pyautogui.PAUSE = 0.01
+        if config_service:
+            executor_config = config_service.get_executor_config()
+            pyautogui.FAILSAFE = executor_config['pyautogui_failsafe']
+            pyautogui.PAUSE = executor_config['pyautogui_pause']
+        else:
+            pyautogui.FAILSAFE = True
+            pyautogui.PAUSE = 0.01
 
         logger.info("ActionExecutor initialized")
+    
+    def _get_config_value(self, key: str, default_value):
+        """从配置服务获取配置值"""
+        if self._config_service:
+            return self._config_service.get_config_value(key, default_value)
+        return default_value
 
-    def get_random_offset(self, radius: int = 5) -> Tuple[int, int]:
+    def get_random_offset(self, radius: int = None) -> Tuple[int, int]:
         """获取随机偏移量
 
         Args:
@@ -140,13 +223,16 @@ class ActionExecutor:
         Returns:
             (x_offset, y_offset): 随机偏移量
         """
+        if radius is None:
+            radius = self._get_config_value('action_executor.random_offset_radius', 5)
+            
         angle = random.uniform(0, 2 * 3.14159)
         distance = random.uniform(0, radius)
         x_offset = int(distance * random.uniform(-1, 1))
         y_offset = int(distance * random.uniform(-1, 1))
         return x_offset, y_offset
 
-    def add_random_delay(self, base_delay: float, variance: float = 0.1) -> float:
+    def add_random_delay(self, base_delay: float, variance: float = None) -> float:
         """添加随机延迟
 
         Args:
@@ -156,6 +242,9 @@ class ActionExecutor:
         Returns:
             实际延迟时间
         """
+        if variance is None:
+            variance = self._get_config_value('action_executor.delay_variance', 0.1)
+            
         min_delay = base_delay * (1 - variance)
         max_delay = base_delay * (1 + variance)
         actual_delay = random.uniform(min_delay, max_delay)
@@ -342,7 +431,7 @@ class ActionExecutor:
             )
 
     async def execute_text_input(
-        self, text: str, interval: float = 0.01
+        self, text: str, interval: float = None
     ) -> ActionResult:
         """执行文本输入
 
@@ -358,6 +447,10 @@ class ActionExecutor:
         try:
             logger.debug(f"Typing text: {text[:50]}{'...' if len(text) > 50 else ''}")
 
+            # 获取输入间隔
+            if interval is None:
+                interval = self._get_config_value('action_executor.text_input.interval', 0.01)
+            
             # 使用pyautogui的typewrite方法，支持中文
             pyautogui.typewrite(text, interval=interval)
 
@@ -564,7 +657,11 @@ class ActionExecutor:
                 f"Executing scroll at ({x}, {y}), direction: {direction}, clicks: {clicks}"
             )
 
-            pyautogui.scroll(clicks if direction == "up" else -clicks, x=x, y=y)
+            # 获取滚动参数
+            default_clicks = self._get_config_value('action_executor.scroll.clicks', 3)
+            actual_clicks = clicks if clicks != 3 else default_clicks
+            
+            pyautogui.scroll(actual_clicks if direction == "up" else -actual_clicks, x=x, y=y)
 
             execution_time = time.time() - start_time
 
@@ -615,11 +712,17 @@ class ActionExecutor:
                 f"Executing drag from ({start_x}, {start_y}) to ({end_x}, {end_y})"
             )
 
+            # 获取拖拽参数
+            default_duration = self._get_config_value('action_executor.drag.duration', 1.0)
+            default_button = self._get_config_value('action_executor.drag.button', 'left')
+            actual_duration = duration if duration != 1.0 else default_duration
+            actual_button = button if button != "left" else default_button
+            
             pyautogui.drag(
                 end_x - start_x,
                 end_y - start_y,
-                duration=duration,
-                button=button,
+                duration=actual_duration,
+                button=actual_button,
                 mouseDownUp=False,
             )
 
@@ -674,7 +777,7 @@ class ActionExecutor:
             elif action_type == ActionType.TEXT_INPUT:
                 params = action_config.get("params", {})
                 result = await self.execute_text_input(
-                    params.get("text", ""), params.get("interval", 0.01)
+                    params.get("text", ""), params.get("interval", self._get_config_value('action_executor.text_input.interval', 0.01))
                 )
 
             elif action_type == ActionType.WAIT:
@@ -690,8 +793,8 @@ class ActionExecutor:
                 result = await self.execute_scroll(
                     params.get("x", 0),
                     params.get("y", 0),
-                    params.get("clicks", 3),
-                    params.get("direction", "up"),
+                    params.get("clicks", self._get_config_value('action_executor.scroll.clicks', 3)),
+                    params.get("direction", self._get_config_value('action_executor.scroll.direction', 'up')),
                 )
 
             elif action_type == ActionType.DRAG:
@@ -701,8 +804,8 @@ class ActionExecutor:
                     params.get("start_y", 0),
                     params.get("end_x", 0),
                     params.get("end_y", 0),
-                    params.get("duration", 1.0),
-                    params.get("button", "left"),
+                    params.get("duration", self._get_config_value('action_executor.drag.duration', 1.0)),
+                    params.get("button", self._get_config_value('action_executor.drag.button', 'left')),
                 )
 
             else:
