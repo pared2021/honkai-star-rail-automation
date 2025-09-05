@@ -50,36 +50,70 @@ python main.py
 ```
 xingtie/
 ├── main.py                    # 程序入口
-├── requirements.txt            # 依赖包列表
+├── requirements.txt           # 依赖包列表
+├── requirements-dev.txt       # 开发依赖包
 ├── README.md                  # 项目说明
-├── config/                    # 配置文件目录
-│   └── default.ini           # 默认配置
-├── src/                       # 源代码目录
-│   ├── __init__.py
-│   ├── core/                  # 核心模块
-│   │   ├── __init__.py
-│   │   ├── config_manager.py  # 配置管理器
-│   │   └── logger.py          # 日志系统
-│   ├── database/              # 数据库模块
-│   │   ├── __init__.py
-│   │   └── db_manager.py      # 数据库管理器
-│   ├── gui/                   # 界面模块
-│   │   ├── __init__.py
-│   │   └── main_window.py     # 主窗口
-│   ├── automation/            # 自动化模块
-│   │   ├── __init__.py
-│   │   ├── game_detector.py   # 游戏检测器
-│   │   └── automation_controller.py  # 自动化控制器
-│   └── utils/                 # 工具模块
-│       ├── __init__.py
-│       └── helpers.py         # 辅助函数
-├── assets/                    # 资源文件
-│   ├── README.md
-│   └── templates/             # 模板图片
-├── data/                      # 数据目录
-│   └── .gitkeep
-└── logs/                      # 日志目录
-    └── .gitkeep
+├── pyproject.toml            # 项目配置文件
+├── pytest.ini               # 测试配置
+├── mypy.ini                  # 类型检查配置
+├── Makefile                  # 构建脚本
+├── version.txt               # 版本信息
+├── .github/                  # GitHub配置
+│   ├── quality-config.json  # 质量配置
+│   └── workflows/            # CI/CD工作流
+├── config/                   # 配置文件目录
+│   ├── default.ini          # 默认配置
+│   ├── automation_config.json
+│   ├── game_settings.json
+│   ├── monitoring.yml
+│   ├── linting/             # 代码检查配置
+│   ├── testing/             # 测试配置
+│   └── ...
+├── scripts/                  # 开发工具脚本
+│   ├── quality_gate.py      # 质量门禁检查
+│   ├── run_tests.py         # 测试运行器
+│   ├── code_quality_check.py
+│   ├── duplicate_detector.py
+│   ├── validate_architecture.py
+│   └── ...
+├── src/                      # 源代码目录
+│   ├── core/                # 核心模块
+│   ├── database/            # 数据库模块
+│   ├── ui/                  # 用户界面模块
+│   ├── automation/          # 自动化模块
+│   ├── services/            # 业务服务
+│   ├── repositories/        # 数据访问层
+│   ├── models/              # 数据模型
+│   ├── utils/               # 工具模块
+│   ├── monitoring/          # 监控模块
+│   ├── adapters/            # 适配器模块
+│   ├── interfaces/          # 接口定义
+│   ├── exceptions/          # 异常定义
+│   ├── middleware/          # 中间件
+│   ├── infrastructure/      # 基础设施
+│   ├── application/         # 应用层
+│   └── config/              # 配置模块
+├── tests/                    # 测试目录
+│   ├── unit/                # 单元测试
+│   ├── integration/         # 集成测试
+│   ├── conftest.py          # 测试配置
+│   └── ...
+├── assets/                   # 资源文件
+│   ├── images/              # 图片资源
+│   └── templates/           # 模板图片
+├── data/                     # 数据目录
+│   ├── app.db               # 应用数据库
+│   ├── screenshots/         # 截图目录
+│   └── ...
+├── logs/                     # 日志目录
+├── docs/                     # 文档目录
+├── reports/                  # 报告目录
+│   ├── coverage/            # 覆盖率报告
+│   ├── quality/             # 质量报告
+│   └── ...
+├── migrations/               # 数据库迁移
+├── examples/                 # 示例代码
+└── venv/                     # 虚拟环境
 ```
 
 ## 核心功能
@@ -135,12 +169,29 @@ xingtie/
 
 ## 开发指南
 
+### 开发环境设置
+
+```bash
+# 安装开发依赖
+pip install -r requirements-dev.txt
+
+# 运行代码质量检查
+python scripts/quality_gate.py
+
+# 运行测试
+python scripts/run_tests.py
+
+# 检查代码覆盖率
+pytest --cov=src --cov-report=html
+```
+
 ### 添加新功能
 
 1. **创建模块**：在相应目录下创建新的 Python 文件
 2. **实现接口**：遵循现有的接口规范
 3. **添加测试**：编写单元测试和集成测试
-4. **更新文档**：更新相关文档和注释
+4. **运行质量检查**：使用 `python scripts/quality_gate.py` 检查代码质量
+5. **更新文档**：更新相关文档和注释
 
 ### 添加新模板
 

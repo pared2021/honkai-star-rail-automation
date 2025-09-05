@@ -1,19 +1,19 @@
-"""告警管理器模块..
+"""告警管理器模块。.
 
 提供系统告警的管理和处理功能。
 """
 
-from collections import defaultdict, deque
-from dataclasses import dataclass, field
-from enum import Enum
 import logging
 import threading
 import time
+from collections import defaultdict, deque
+from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
 
 class AlertLevel(Enum):
-    """告警级别枚举."""
+    """告警级别枚举。"""
 
     DEBUG = "debug"
     INFO = "info"
@@ -23,7 +23,7 @@ class AlertLevel(Enum):
 
 
 class AlertStatus(Enum):
-    """告警状态枚举."""
+    """告警状态枚举。"""
 
     ACTIVE = "active"
     RESOLVED = "resolved"
@@ -33,7 +33,7 @@ class AlertStatus(Enum):
 
 @dataclass
 class Alert:
-    """告警数据类."""
+    """告警数据类。"""
 
     id: str
     title: str
@@ -51,7 +51,7 @@ class Alert:
 
 @dataclass
 class AlertRule:
-    """告警规则数据类."""
+    """告警规则数据类。"""
 
     id: str
     name: str
@@ -65,13 +65,13 @@ class AlertRule:
 
 
 class AlertManager:
-    """告警管理器.
+    """告警管理器。
 
     负责管理系统告警的创建、处理、通知和存储。
     """
 
     def __init__(self, max_alerts: int = 1000):
-        """初始化告警管理器.
+        """初始化告警管理器。
 
         Args:
             max_alerts: 最大告警数量
@@ -102,7 +102,7 @@ class AlertManager:
         annotations: Optional[Dict[str, str]] = None,
         alert_id: Optional[str] = None,
     ) -> str:
-        """创建告警.
+        """创建告警。
 
         Args:
             title: 告警标题
@@ -146,7 +146,7 @@ class AlertManager:
         return alert_id
 
     def resolve_alert(self, alert_id: str) -> bool:
-        """解决告警.
+        """解决告警。
 
         Args:
             alert_id: 告警ID
@@ -171,7 +171,7 @@ class AlertManager:
         return False
 
     def acknowledge_alert(self, alert_id: str, acknowledged_by: str) -> bool:
-        """确认告警.
+        """确认告警。
 
         Args:
             alert_id: 告警ID
@@ -198,7 +198,7 @@ class AlertManager:
         return False
 
     def suppress_alert(self, alert_id: str) -> bool:
-        """抑制告警.
+        """抑制告警。
 
         Args:
             alert_id: 告警ID
@@ -222,7 +222,7 @@ class AlertManager:
         return False
 
     def get_alert(self, alert_id: str) -> Optional[Alert]:
-        """获取告警.
+        """获取告警。
 
         Args:
             alert_id: 告警ID
@@ -240,7 +240,7 @@ class AlertManager:
         source: Optional[str] = None,
         limit: Optional[int] = None,
     ) -> List[Alert]:
-        """获取告警列表.
+        """获取告警列表。
 
         Args:
             status: 过滤状态
@@ -272,7 +272,7 @@ class AlertManager:
         return alerts
 
     def add_rule(self, rule: AlertRule) -> None:
-        """添加告警规则.
+        """添加告警规则。
 
         Args:
             rule: 告警规则
@@ -283,7 +283,7 @@ class AlertManager:
         self._logger.info(f"Alert rule added: {rule.id} - {rule.name}")
 
     def remove_rule(self, rule_id: str) -> bool:
-        """移除告警规则.
+        """移除告警规则。
 
         Args:
             rule_id: 规则ID
@@ -300,7 +300,7 @@ class AlertManager:
         return False
 
     def evaluate_rules(self, data: Any) -> List[str]:
-        """评估告警规则.
+        """评估告警规则。
 
         Args:
             data: 评估数据
@@ -343,7 +343,7 @@ class AlertManager:
         return triggered_alerts
 
     def add_handler(self, level: AlertLevel, handler: Callable[[Alert], None]) -> None:
-        """添加告警处理器.
+        """添加告警处理器。
 
         Args:
             level: 告警级别
@@ -355,7 +355,7 @@ class AlertManager:
     def remove_handler(
         self, level: AlertLevel, handler: Callable[[Alert], None]
     ) -> bool:
-        """移除告警处理器.
+        """移除告警处理器。
 
         Args:
             level: 告警级别
@@ -372,7 +372,7 @@ class AlertManager:
         return False
 
     def get_stats(self) -> Dict[str, Any]:
-        """获取统计信息.
+        """获取统计信息。
 
         Returns:
             统计信息字典
@@ -388,7 +388,7 @@ class AlertManager:
         return stats
 
     def clear_resolved_alerts(self, older_than: Optional[float] = None) -> int:
-        """清理已解决的告警.
+        """清理已解决的告警。
 
         Args:
             older_than: 清理早于指定时间的告警（秒）
@@ -426,7 +426,7 @@ class AlertManager:
         return cleared_count
 
     def _trigger_handlers(self, alert: Alert) -> None:
-        """触发告警处理器.
+        """触发告警处理器。
 
         Args:
             alert: 告警对象

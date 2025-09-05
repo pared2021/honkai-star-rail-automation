@@ -112,8 +112,15 @@ class DatabaseManager:
             self._local.connection.close()
             delattr(self._local, "connection")
 
+    def initialize_database(self):
+        """初始化数据库.
+        
+        创建数据库文件和基本表结构。
+        """
+        self.initialize_schema()
+
     def initialize_schema(self):
-        """初始化数据库架构.."""
+        """初始化数据库架构."""
         if self._initialized:
             return
 

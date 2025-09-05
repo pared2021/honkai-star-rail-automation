@@ -504,9 +504,7 @@ class TestGameDetector:
 
     def test_is_game_running_false(self):
         """测试游戏未运行"""
-        with patch.object(
-            self.game_detector.window_manager, "find_game_windows"
-        ) as mock_find_windows:
+        with patch.object(self.game_detector.window_manager, "find_game_windows") as mock_find_windows:
             mock_find_windows.return_value = []
 
             result = self.game_detector.is_game_running()
@@ -829,7 +827,7 @@ class TestTemplateMatcherAdvanced:
         template_info = TemplateInfo(
             name="test", image=self.test_template, threshold=0.8, path="test.png"
         )
-
+        
         # 将模板信息添加到缓存中
         self.template_matcher.template_info_cache["test"] = template_info
 
@@ -840,7 +838,9 @@ class TestTemplateMatcherAdvanced:
             mock_match.return_value = np.array([[0.9]])
             mock_minmax.return_value = (0.1, 0.9, (10, 10), (100, 100))
 
-            result = self.template_matcher.match_template(self.test_screenshot, "test")
+            result = self.template_matcher.match_template(
+                self.test_screenshot, "test"
+            )
 
             assert result is not None
             assert isinstance(result, UIElement)
