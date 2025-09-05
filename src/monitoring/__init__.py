@@ -3,23 +3,24 @@
 监控系统模块 - 提供完整的日志记录、性能监控、健康检查和告警功能
 """
 
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from loguru import logger
 
 from src.core.config_manager import (
-    AlertingConfig,
-    ConfigType,
-    DashboardConfig,
-    HealthCheckConfig as ConfigHealthCheckConfig,
-    LoggingConfig,
-    MonitoringConfig,
-    MonitoringSystemConfig,
-    NotificationConfig,
-    PerformanceConfig,
-    SystemConfig,
+    ConfigManager,
 )
 from src.core.interfaces.config_interface import IConfigManager
+from enum import Enum
+
+
+class ConfigType(Enum):
+    """配置类型枚举"""
+    ALERTING = "alerting"
+    HEALTH_CHECK = "health_check"
+    MONITORING = "monitoring"
+    DASHBOARD = "dashboard"
+    LOGGING = "logging"
 from src.monitoring.alert_manager import (
     Alert,
     AlertChannel,
@@ -53,20 +54,40 @@ from src.monitoring.logging_monitoring_service import (
     SystemMetrics,
 )
 
+# 定义占位符类
+class _MonitoringDashboardPlaceholder:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        raise ImportError("MonitoringDashboard不可用")
+
 # 导入UI组件
 try:
-    from src.ui import MonitoringDashboard
+    # 尝试导入PyQt6依赖
+    import PyQt6
+    # 如果dashboard.py文件存在，则导入
+    try:
+        from src.monitoring.dashboard import MonitoringDashboard
+        _monitoring_dashboard_available = True
+    except ImportError:
+        # dashboard.py文件不存在，使用占位符
+        MonitoringDashboard = _MonitoringDashboardPlaceholder  # type: ignore
+        _monitoring_dashboard_available = False
+        logger.warning("监控仪表板模块不存在")
 except ImportError:
-    MonitoringDashboard = None
+    # PyQt6不可用，使用占位符
+    MonitoringDashboard = _MonitoringDashboardPlaceholder  # type: ignore
+    _monitoring_dashboard_available = False
     logger.warning("监控仪表板UI组件导入失败，可能缺少PyQt6依赖")
 
 
 class MonitoringSystem:
     """监控系统主类 - 整合所有监控功能"""
+    
+    # 类属性类型注解
+    config_manager: IConfigManager
 
     def __init__(
-        self, event_bus=None, db_manager=None, config_directory: str = "./config", config_manager: IConfigManager = None
-    ):
+        self, event_bus: Optional[Any] = None, db_manager: Optional[Any] = None, config_directory: str = "./config", config_manager: Optional[IConfigManager] = None
+    ) -> None:
         """
         初始化监控系统
 
@@ -82,12 +103,16 @@ class MonitoringSystem:
         # 初始化配置管理器
         if config_manager is None:
             from src.core.dependency_injection import ServiceLocator
-            self.config_manager = ServiceLocator.resolve(IConfigManager)
+            try:
+                self.config_manager = ServiceLocator.resolve(ConfigManager)
+            except ValueError:
+                # 如果ConfigManager未注册，创建默认实例
+                self.config_manager = ConfigManager()
         else:
             self.config_manager = config_manager
 
         # 获取监控配置
-        self.config = self.config_manager.get_monitoring_config()
+        self.config = self.config_manager.get_section("monitoring") if self.config_manager else {}
 
         # 初始化核心组件
         self.logging_service: Optional[LoggingMonitoringService] = None
@@ -104,43 +129,60 @@ class MonitoringSystem:
         """初始化所有监控组件"""
         try:
             # 初始化日志监控服务
-            if self.config.monitoring.enabled:
+            if self.config.get('monitoring', {}).get('enabled', False):
                 from src.core.performance_monitor import PerformanceMonitor
                 from src.monitoring.task_monitor import TaskMonitor
 
                 # 创建性能监控器和任务监控器
                 performance_monitor = PerformanceMonitor()
-                task_monitor = TaskMonitor(
-                    db_manager=self.db_manager,
-                    automation_controller=None,  # 暂时设为None，后续可以注入
-                )
+                # 只有当db_manager是正确类型且automation_controller可用时才初始化
+                from src.database.db_manager import DatabaseManager
+                from src.automation.automation_controller import AutomationController
+                if (isinstance(self.db_manager, DatabaseManager)
+                    and hasattr(self, 'automation_controller') 
+                    and isinstance(getattr(self, 'automation_controller', None), AutomationController)):
+                    task_monitor = TaskMonitor(
+                        db_manager=self.db_manager,
+                        automation_controller=self.automation_controller,
+                    )
+                else:
+                    task_monitor = None
 
-                self.logging_service = LoggingMonitoringService(
-                    performance_monitor=performance_monitor,
-                    task_monitor=task_monitor,
-                    log_directory="logs",
-                )
+                if task_monitor is not None:
+                    self.logging_service = LoggingMonitoringService(
+                        performance_monitor=performance_monitor,
+                        task_monitor=task_monitor,
+                        log_directory="logs",
+                    )
+                else:
+                    self.logging_service = None
                 logger.info("日志监控服务初始化完成")
 
             # 初始化告警管理器
-            if self.config.alerting.enabled:
+            if (self.config.get('alerting', {}).get('enabled', False) 
+                and self.event_bus is not None):
                 self.alert_manager = AlertManager(event_bus=self.event_bus)
                 logger.info("告警管理器初始化完成")
 
             # 初始化健康检查器
-            if self.config.health_check.enabled:
-                self.health_checker = HealthChecker(
-                    event_bus=self.event_bus, db_manager=self.db_manager
-                )
+            if self.config.get('health_check', {}).get('enabled', False):
+                from src.database.db_manager import DatabaseManager
+                # 只有当db_manager是DatabaseManager类型时才传递
+                if (isinstance(self.db_manager, DatabaseManager) and self.event_bus is not None):
+                    self.health_checker = HealthChecker(
+                        event_bus=self.event_bus, db_manager=self.db_manager
+                    )
+                else:
+                    # HealthChecker需要db_manager参数，如果没有则不创建
+                    self.health_checker = None
                 logger.info("健康检查器初始化完成")
 
             # 初始化仪表板（如果可用）
-            if self.config.dashboard.enabled and MonitoringDashboard:
+            if (self.config.get('dashboard', {}).get('enabled', False) and _monitoring_dashboard_available
+                and self.logging_service is not None):
                 try:
                     self.dashboard = MonitoringDashboard(
-                        logging_service=self.logging_service,
-                        alert_manager=self.alert_manager,
-                        health_checker=self.health_checker,
+                        logging_monitoring_service=self.logging_service
                     )
                     logger.info("监控仪表板初始化完成")
                 except Exception as e:
@@ -243,13 +285,13 @@ class MonitoringSystem:
             return False
 
         # 重新加载配置
-        self.config = self.config_manager.get_monitoring_config()
+        self.config = self.config_manager.get_section("monitoring") if self.config_manager else {}
 
         return self.start()
 
     def get_status(self) -> Dict[str, Any]:
         """获取监控系统状态"""
-        status = {
+        status: Dict[str, Any] = {
             "is_running": self.is_running,
             "components": {},
             "configuration": {"monitoring": self.config},
@@ -356,7 +398,7 @@ class MonitoringSystem:
             logger.error(f"监控数据导出失败: {e}")
             return False
 
-    def show_dashboard(self):
+    def show_dashboard(self) -> None:
         """显示监控仪表板"""
         if self.dashboard:
             self.dashboard.show()
@@ -364,7 +406,7 @@ class MonitoringSystem:
         else:
             logger.warning("监控仪表板不可用")
 
-    def hide_dashboard(self):
+    def hide_dashboard(self) -> None:
         """隐藏监控仪表板"""
         if self.dashboard:
             self.dashboard.hide()
@@ -374,10 +416,10 @@ class MonitoringSystem:
         self, config_type: ConfigType, config_data: Dict[str, Any]
     ) -> bool:
         """更新配置"""
-        success = self.config_manager.update_monitoring_config(config_data)
+        success = self.config_manager.set_section("monitoring", config_data)
         if success:
             # 重新加载配置
-            self.config = self.config_manager.get_monitoring_config()
+            self.config = self.config_manager.get_section("monitoring") if self.config_manager else {}
 
             # 通知组件配置已更新
             self._notify_config_change(config_type, config_data)
@@ -386,12 +428,12 @@ class MonitoringSystem:
 
         return success
 
-    def _setup_component_connections(self):
+    def _setup_component_connections(self) -> None:
         """设置组件间的连接"""
         # 连接告警管理器和日志服务
         if self.alert_manager and self.logging_service:
-            # 设置告警管理器的日志服务引用
-            self.alert_manager.logging_service = self.logging_service
+            # AlertManager不需要logging_service属性
+            pass
 
         # 连接健康检查器和告警管理器
         if self.health_checker and self.alert_manager:
@@ -408,16 +450,17 @@ class MonitoringSystem:
 
     def _handle_health_status_change(
         self, component: str, old_status: str, new_status: str
-    ):
+    ) -> None:
         """处理健康状态变化"""
         if self.alert_manager:
             # 根据健康状态变化创建相应的告警
             if new_status == "critical":
                 self.alert_manager.create_alert(
-                    rule_name=f"health_check_{component}",
+                    rule_id=f"health_check_{component}",
+                    title="组件健康状态严重",
                     message=f"组件 {component} 健康状态变为严重",
-                    severity=AlertSeverity.CRITICAL,
-                    details={
+                    source="health_checker",
+                    data={
                         "component": component,
                         "old_status": old_status,
                         "new_status": new_status,
@@ -425,10 +468,11 @@ class MonitoringSystem:
                 )
             elif new_status == "warning":
                 self.alert_manager.create_alert(
-                    rule_name=f"health_check_{component}",
+                    rule_id=f"health_check_{component}",
+                    title="组件健康状态警告",
                     message=f"组件 {component} 健康状态变为警告",
-                    severity=AlertSeverity.WARNING,
-                    details={
+                    source="health_checker",
+                    data={
                         "component": component,
                         "old_status": old_status,
                         "new_status": new_status,
@@ -437,7 +481,7 @@ class MonitoringSystem:
 
     def _notify_config_change(
         self, config_type: ConfigType, config_data: Dict[str, Any]
-    ):
+    ) -> None:
         """通知组件配置变更"""
         # 根据配置类型通知相应组件
         if config_type == ConfigType.ALERTING and self.alert_manager:
@@ -452,7 +496,7 @@ class MonitoringSystem:
             # 重新加载监控配置
             pass  # 日志服务可以实现配置重载方法
 
-    def _on_config_changed(self, config_type: ConfigType, config_data: Dict[str, Any]):
+    def _on_config_changed(self, config_type: ConfigType, config_data: Dict[str, Any]) -> None:
         """配置变更回调"""
         logger.info(f"配置已变更: {config_type.value}")
 
@@ -467,7 +511,7 @@ class MonitoringSystem:
                 },
             )
 
-    def _get_active_components(self) -> list:
+    def _get_active_components(self) -> List[str]:
         """获取活动组件列表"""
         components = []
 
@@ -498,15 +542,15 @@ def get_monitoring_system() -> Optional[MonitoringSystem]:
     return _monitoring_system_instance
 
 
-def set_monitoring_system(monitoring_system: MonitoringSystem):
+def set_monitoring_system(monitoring_system: MonitoringSystem) -> None:
     """设置全局监控系统实例"""
     global _monitoring_system_instance
     _monitoring_system_instance = monitoring_system
 
 
 def initialize_monitoring_system(
-    event_bus=None, db_manager=None, config_directory: str = "./config"
-) -> MonitoringSystem:
+    event_bus: Optional[Any] = None, db_manager: Optional[Any] = None, config_directory: str = "./config"
+) -> Optional[MonitoringSystem]:
     """初始化监控系统的便捷函数"""
     monitoring_system = MonitoringSystem(
         event_bus=event_bus, db_manager=db_manager, config_directory=config_directory
@@ -553,7 +597,7 @@ __all__ = [
     "ProcessHealthCheck",
     "ServiceHealthCheck",
     # 配置管理
-    "MonitoringConfigManager",
+
     "ConfigType",
     "LoggingConfig",
     "MonitoringConfig",

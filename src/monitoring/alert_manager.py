@@ -92,6 +92,28 @@ class Alert:
     resolved_by: Optional[str] = None
     notification_count: int = 0
     last_notification_at: Optional[datetime] = None
+    
+    def to_dict(self) -> Dict[str, Any]:
+        """将告警转换为字典"""
+        return {
+            "id": self.id,
+            "rule_id": self.rule_id,
+            "title": self.title,
+            "message": self.message,
+            "severity": self.severity.value,
+            "status": self.status.value,
+            "source": self.source,
+            "data": self.data,
+            "tags": self.tags,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
+            "acknowledged_at": (
+                self.acknowledged_at.isoformat() if self.acknowledged_at else None
+            ),
+            "acknowledged_by": self.acknowledged_by,
+            "resolved_at": self.resolved_at.isoformat() if self.resolved_at else None,
+            "resolved_by": self.resolved_by,
+        }
 
 
 @dataclass
@@ -207,7 +229,7 @@ class NotificationSender:
         self.sender_thread = None
         self.running = False
 
-    def start(self):
+    def start(self) -> None:
         """启动通知发送器"""
         if not self.running:
             self.running = True
@@ -215,19 +237,19 @@ class NotificationSender:
             self.sender_thread.start()
             logger.info("通知发送器已启动")
 
-    def stop(self):
+    def stop(self) -> None:
         """停止通知发送器"""
         self.running = False
         if self.sender_thread:
             self.sender_thread.join(timeout=5)
         logger.info("通知发送器已停止")
 
-    def send_notification(self, alert: Alert, channels: List[AlertChannel]):
+    def send_notification(self, alert: Alert, channels: List[AlertChannel]) -> None:
         """发送通知"""
         for channel in channels:
             self.send_queue.put((alert, channel))
 
-    def _sender_loop(self):
+    def _sender_loop(self) -> None:
         """发送器主循环"""
         while self.running:
             try:
@@ -239,7 +261,7 @@ class NotificationSender:
             except Exception as e:
                 logger.error(f"发送通知失败: {e}")
 
-    def _send_single_notification(self, alert: Alert, channel: AlertChannel):
+    def _send_single_notification(self, alert: Alert, channel: AlertChannel) -> None:
         """发送单个通知"""
         try:
             if channel == AlertChannel.EMAIL and self.config.email_enabled:
@@ -258,7 +280,7 @@ class NotificationSender:
         except Exception as e:
             logger.error(f"发送{channel.value}通知失败: {e}")
 
-    def _send_email(self, alert: Alert):
+    def _send_email(self, alert: Alert) -> None:
         """发送邮件通知"""
         if not self.config.email_to:
             return
@@ -298,7 +320,7 @@ class NotificationSender:
             server.login(self.config.email_username, self.config.email_password)
             server.send_message(msg)
 
-    def _send_desktop_notification(self, alert: Alert):
+    def _send_desktop_notification(self, alert: Alert) -> None:
         """发送桌面通知"""
         try:
             import plyer
@@ -313,7 +335,7 @@ class NotificationSender:
         except Exception as e:
             logger.error(f"发送桌面通知失败: {e}")
 
-    def _send_log_notification(self, alert: Alert):
+    def _send_log_notification(self, alert: Alert) -> None:
         """发送日志通知"""
         level_map = {
             AlertSeverity.LOW: logger.info,
@@ -325,7 +347,7 @@ class NotificationSender:
         log_func = level_map.get(alert.severity, logger.info)
         log_func(f"告警: {alert.title} - {alert.message}")
 
-    def _send_webhook(self, alert: Alert):
+    def _send_webhook(self, alert: Alert) -> None:
         """发送Webhook通知"""
         try:
             import requests
@@ -355,7 +377,7 @@ class NotificationSender:
         except Exception as e:
             logger.error(f"发送Webhook通知失败: {e}")
 
-    def _send_sms(self, alert: Alert):
+    def _send_sms(self, alert: Alert) -> None:
         """发送短信通知"""
         # 这里可以集成短信服务API
         logger.info(f"短信通知: {alert.title} - {alert.message}")

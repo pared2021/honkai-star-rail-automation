@@ -715,6 +715,12 @@ class TaskManager:
 
         return len(running_tasks) < max_concurrent
 
+    def _check_resource_limits_sync(self) -> bool:
+        """检查资源限制（同步版本）"""
+        # 检查当前活跃的执行数量
+        max_concurrent = self.config_manager.get("task_manager.max_concurrent_tasks", 10) if self.config_manager else 10
+        return len(self._active_executions) < max_concurrent
+
     async def _schedule_task_execution(self, task: Dict):
         """调度任务执行"""
         task_id = task["task_id"]
@@ -1974,7 +1980,7 @@ class TaskManager:
         """
         try:
             # 检查资源限制
-            if not self._check_resource_limits():
+            if not await self._check_resource_limits():
                 logger.warning(f"资源限制阻止任务提交: {task_id}")
                 return False
 
@@ -2150,7 +2156,7 @@ class TaskManager:
             # 检查并发任务数量
             if (
                 len(self._running_tasks)
-                >= self._resource_limits["max_concurrent_tasks"]
+                >= self._resource_limits.max_concurrent_tasks
             ):
                 logger.warning(f"并发任务数量已达上限: {len(self._running_tasks)}")
                 return False
@@ -2163,7 +2169,7 @@ class TaskManager:
 
     async def _trigger_execution_callback(
         self, task_id: str, event: str, data: Any = None
-    ):
+    ) -> None:
         """触发执行回调
 
         Args:
@@ -2181,7 +2187,7 @@ class TaskManager:
         except Exception as e:
             logger.error(f"执行回调失败: {task_id}, 事件: {event}, 错误: {e}")
 
-    def set_execution_callback(self, task_id: str, callback: Callable):
+    def set_execution_callback(self, task_id: str, callback: Callable) -> None:
         """设置任务执行回调
 
         Args:
@@ -2190,7 +2196,7 @@ class TaskManager:
         """
         self._execution_callbacks[task_id] = callback
 
-    def remove_execution_callback(self, task_id: str):
+    def remove_execution_callback(self, task_id: str) -> None:
         """移除任务执行回调
 
         Args:
@@ -2209,27 +2215,36 @@ class TaskManager:
             "running_tasks": len(self._running_tasks),
             "max_concurrent_tasks": self._max_concurrent_tasks,
             "queue_size": self._task_queue.qsize(),
-            "resource_limits": self._resource_limits.copy(),
+            "resource_limits": {
+                "max_concurrent_tasks": self._resource_limits.max_concurrent_tasks,
+                "max_cpu_usage": self._resource_limits.max_cpu_usage,
+                "max_memory_usage": self._resource_limits.max_memory_usage,
+            },
             "running_task_ids": list(self._running_tasks.keys()),
         }
 
-    def update_resource_limits(self, limits: Dict[str, Any]):
+    def update_resource_limits(self, limits: Dict[str, Any]) -> None:
         """更新资源限制
 
         Args:
             limits: 新的资源限制配置
         """
-        self._resource_limits.update(limits)
-
-        # 更新并发任务数量限制
+        # 逐个更新ResourceLimits属性
         if "max_concurrent_tasks" in limits:
+            self._resource_limits.max_concurrent_tasks = limits["max_concurrent_tasks"]
             new_limit = limits["max_concurrent_tasks"]
             self._max_concurrent_tasks = new_limit
             self._execution_semaphore = asyncio.Semaphore(new_limit)
+        
+        if "max_cpu_usage" in limits:
+            self._resource_limits.max_cpu_usage = limits["max_cpu_usage"]
+        
+        if "max_memory_usage" in limits:
+            self._resource_limits.max_memory_usage = limits["max_memory_usage"]
 
         logger.info(f"资源限制已更新: {self._resource_limits}")
 
-    async def shutdown_concurrent_execution(self):
+    async def shutdown_concurrent_execution(self) -> None:
         """关闭并发执行系统"""
         try:
             # 取消所有运行中的任务
@@ -2342,7 +2357,7 @@ class TaskManager:
             raise
 
     async def update_task_async(
-        self, task_id: str, user_id: str, **updates
+        self, task_id: str, user_id: str, **updates: Any
     ) -> Dict[str, Any]:
         """异步更新任务
 
@@ -2525,7 +2540,7 @@ class TaskManager:
 
     # ==================== 辅助方法 ====================
 
-    async def _validate_task_config_async(self, task_type: str, config: Dict[str, Any]):
+    async def _validate_task_config_async(self, task_type: str, config: Dict[str, Any]) -> bool:
         """异步验证任务配置"""
         if not config:
             raise ValueError("任务配置不能为空")
@@ -2538,7 +2553,7 @@ class TaskManager:
             if not config.get("schedule_config"):
                 raise ValueError("计划任务必须提供schedule_config")
 
-    async def _validate_parent_task_async(self, parent_task_id: str, user_id: str):
+    async def _validate_parent_task_async(self, parent_task_id: str, user_id: str) -> bool:
         """异步验证父任务"""
         try:
             parent_task = await self.get_task_async(parent_task_id, user_id)
@@ -2572,12 +2587,12 @@ class TaskManager:
         # 这里应该实现实际的数据库删除逻辑
         return True
 
-    async def _remove_task_dependencies_async(self, task_id: str):
+    async def _remove_task_dependencies_async(self, task_id: str) -> None:
         """异步删除任务依赖"""
         # 这里应该实现实际的依赖删除逻辑
         pass
 
-    async def _query_tasks_async(self, **filters) -> List[Dict[str, Any]]:
+    async def _query_tasks_async(self, **filters: Any) -> List[Dict[str, Any]]:
         """异步查询任务"""
         # 这里应该实现实际的数据库查询逻辑
         return []
@@ -2589,51 +2604,26 @@ class TaskManager:
         # 这里应该实现实际的搜索逻辑
         return []
 
-    async def _check_task_dependencies_async(self, task_id: str):
+    async def _check_task_dependencies_async(self, task_id: str) -> bool:
         """异步检查任务依赖"""
         # 这里应该实现实际的依赖检查逻辑
         pass
 
-    async def _create_execution_record_async(self, execution_id: str, task_id: str):
+    async def _create_execution_record_async(self, execution_id: str, task_id: str) -> None:
         """异步创建执行记录"""
         # 这里应该实现实际的执行记录创建逻辑
         pass
 
-    async def _publish_event_async(self, event_type: str, event_data: Dict[str, Any]):
+    async def _publish_event_async(self, event_type: str, event_data: Dict[str, Any]) -> None:
         """异步发布事件"""
         # 这里应该实现实际的事件发布逻辑
         logger.info(f"发布事件: {event_type}, 数据: {event_data}")
 
     # ==================== 并发执行功能（从MultiTaskManager整合） ====================
 
-    async def shutdown_concurrent_execution(self):
-        """关闭并发执行功能"""
-        try:
-            # 停止并发管理器
-            self._concurrent_manager_running = False
-            if (
-                self._concurrent_manager_thread
-                and self._concurrent_manager_thread.is_alive()
-            ):
-                self._concurrent_manager_thread.join(timeout=5.0)
 
-            # 取消所有活跃的任务执行
-            for execution_id in list(self._active_executions.keys()):
-                await self.cancel_concurrent_task(execution_id)
 
-            # 停止所有正在运行的任务
-            for task_id in list(self._running_tasks.keys()):
-                await self.cancel_task(task_id)
-
-            # 关闭线程池
-            if hasattr(self, "_thread_pool"):
-                self._thread_pool.shutdown(wait=True)
-
-            logger.info("并发执行功能已关闭")
-        except Exception as e:
-            logger.error(f"关闭并发执行功能时出错: {e}")
-
-    def start_concurrent_manager(self):
+    def start_concurrent_manager(self) -> None:
         """启动并发管理器"""
         if self._concurrent_manager_running:
             return
@@ -2648,7 +2638,7 @@ class TaskManager:
         self._concurrent_manager_thread.start()
         logger.info("并发管理器已启动")
 
-    def stop_concurrent_manager(self):
+    def stop_concurrent_manager(self) -> None:
         """停止并发管理器"""
         self._concurrent_manager_running = False
         if (
@@ -2658,12 +2648,12 @@ class TaskManager:
             self._concurrent_manager_thread.join(timeout=5.0)
         logger.info("并发管理器已停止")
 
-    def submit_concurrent_task(
+    def submit_concurrent_task_sync(
         self,
         task_id: str,
         priority: TaskPriority = TaskPriority.MEDIUM,
-        dependencies: List[str] = None,
-        resource_requirements: Dict[str, Any] = None,
+        dependencies: Optional[List[str]] = None,
+        resource_requirements: Optional[Dict[str, Any]] = None,
     ) -> str:
         """提交任务到并发执行队列"""
         execution_id = str(uuid.uuid4())
@@ -2686,7 +2676,7 @@ class TaskManager:
 
         return execution_id
 
-    async def cancel_concurrent_task(self, execution_id: str) -> bool:
+    async def cancel_concurrent_execution(self, execution_id: str) -> bool:
         """取消并发任务执行"""
         if execution_id in self._active_executions:
             execution = self._active_executions[execution_id]
@@ -2733,7 +2723,7 @@ class TaskManager:
             "queue_by_priority": self._concurrent_task_queue.get_priority_counts(),
         }
 
-    def _concurrent_management_loop(self):
+    def _concurrent_management_loop(self) -> None:
         """并发管理循环"""
         logger.info("并发管理循环已启动")
 
@@ -2749,7 +2739,7 @@ class TaskManager:
                 self._cleanup_completed_executions()
 
                 # 检查资源限制
-                self._check_resource_limits()
+                self._check_resource_limits_sync()
 
                 # 检查超时任务
                 self._check_timeout_tasks()
@@ -2763,7 +2753,7 @@ class TaskManager:
 
         logger.info("并发管理循环已停止")
 
-    def _assign_tasks_to_workers(self):
+    def _assign_tasks_to_workers(self) -> None:
         """分配任务给工作线程"""
         # 检查是否有可用的工作线程槽位
         if len(self._active_executions) >= self._resource_limits.max_concurrent_tasks:
@@ -2832,7 +2822,7 @@ class TaskManager:
 
         return True
 
-    def _check_completed_tasks(self):
+    def _check_completed_tasks(self) -> None:
         """检查已完成的任务"""
         completed_executions = []
 
@@ -2872,7 +2862,7 @@ class TaskManager:
             if execution.duration:
                 self._total_execution_time += execution.duration.total_seconds()
 
-    def _cleanup_completed_executions(self):
+    def _cleanup_completed_executions(self) -> None:
         """清理已完成的任务执行记录"""
         # 保留最近的1000条记录
         if len(self._completed_executions) > 1000:
@@ -2886,12 +2876,9 @@ class TaskManager:
             for execution in to_remove:
                 del self._completed_executions[execution.execution_id]
 
-    def _check_resource_limits(self):
-        """检查资源限制"""
-        # 这里可以实现更复杂的资源监控逻辑
-        pass
 
-    def _check_timeout_tasks(self):
+
+    def _check_timeout_tasks(self) -> None:
         """检查超时任务"""
         current_time = datetime.now()
         timeout_threshold = timedelta(seconds=self._resource_limits.max_execution_time)
@@ -2935,3 +2922,15 @@ class TaskManager:
         except Exception as e:
             logger.error(f"任务执行出错: {task_execution.task_id}, 错误: {e}")
             raise
+
+    async def cancel_task(self, task_id: str) -> bool:
+        """取消任务
+        
+        Args:
+            task_id: 任务ID
+            
+        Returns:
+            是否取消成功
+        """
+        # 委托给task_executor处理
+        return await self.task_executor.cancel_task(task_id)

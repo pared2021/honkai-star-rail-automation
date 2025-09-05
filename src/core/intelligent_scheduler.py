@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """智能任务调度器 - 根据游戏状态自动选择和调度任务执行."""
 
-from dataclasses import dataclass
+import asyncio
+from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from enum import Enum
 from queue import PriorityQueue
@@ -11,7 +12,8 @@ from typing import Any, Callable, Dict, List, Optional
 
 from loguru import logger
 from src.automation.automation_controller import AutomationController
-from src.models.task_models import Task, TaskPriority, TaskStatus, TaskType
+from src.models.task_models import Task, TaskPriority, TaskStatus
+from src.core.enums import TaskType
 
 from .game_detector import GameDetector, SceneType
 from .task_manager import TaskManager
@@ -45,14 +47,9 @@ class ScheduledTask:
     scheduled_time: datetime
     retry_count: int = 0
     last_attempt: Optional[datetime] = None
-    dependencies: List[str] = None  # 依赖的任务ID列表
+    dependencies: List[str] = field(default_factory=list)  # 依赖的任务ID列表
 
-    def __post_init__(self):
-        """初始化后处理."""
-        if self.dependencies is None:
-            self.dependencies = []
-
-    def __lt__(self, other):
+    def __lt__(self, other: 'ScheduledTask') -> bool:
         """比较运算符，用于优先级队列排序."""
         # 优先级队列排序：优先级高的先执行，时间早的先执行
         if self.priority != other.priority:
@@ -74,7 +71,7 @@ class SchedulerConfig:
     priority_boost_factor: float = 1.2  # 优先级提升因子
     
     @classmethod
-    def from_config_manager(cls, config_manager):
+    def from_config_manager(cls, config_manager: Any) -> 'SchedulerConfig':
         """从配置管理器创建调度器配置."""
         if config_manager is None:
             return cls()
@@ -100,8 +97,8 @@ class IntelligentScheduler:
         game_detector: GameDetector,
         automation_controller: AutomationController,
         config: Optional[SchedulerConfig] = None,
-        config_manager=None,
-    ):
+        config_manager: Any = None,
+    ) -> None:
         """初始化智能任务调度器."""
         self.task_manager = task_manager
         self.game_detector = game_detector
@@ -113,7 +110,7 @@ class IntelligentScheduler:
         self.state = SchedulerState.STOPPED
 
         # 任务队列
-        self.task_queue = PriorityQueue()
+        self.task_queue: PriorityQueue[ScheduledTask] = PriorityQueue()
         self.running_tasks: Dict[str, threading.Thread] = {}
         self.completed_tasks: List[str] = []
         self.failed_tasks: List[str] = []
@@ -152,7 +149,7 @@ class IntelligentScheduler:
 
         logger.info("智能任务调度器初始化完成")
 
-    def _get_config_value(self, key: str, default_value):
+    def _get_config_value(self, key: str, default_value: Any) -> Any:
         """从配置管理器获取配置值."""
         if self.config_manager:
             return self.config_manager.get(key, default_value)
@@ -295,7 +292,7 @@ class IntelligentScheduler:
             logger.error(f"更新调度器配置失败: {e}")
             return False
 
-    def _scheduler_loop(self):
+    def _scheduler_loop(self) -> None:
         """调度器主循环."""
         logger.info("调度器主循环开始")
 
@@ -327,7 +324,7 @@ class IntelligentScheduler:
 
         logger.info("调度器主循环结束")
 
-    def _try_execute_next_task(self):
+    def _try_execute_next_task(self) -> None:
         """尝试执行下一个任务."""
         if self.task_queue.empty():
             return
@@ -390,13 +387,13 @@ class IntelligentScheduler:
                 return False
         return True
 
-    def _execute_task(self, scheduled_task: ScheduledTask):
+    def _execute_task(self, scheduled_task: ScheduledTask) -> None:
         """执行任务."""
         task = scheduled_task.task
         task_id = task.task_id
 
-        # 更新任务状态
-        self.task_manager.update_task_status(task_id, TaskStatus.RUNNING)
+        # 更新任务状态为运行中
+        asyncio.run(self.task_manager.update_task_status(task_id, TaskStatus.RUNNING))
         scheduled_task.last_attempt = datetime.now()
 
         # 创建任务执行线程
@@ -416,7 +413,7 @@ class IntelligentScheduler:
 
         logger.info(f"开始执行任务: {task.name} (ID: {task_id})")
 
-    def _task_execution_wrapper(self, scheduled_task: ScheduledTask):
+    def _task_execution_wrapper(self, scheduled_task: ScheduledTask) -> None:
         """任务执行包装器."""
         task = scheduled_task.task
         task_id = task.task_id
@@ -427,7 +424,7 @@ class IntelligentScheduler:
 
             if result == TaskExecutionResult.SUCCESS:
                 # 任务成功
-                self.task_manager.update_task_status(task_id, TaskStatus.COMPLETED)
+                asyncio.run(self.task_manager.update_task_status(task_id, TaskStatus.COMPLETED))
                 self.completed_tasks.append(task_id)
 
                 if self.task_completed_callback:
@@ -452,7 +449,7 @@ class IntelligentScheduler:
                     )
                 else:
                     # 重试次数用尽，标记为失败
-                    self.task_manager.update_task_status(task_id, TaskStatus.FAILED)
+                    asyncio.run(self.task_manager.update_task_status(task_id, TaskStatus.FAILED))
                     self.failed_tasks.append(task_id)
 
                     if self.task_failed_callback:
@@ -462,7 +459,7 @@ class IntelligentScheduler:
 
             else:
                 # 任务失败
-                self.task_manager.update_task_status(task_id, TaskStatus.FAILED)
+                asyncio.run(self.task_manager.update_task_status(task_id, TaskStatus.FAILED))
                 self.failed_tasks.append(task_id)
 
                 if self.task_failed_callback:
@@ -472,7 +469,7 @@ class IntelligentScheduler:
 
         except Exception as e:
             # 异常处理
-            self.task_manager.update_task_status(task_id, TaskStatus.FAILED)
+            asyncio.run(self.task_manager.update_task_status(task_id, TaskStatus.FAILED))
             self.failed_tasks.append(task_id)
 
             if self.task_failed_callback:
@@ -531,12 +528,11 @@ class IntelligentScheduler:
         else:
             base_priority_mapping = default_base_priority
             
-        base_priority = base_priority_mapping.get(task.priority, 5)
+        base_priority = int(base_priority_mapping.get(task.priority, 5))
 
         # 根据任务类型调整优先级 - 从配置获取
         default_type_bonus = {
             TaskType.DAILY_MISSION: 5,
-            TaskType.COMBAT_TRAINING: 3,
             TaskType.EXPLORATION: 2,
             TaskType.CUSTOM: 1,
         }
@@ -546,7 +542,7 @@ class IntelligentScheduler:
         else:
             type_bonus_mapping = default_type_bonus
             
-        type_bonus = type_bonus_mapping.get(task.task_type, 1)
+        type_bonus = int(type_bonus_mapping.get(task.task_type, 1))
 
         # 根据当前游戏场景调整优先级
         current_scene = self.game_detector.detect_current_scene()
@@ -556,9 +552,9 @@ class IntelligentScheduler:
         if task.task_type in suitable_tasks:
             scene_bonus = int(base_priority * self.config.priority_boost_factor)
 
-        return base_priority + type_bonus + scene_bonus
+        return int(base_priority + type_bonus + scene_bonus)
 
-    def _cleanup_completed_threads(self):
+    def _cleanup_completed_threads(self) -> None:
         """清理已完成的线程."""
         completed_task_ids = []
 
@@ -569,7 +565,7 @@ class IntelligentScheduler:
         for task_id in completed_task_ids:
             del self.running_tasks[task_id]
 
-    def _check_task_timeouts(self):
+    def _check_task_timeouts(self) -> None:
         """检查任务超时."""
         # TODO: 实现任务超时检查逻辑
         # 需要记录任务开始时间并检查是否超时
@@ -578,7 +574,7 @@ class IntelligentScheduler:
             # 实际应该在任务开始时记录时间戳
             pass
 
-    def _stop_all_running_tasks(self):
+    def _stop_all_running_tasks(self) -> None:
         """停止所有运行中的任务."""
         for task_id, thread in self.running_tasks.items():
             try:
@@ -591,7 +587,7 @@ class IntelligentScheduler:
                     thread.join(timeout=timeout)
 
                 # 更新任务状态
-                self.task_manager.update_task_status(task_id, TaskStatus.CANCELLED)
+                asyncio.run(self.task_manager.update_task_status(task_id, TaskStatus.CANCELLED))
 
             except Exception as e:
                 logger.error(f"停止任务失败: {task_id} - {e}")
@@ -604,7 +600,7 @@ class IntelligentScheduler:
         task_completed: Optional[Callable] = None,
         task_failed: Optional[Callable] = None,
         scheduler_error: Optional[Callable] = None,
-    ):
+    ) -> None:
         """设置回调函数."""
         self.task_started_callback = task_started
         self.task_completed_callback = task_completed

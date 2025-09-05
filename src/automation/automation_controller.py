@@ -9,6 +9,7 @@ import threading
 from typing import Optional, Dict, Any, List, Callable
 from dataclasses import dataclass
 from queue import Queue, Empty
+from datetime import datetime
 
 import pyautogui
 from src.core.logger import get_logger
@@ -512,6 +513,45 @@ class AutomationController:
             delay = base_delay
         
         time.sleep(delay)
+    
+    def execute_action_from_dict(self, action_data: Dict[str, Any]) -> bool:
+        """从字典数据执行操作
+        
+        Args:
+            action_data: 操作数据字典
+            
+        Returns:
+            bool: 是否执行成功
+        """
+        try:
+            # 将字典转换为AutomationAction对象
+            action_type_str = action_data.get('action_type', action_data.get('type'))
+            if not action_type_str:
+                logger.error("操作数据缺少action_type字段")
+                return False
+            
+            # 转换操作类型
+            try:
+                action_type = ActionType(action_type_str)
+            except ValueError:
+                logger.error(f"未知的操作类型: {action_type_str}")
+                return False
+            
+            # 创建AutomationAction对象
+            action = AutomationAction(
+                action_type=action_type,
+                params=action_data.get('params', {}),
+                description=action_data.get('description', ''),
+                retry_count=action_data.get('retry_count', 3),
+                timeout=action_data.get('timeout', 10.0)
+            )
+            
+            # 执行操作
+            return self._execute_action(action)
+            
+        except Exception as e:
+            logger.error(f"从字典执行操作失败: {e}")
+            return False
     
     def add_action(self, action: AutomationAction):
         """添加操作到队列

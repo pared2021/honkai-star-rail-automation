@@ -3,56 +3,56 @@
 
 import sys
 import os
+import pytest
 
 # 添加 src 目录到 Python 路径
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
 
-try:
-    print("=== 最终测试开始 ===")
+
+class TestTaskManagerIntegration:
+    """TaskManager集成测试"""
     
-    # 测试 1: 导入 TaskManagerAdapter
-    print("\n1. 测试 TaskManagerAdapter 导入...")
-    from adapters.task_manager_adapter import TaskManagerAdapter
-    print("✓ TaskManagerAdapter 导入成功")
+    def test_task_manager_adapter_import(self):
+        """测试 TaskManagerAdapter 导入"""
+        from src.adapters.task_manager_adapter import TaskManagerAdapter
+        assert TaskManagerAdapter is not None
     
-    # 测试 2: 检查 get_task_sync 方法
-    print("\n2. 检查 get_task_sync 方法...")
-    has_method = hasattr(TaskManagerAdapter, 'get_task_sync')
-    print(f"✓ get_task_sync 方法存在: {has_method}")
-    
-    if has_method:
+    def test_get_task_sync_method_exists(self):
+        """检查 get_task_sync 方法存在"""
+        from src.adapters.task_manager_adapter import TaskManagerAdapter
+        
+        has_method = hasattr(TaskManagerAdapter, 'get_task_sync')
+        assert has_method, "get_task_sync 方法不存在"
+        
         method = getattr(TaskManagerAdapter, 'get_task_sync')
-        is_callable = callable(method)
-        print(f"✓ get_task_sync 方法可调用: {is_callable}")
+        assert callable(method), "get_task_sync 方法不可调用"
     
-    # 测试 3: 导入 DatabaseManager
-    print("\n3. 测试 DatabaseManager 导入...")
-    from database.db_manager import DatabaseManager
-    print("✓ DatabaseManager 导入成功")
+    def test_database_manager_import(self):
+        """测试 DatabaseManager 导入"""
+        from src.database.db_manager import DatabaseManager
+        assert DatabaseManager is not None
     
-    # 测试 4: 创建实例
-    print("\n4. 创建实例...")
-    db_manager = DatabaseManager()
-    print("✓ DatabaseManager 实例创建成功")
+    def test_create_instances(self):
+        """测试创建实例"""
+        from src.database.db_manager import DatabaseManager
+        from src.adapters.task_manager_adapter import TaskManagerAdapter
+        
+        db_manager = DatabaseManager()
+        assert db_manager is not None
+        
+        task_manager = TaskManagerAdapter(db_manager)
+        assert task_manager is not None
     
-    task_manager = TaskManagerAdapter(db_manager)
-    print("✓ TaskManagerAdapter 实例创建成功")
-    
-    # 测试 5: 检查实例方法
-    print("\n5. 检查实例方法...")
-    instance_has_method = hasattr(task_manager, 'get_task_sync')
-    print(f"✓ 实例具有 get_task_sync 方法: {instance_has_method}")
-    
-    if instance_has_method:
+    def test_instance_methods(self):
+        """检查实例方法"""
+        from src.database.db_manager import DatabaseManager
+        from src.adapters.task_manager_adapter import TaskManagerAdapter
+        
+        db_manager = DatabaseManager()
+        task_manager = TaskManagerAdapter(db_manager)
+        
+        instance_has_method = hasattr(task_manager, 'get_task_sync')
+        assert instance_has_method, "实例不具有 get_task_sync 方法"
+        
         instance_method = getattr(task_manager, 'get_task_sync')
-        instance_is_callable = callable(instance_method)
-        print(f"✓ 实例方法可调用: {instance_is_callable}")
-    
-    print("\n=== 所有测试通过! ===")
-    print("TaskManagerAdapter 的 get_task_sync 方法问题已解决")
-    
-except Exception as e:
-    print(f"\n❌ 测试失败: {e}")
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
+        assert callable(instance_method), "实例方法不可调用"

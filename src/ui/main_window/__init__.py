@@ -12,4 +12,5 @@ __all__ = [
     'MainWindowModel',
     'MainWindowView', 
     'MainWindowPresenter',
-    'MainWindowM
+    'MainWindowMVP'
+]

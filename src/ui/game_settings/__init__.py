@@ -12,4 +12,5 @@ __all__ = [
     "GameSettingsModel",
     "GameSettingsView", 
     "GameSettingsPresenter",
-    "Game
+    "GameSettingsMVP"
+]

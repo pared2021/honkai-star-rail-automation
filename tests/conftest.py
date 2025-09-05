@@ -1,36 +1,17 @@
-"""简洁的pytest配置文件，避免复杂的异步操作"""
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 
+import sys
 import os
-from pathlib import Path
-import tempfile
 
-import pytest
+# 添加项目根目录和src目录到Python路径
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+src_path = os.path.join(project_root, 'src')
 
+if project_root not in sys.path:
+    sys.path.insert(0, project_root)
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
-@pytest.fixture(scope="session")
-def temp_db_path():
-    """创建临时数据库文件路径"""
-    with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
-        db_path = tmp.name
-
-    yield db_path
-
-    # 清理临时文件
-    try:
-        if os.path.exists(db_path):
-            os.unlink(db_path)
-    except Exception:
-        pass  # 忽略清理错误
-
-
-@pytest.fixture(scope="function")
-def clean_environment():
-    """确保每个测试都有干净的环境"""
-    # 测试前的设置
-    yield
-    # 测试后的清理（如果需要）
-    pass
-
-
-# 移除复杂的事件循环fixture，使用同步测试
-# 如果需要异步测试，使用pytest-asyncio的默认配置
+# 设置环境变量
+os.environ['PYTHONPATH'] = f"{src_path}{os.pathsep}{project_root}{os.pathsep}{os.environ.get('PYTHONPATH', '')}"

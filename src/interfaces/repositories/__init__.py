@@ -11,3 +11,4 @@ __all__ = [
     'ITaskRepository',
     'IConfigRepository', 
     'IBaseRepository'
+]

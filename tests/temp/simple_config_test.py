@@ -2,33 +2,39 @@
 # -*- coding: utf-8 -*-
 
 import sys
-sys.path.insert(0, 'src')
+import os
+import pytest
 
-try:
-    print("测试 TaskConfig 导入...")
-    from models.task_models import TaskConfig
-    from core.task_model import TaskType, TaskPriority
-    print("✓ 导入成功")
+# 添加 src 目录到 Python 路径
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..', 'src'))
+
+
+class TestTaskConfig:
+    """TaskConfig测试"""
     
-    print("\n测试 TaskConfig 创建...")
-    config = TaskConfig(
-        name="测试任务",
-        task_type=TaskType.AUTOMATION,
-        description="测试描述",
-        priority=TaskPriority.MEDIUM
-    )
-    print("✓ TaskConfig 创建成功")
+    def test_task_config_import(self):
+        """测试 TaskConfig 导入"""
+        from src.models.task_models import TaskConfig
+        from src.core.task_model import TaskType, TaskPriority
+        
+        assert TaskConfig is not None
+        assert TaskType is not None
+        assert TaskPriority is not None
     
-    print(f"\n验证属性:")
-    print(f"config.name = {config.name}")
-    print(f"config.task_type = {config.task_type}")
-    print(f"config.description = {config.description}")
-    print(f"config.priority = {config.priority}")
-    
-    print("\n✅ 所有测试通过！")
-    
-except Exception as e:
-    print(f"❌ 测试失败: {e}")
-    import traceback
-    traceback.print_exc()
-    sys.exit(1)
+    def test_task_config_creation(self):
+        """测试 TaskConfig 创建"""
+        from src.models.task_models import TaskConfig
+        from src.core.task_model import TaskType, TaskPriority
+        
+        config = TaskConfig(
+            name="测试任务",
+            task_type=TaskType.AUTOMATION,
+            description="测试描述",
+            priority=TaskPriority.MEDIUM
+        )
+        
+        assert config is not None
+        assert config.name == "测试任务"
+        assert config.task_type == TaskType.AUTOMATION
+        assert config.description == "测试描述"
+        assert config.priority == TaskPriority.MEDIUM
