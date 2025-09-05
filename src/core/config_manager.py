@@ -1,18 +1,19 @@
-"""核心配置管理器模块。
+"""核心配置管理器模块。.
 
 提供核心系统的配置管理功能。
 """
 
 import json
 import logging
-from pathlib import Path
-from typing import Any, Dict, Optional, Union
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 
 class ConfigType(Enum):
-    """配置类型枚举"""
+    """配置类型枚举。."""
+
     GAME = "game"
     UI = "ui"
     DETECTION = "detection"
@@ -23,7 +24,8 @@ class ConfigType(Enum):
 
 @dataclass
 class GameConfig:
-    """游戏配置"""
+    """游戏配置。."""
+
     window_title: str = "崩坏：星穹铁道"
     process_name: str = "StarRail.exe"
     screenshot_interval: float = 0.1
@@ -34,7 +36,8 @@ class GameConfig:
 
 @dataclass
 class UIConfig:
-    """UI配置"""
+    """UI配置。."""
+
     template_dir: str = "templates"
     screenshot_dir: str = "screenshots"
     result_dir: str = "results"
@@ -44,21 +47,25 @@ class UIConfig:
 
 @dataclass
 class DetectionConfig:
-    """检测配置"""
-    scale_factors: list = None
-    match_method: str = "TM_CCOEFF_NORMED"
+    """检测配置."""
+
+    confidence_threshold: float = 0.8
+    template_matching_method: str = "TM_CCOEFF_NORMED"
+    scale_factors: list = field(
+        default_factory=lambda: [0.8, 0.9, 1.0, 1.1, 1.2]
+    )
+    max_scale_iterations: int = 5
+    roi_enabled: bool = False
+    roi_coordinates: tuple = (0, 0, 0, 0)
     multi_scale_enabled: bool = True
     edge_detection_enabled: bool = False
     noise_reduction_enabled: bool = True
 
-    def __post_init__(self):
-        if self.scale_factors is None:
-            self.scale_factors = [0.8, 0.9, 1.0, 1.1, 1.2]
-
 
 @dataclass
 class AutomationConfig:
-    """自动化配置"""
+    """自动化配置。."""
+
     action_delay: float = 0.5
     click_delay: float = 0.1
     key_delay: float = 0.05
@@ -69,7 +76,8 @@ class AutomationConfig:
 
 @dataclass
 class LoggingConfig:
-    """日志配置"""
+    """日志配置。."""
+
     level: str = "INFO"
     format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     file_enabled: bool = True
@@ -80,7 +88,8 @@ class LoggingConfig:
 
 @dataclass
 class SystemConfig:
-    """系统配置"""
+    """系统配置。."""
+
     work_dir: str = "."
     temp_dir: str = "temp"
     cache_enabled: bool = True
@@ -90,12 +99,13 @@ class SystemConfig:
 
 
 class ConfigManager:
-    """配置管理器"""
+    """配置管理器。."""
 
-    def __init__(self, config_file: Optional[str] = None):
+    def __init__(self, config_file: str = "config.json"):
+        """初始化配置管理器."""
+        self.config_file = Path(config_file)
         self.logger = logging.getLogger(__name__)
-        self.config_file = Path(config_file) if config_file else Path("config.json")
-        
+
         # 默认配置
         self._configs = {
             ConfigType.GAME: GameConfig(),
@@ -103,67 +113,79 @@ class ConfigManager:
             ConfigType.DETECTION: DetectionConfig(),
             ConfigType.AUTOMATION: AutomationConfig(),
             ConfigType.LOGGING: LoggingConfig(),
-            ConfigType.SYSTEM: SystemConfig()
+            ConfigType.SYSTEM: SystemConfig(),
         }
-        
+
         # 加载配置文件
         self.load_config()
 
     def get_config(self, config_type: ConfigType) -> Any:
-        """获取指定类型的配置"""
+        """获取指定类型的配置。."""
         return self._configs.get(config_type)
 
     def get_game_config(self) -> GameConfig:
-        """获取游戏配置"""
-        return self._configs[ConfigType.GAME]
+        """获取游戏配置。."""
+        config = self._configs[ConfigType.GAME]
+        return config  # type: ignore
 
     def get_ui_config(self) -> UIConfig:
-        """获取UI配置"""
-        return self._configs[ConfigType.UI]
+        """获取UI配置。."""
+        config = self._configs[ConfigType.UI]
+        return config  # type: ignore
 
     def get_detection_config(self) -> DetectionConfig:
-        """获取检测配置"""
-        return self._configs[ConfigType.DETECTION]
+        """获取检测配置。."""
+        config = self._configs[ConfigType.DETECTION]
+        return config  # type: ignore
 
     def get_automation_config(self) -> AutomationConfig:
-        """获取自动化配置"""
-        return self._configs[ConfigType.AUTOMATION]
+        """获取自动化配置。."""
+        config = self._configs[ConfigType.AUTOMATION]
+        return config  # type: ignore
 
     def get_logging_config(self) -> LoggingConfig:
-        """获取日志配置"""
-        return self._configs[ConfigType.LOGGING]
+        """获取日志配置。."""
+        config = self._configs[ConfigType.LOGGING]
+        return config  # type: ignore
 
     def get_system_config(self) -> SystemConfig:
-        """获取系统配置"""
-        return self._configs[ConfigType.SYSTEM]
+        """获取系统配置。."""
+        config = self._configs[ConfigType.SYSTEM]
+        return config  # type: ignore
 
     def set_config(self, config_type: ConfigType, config: Any) -> None:
-        """设置指定类型的配置"""
+        """设置指定类型的配置。."""
         self._configs[config_type] = config
         self.logger.debug(f"配置已更新: {config_type.value}")
 
     def update_config(self, config_type: ConfigType, **kwargs) -> None:
-        """更新指定类型配置的部分字段"""
+        """更新指定类型配置的部分字段。."""
         config = self._configs.get(config_type)
         if config:
             for key, value in kwargs.items():
                 if hasattr(config, key):
                     setattr(config, key, value)
-                    self.logger.debug(f"配置字段已更新: {config_type.value}.{key} = {value}")
+                    self.logger.debug(
+                        f"配置字段已更新: {config_type.value}.{key} = {value}"
+                    )
                 else:
-                    self.logger.warning(f"配置字段不存在: {config_type.value}.{key}")
+                    self.logger.warning(
+                        f"配置字段不存在: {config_type.value}.{key}"
+                    )
 
     def load_config(self, config_file: Optional[str] = None) -> bool:
-        """从文件加载配置"""
+        """从文件加载配置。."""
         if config_file:
             self.config_file = Path(config_file)
 
         if not self.config_file.exists():
-            self.logger.info(f"配置文件不存在，使用默认配置: {self.config_file}")
+            self.logger.info(
+                f"配置文件不存在，使用默认配置: {self.config_file}"
+            )
             return False
 
         try:
-            with open(self.config_file, 'r', encoding='utf-8') as f:
+            with open(self.config_file, "r", encoding="utf-8") as f:
                 data = json.load(f)
 
             # 更新配置
@@ -171,20 +193,24 @@ class ConfigManager:
                 try:
                     config_type = ConfigType(config_type_str)
                     current_config = self._configs[config_type]
-                    
+
                     # 更新配置对象的字段
                     for key, value in config_data.items():
                         if hasattr(current_config, key):
                             setattr(current_config, key, value)
                         else:
-                            self.logger.warning(f"未知配置字段: {config_type_str}.{key}")
-                            
+                            self.logger.warning(
+                                f"未知配置字段: {config_type_str}.{key}"
+                            )
+
                 except ValueError:
                     self.logger.warning(f"未知配置类型: {config_type_str}")
                 except Exception as e:
                     self.logger.error(f"加载配置失败 {config_type_str}: {e}")
 
-            self.logger.info(f"配置加载成功: {self.config_file}")
+            self.logger.info(
+                f"配置加载成功: {self.config_file}"
+            )
             return True
 
         except Exception as e:
@@ -192,7 +218,7 @@ class ConfigManager:
             return False
 
     def save_config(self, config_file: Optional[str] = None) -> bool:
-        """保存配置到文件"""
+        """保存配置到文件。."""
         if config_file:
             self.config_file = Path(config_file)
 
@@ -203,10 +229,10 @@ class ConfigManager:
             # 转换配置为字典
             data = {}
             for config_type, config_obj in self._configs.items():
-                data[config_type.value] = asdict(config_obj)
+                data[config_type.value] = asdict(config_obj)  # type: ignore
 
             # 保存到文件
-            with open(self.config_file, 'w', encoding='utf-8') as f:
+            with open(self.config_file, "w", encoding="utf-8") as f:
                 json.dump(data, f, indent=2, ensure_ascii=False)
 
             self.logger.info(f"配置保存成功: {self.config_file}")
@@ -216,24 +242,28 @@ class ConfigManager:
             self.logger.error(f"保存配置文件失败: {e}")
             return False
 
-    def get_value(self, config_type: ConfigType, key: str, default: Any = None) -> Any:
-        """获取配置值"""
+    def get_value(
+        self, config_type: ConfigType, key: str, default: Any = None
+    ) -> Any:
+        """获取配置值。."""
         config = self._configs.get(config_type)
         if config and hasattr(config, key):
             return getattr(config, key)
         return default
 
     def set_value(self, config_type: ConfigType, key: str, value: Any) -> bool:
-        """设置配置值"""
+        """设置配置值。."""
         config = self._configs.get(config_type)
         if config and hasattr(config, key):
             setattr(config, key, value)
-            self.logger.debug(f"配置值已设置: {config_type.value}.{key} = {value}")
+            self.logger.debug(
+                f"配置值已设置: {config_type.value}.{key} = {value}"
+            )
             return True
         return False
 
     def reset_config(self, config_type: Optional[ConfigType] = None) -> None:
-        """重置配置为默认值"""
+        """重置配置为默认值。."""
         if config_type:
             # 重置指定类型的配置
             if config_type == ConfigType.GAME:
@@ -248,7 +278,7 @@ class ConfigManager:
                 self._configs[config_type] = LoggingConfig()
             elif config_type == ConfigType.SYSTEM:
                 self._configs[config_type] = SystemConfig()
-            
+
             self.logger.info(f"配置已重置: {config_type.value}")
         else:
             # 重置所有配置
@@ -258,14 +288,14 @@ class ConfigManager:
                 ConfigType.DETECTION: DetectionConfig(),
                 ConfigType.AUTOMATION: AutomationConfig(),
                 ConfigType.LOGGING: LoggingConfig(),
-                ConfigType.SYSTEM: SystemConfig()
+                ConfigType.SYSTEM: SystemConfig(),
             }
             self.logger.info("所有配置已重置为默认值")
 
     def validate_config(self) -> Dict[str, list]:
-        """验证配置的有效性"""
+        """验证配置的有效性。."""
         errors = {}
-        
+
         # 验证游戏配置
         game_config = self.get_game_config()
         game_errors = []
@@ -301,9 +331,12 @@ class ConfigManager:
         return errors
 
     def __str__(self) -> str:
-        """字符串表示"""
-        return f"ConfigManager(file={self.config_file}, configs={len(self._configs)})"
+        """字符串表示。."""
+        return (
+            f"ConfigManager(file={self.config_file}, "
+            f"configs={len(self._configs)})"
+        )
 
     def __repr__(self) -> str:
-        """详细字符串表示"""
+        """详细字符串表示。."""
         return self.__str__()
