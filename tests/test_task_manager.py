@@ -493,9 +493,9 @@ class TestTaskManager:
 
     def test_submit_concurrent_task(self):
         """测试提交并发任务"""
-        task_data = {"task_id": "test_task", "priority": TaskPriority.MEDIUM}
+        task_data = {"name": "test_task", "priority": "medium", "type": "user"}
 
-        result = self.task_manager.submit_concurrent_task(**task_data)
+        result = self.task_manager.submit_concurrent_task(task_data)
         # 验证任务提交
         assert result is not None
 
@@ -548,9 +548,8 @@ class TestTaskManagerIntegration:
             }
 
             # 提交任务
-            execution_id = self.task_manager.submit_concurrent_task(
-                task_id="test_task", priority=TaskPriority.HIGH
-            )
+            task_data = {"name": "test_task", "priority": "high", "type": "user"}
+            execution_id = self.task_manager.submit_concurrent_task(task_data)
             assert execution_id == "exec_1"
 
             # 检查状态
@@ -583,9 +582,8 @@ class TestTaskManagerIntegration:
             # 提交多个任务
             execution_ids = []
             for i in range(3):
-                execution_id = self.task_manager.submit_concurrent_task(
-                    task_id=f"task_{i}", priority=TaskPriority.MEDIUM
-                )
+                task_data = {"name": f"task_{i}", "priority": "medium", "type": "user"}
+                execution_id = self.task_manager.submit_concurrent_task(task_data)
                 execution_ids.append(execution_id)
 
             # 验证任务已提交
@@ -610,15 +608,14 @@ class TestTaskManagerIntegration:
             self.task_manager.start_concurrent_manager()
 
             # 按低、高、中优先级顺序提交任务
-            low_exec = self.task_manager.submit_concurrent_task(
-                task_id="low_task", priority=TaskPriority.LOW
-            )
-            high_exec = self.task_manager.submit_concurrent_task(
-                task_id="high_task", priority=TaskPriority.HIGH
-            )
-            medium_exec = self.task_manager.submit_concurrent_task(
-                task_id="medium_task", priority=TaskPriority.MEDIUM
-            )
+            low_task_data = {"name": "low_task", "priority": "low", "type": "user"}
+            low_exec = self.task_manager.submit_concurrent_task(low_task_data)
+            
+            high_task_data = {"name": "high_task", "priority": "high", "type": "user"}
+            high_exec = self.task_manager.submit_concurrent_task(high_task_data)
+            
+            medium_task_data = {"name": "medium_task", "priority": "medium", "type": "user"}
+            medium_exec = self.task_manager.submit_concurrent_task(medium_task_data)
 
             # 验证任务执行ID的创建
             assert low_exec == "low_exec"

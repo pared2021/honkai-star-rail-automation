@@ -1,0 +1,5 @@
+2025-09-06 09:35:42 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'TaskManager' object has no attribute 'start_concurrent_manager'
+2025-09-06 09:36:31 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'MetricsCollector' object has no attribute 'record_gauge'
+2025-09-06 09:37:05 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'MetricsCollector' object has no attribute 'record_gauge'
+2025-09-06 09:37:17 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'AutomationController' object has no attribute 'get_available_tasks'
+2025-09-06 09:38:02 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'AutomationController' object has no attribute 'get_available_tasks'

@@ -278,6 +278,51 @@ class MonitoringWidget(QWidget):
         else:
             self.success_rate_label.setText("0%")
             
+    def update_status(self, status_info: dict):
+        """更新状态信息.
+        
+        Args:
+            status_info: 包含状态信息的字典
+        """
+        try:
+            # 更新游戏检测状态
+            if 'game_running' in status_info:
+                game_status = "已检测到" if status_info['game_running'] else "未检测到"
+                self.game_status_label.setText(game_status)
+            
+            # 更新自动化状态
+            if 'automation_running' in status_info:
+                automation_status = "运行中" if status_info['automation_running'] else "已停止"
+                self.automation_status_label.setText(automation_status)
+            
+            # 更新任务统计
+            if 'active_tasks' in status_info:
+                active_tasks = status_info['active_tasks']
+                self.total_tasks_label.setText(str(active_tasks))
+            
+            if 'completed_tasks' in status_info:
+                completed_tasks = status_info['completed_tasks']
+                self.success_tasks_label.setText(str(completed_tasks))
+            
+            if 'failed_tasks' in status_info:
+                failed_tasks = status_info['failed_tasks']
+                self.failed_tasks_label.setText(str(failed_tasks))
+            
+            # 计算成功率
+            if 'completed_tasks' in status_info and 'failed_tasks' in status_info:
+                completed = status_info['completed_tasks']
+                failed = status_info['failed_tasks']
+                total = completed + failed
+                
+                if total > 0:
+                    success_rate = (completed / total) * 100
+                    self.success_rate_label.setText(f"{success_rate:.1f}%")
+                else:
+                    self.success_rate_label.setText("0%")
+                    
+        except Exception as e:
+            self.add_log(f"更新状态信息时出错: {str(e)}")
+            
     def add_log(self, message: str):
         """添加日志消息.
         

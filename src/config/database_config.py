@@ -98,6 +98,26 @@ class DatabaseConfig:
             "autocommit": self.autocommit,
             "autoflush": self.autoflush,
         }
+    
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> "DatabaseConfig":
+        """从字典创建配置."""
+        return cls(
+            db_type=data.get("db_type", "sqlite"),
+            db_path=data.get("db_path"),
+            host=data.get("host"),
+            port=data.get("port"),
+            database=data.get("database"),
+            username=data.get("username"),
+            password=data.get("password"),
+            pool_size=data.get("pool_size", 5),
+            max_overflow=data.get("max_overflow", 10),
+            pool_timeout=data.get("pool_timeout", 30),
+            pool_recycle=data.get("pool_recycle", 3600),
+            echo=data.get("echo", False),
+            autocommit=data.get("autocommit", False),
+            autoflush=data.get("autoflush", True),
+        )
 
 
 # 默认配置实例

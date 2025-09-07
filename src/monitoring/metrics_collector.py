@@ -9,7 +9,12 @@ from enum import Enum
 import logging
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, Union
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FutureTimeoutError
+from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
+from datetime import datetime
+
+if TYPE_CHECKING:
+    from .alert_manager import AlertManager
 
 
 class MetricType(Enum):
@@ -41,11 +46,12 @@ class MetricsCollector:
     负责收集、存储和管理系统指标。
     """
 
-    def __init__(self, max_metrics: int = 10000):
+    def __init__(self, max_metrics: int = 10000, alert_manager: Optional['AlertManager'] = None):
         """初始化指标收集器.
 
         Args:
             max_metrics: 最大指标数量
+            alert_manager: 告警管理器
         """
         self._metrics: Dict[str, List[Metric]] = defaultdict(list)
         self._counters: Dict[str, float] = defaultdict(float)
@@ -56,6 +62,8 @@ class MetricsCollector:
         self._lock = threading.RLock()
         self._logger = logging.getLogger(__name__)
         self._collectors: Dict[str, Callable[[], Dict[str, Any]]] = {}
+        self._alert_manager = alert_manager
+        self._running = False
 
     def record_counter(
         self, name: str, value: float = 1.0, labels: Optional[Dict[str, str]] = None
@@ -99,9 +107,21 @@ class MetricsCollector:
                 value=value,
                 metric_type=MetricType.GAUGE,
                 labels=labels or {},
+                timestamp=time.time(),
             )
-
             self._add_metric(name, metric)
+    
+    def record_gauge(
+        self, name: str, value: float, labels: Optional[Dict[str, str]] = None
+    ) -> None:
+        """记录仪表盘指标（set_gauge的别名）.
+
+        Args:
+            name: 指标名称
+            value: 指标值
+            labels: 标签
+        """
+        self.set_gauge(name, value, labels)
 
     def record_histogram(
         self, name: str, value: float, labels: Optional[Dict[str, str]] = None
@@ -183,14 +203,30 @@ class MetricsCollector:
         Returns:
             指标字典
         """
-        # 运行自定义收集器
-        self._run_collectors()
+        start_time = time.time()
+        
+        try:
+            # 运行自定义收集器
+            self._run_collectors()
 
-        with self._lock:
-            if metric_name is not None:
-                return {metric_name: self._metrics.get(metric_name, [])}
-            else:
-                return {name: metrics.copy() for name, metrics in self._metrics.items()}
+            with self._lock:
+                if metric_name is not None:
+                    result = {metric_name: self._metrics.get(metric_name, [])}
+                else:
+                    result = {name: metrics.copy() for name, metrics in self._metrics.items()}
+                
+                collection_duration = time.time() - start_time
+                self._logger.debug(f"指标收集完成 (耗时: {collection_duration:.3f}s)")
+                
+                # 评估指标并触发告警
+                if self._alert_manager:
+                    self._alert_manager.evaluate_metrics(result)
+                
+                return result
+                
+        except Exception as e:
+            self._logger.error(f"指标收集失败: {str(e)}", exc_info=True)
+            return {}
 
     def get_counter(self, name: str, labels: Optional[Dict[str, str]] = None) -> float:
         """获取计数器值.
@@ -327,6 +363,9 @@ class MetricsCollector:
         Returns:
             指标汇总字典
         """
+        # 运行自定义收集器
+        self._run_collectors()
+        
         with self._lock:
             result: Dict[str, Any] = {
                 "counters": dict(self._counters),
@@ -348,12 +387,18 @@ class MetricsCollector:
 
             return result
 
-    def start(self) -> None:
-        """开始指标收集."""
+    def start(self, interval: Optional[float] = None) -> None:
+        """开始指标收集.
+        
+        Args:
+            interval: 收集间隔（秒），可选参数
+        """
+        self._running = True
         self._logger.info("Metrics collection started")
 
     def stop(self) -> None:
         """停止指标收集."""
+        self._running = False
         self._logger.info("Metrics collection stopped")
 
     def reset_metrics(self, metric_name: Optional[str] = None) -> None:
@@ -435,9 +480,18 @@ class MetricsCollector:
 
     def _run_collectors(self) -> None:
         """运行自定义收集器."""
+        failed_collectors = []
+        
         for name, collector_func in self._collectors.items():
+            collect_start = time.time()
             try:
-                metrics_data = collector_func()
+                # 设置收集超时
+                metrics_data = self._run_collector_with_timeout(collector_func, name, timeout=5.0)
+                
+                if metrics_data is None:
+                    self._logger.warning(f"指标收集器 {name} 返回空结果")
+                    failed_collectors.append(name)
+                    continue
 
                 # 处理收集到的指标数据
                 for metric_name, value in metrics_data.items():
@@ -464,9 +518,207 @@ class MetricsCollector:
                             self.record_timer(
                                 f"{name}.{metric_name}", metric_value, labels
                             )
-
+                
+                collect_duration = time.time() - collect_start
+                self._logger.debug(f"指标收集成功: {name} (耗时: {collect_duration:.3f}s)")
+                
+            except TimeoutError:
+                failed_collectors.append(name)
+                self._logger.error(f"指标收集超时: {name}")
+                
             except Exception as e:
-                self._logger.error(f"Error running collector {name}: {e}")
+                failed_collectors.append(name)
+                self._logger.error(f"Error running collector {name}: {e}", exc_info=True)
+        
+        if failed_collectors:
+            self._logger.warning(f"部分指标收集器失败: {failed_collectors}")
+    
+    def _run_collector_with_timeout(self, collector_func: Callable, name: str, timeout: float = 5.0) -> Dict[str, Any]:
+        """运行收集器，带超时控制"""
+        result = None
+        exception = None
+        completed = threading.Event()
+        
+        def target():
+            nonlocal result, exception
+            try:
+                result = collector_func()
+            except Exception as e:
+                exception = e
+            finally:
+                completed.set()
+        
+        thread = threading.Thread(target=target)
+        thread.daemon = True
+        thread.start()
+        
+        # 等待完成或超时
+        if not completed.wait(timeout):
+            self._logger.warning(f"Collector {name} timed out after {timeout} seconds")
+            return {}
+        
+        if exception:
+            self._logger.error(f"Collector {name} failed: {exception}")
+            return {}
+        
+        return result if isinstance(result, dict) else {}
+
+    def create_game_collectors(self) -> None:
+        """创建游戏相关的指标收集器."""
+        
+        def game_performance_collector() -> Dict[str, Any]:
+            """游戏性能指标收集器."""
+            try:
+                import psutil
+                import win32gui
+                import win32process
+                
+                metrics = {}
+                
+                # 查找游戏进程
+                game_processes = []
+                for proc in psutil.process_iter(['pid', 'name', 'cpu_percent', 'memory_info']):
+                    try:
+                        proc_name = proc.info['name'].lower()
+                        if any(game in proc_name for game in ['game', 'client', 'launcher', 'unity', 'unreal']):
+                            game_processes.append(proc)
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        continue
+                
+                if game_processes:
+                    # 计算游戏进程的总CPU和内存使用
+                    total_cpu = sum(proc.info.get('cpu_percent', 0) for proc in game_processes)
+                    total_memory = sum(proc.info.get('memory_info', {}).get('rss', 0) for proc in game_processes)
+                    
+                    metrics['game_process_count'] = len(game_processes)
+                    metrics['game_cpu_usage'] = total_cpu
+                    metrics['game_memory_usage'] = total_memory / (1024 * 1024)  # MB
+                
+                # 游戏窗口数量
+                game_windows = []
+                def enum_windows_callback(hwnd, windows):
+                    if win32gui.IsWindowVisible(hwnd):
+                        window_title = win32gui.GetWindowText(hwnd)
+                        if window_title and any(game in window_title.lower() for game in ['game', 'client', 'launcher']):
+                            windows.append(hwnd)
+                    return True
+                
+                try:
+                    win32gui.EnumWindows(enum_windows_callback, game_windows)
+                    metrics['game_window_count'] = len(game_windows)
+                except:
+                    metrics['game_window_count'] = 0
+                
+                return metrics
+                
+            except Exception as e:
+                self._logger.error(f"Game performance collector failed: {e}")
+                return {}
+        
+        def automation_metrics_collector() -> Dict[str, Any]:
+            """自动化系统指标收集器."""
+            try:
+                metrics = {}
+                
+                # 这里可以添加自动化系统的具体指标
+                # 例如：任务执行次数、成功率、平均执行时间等
+                
+                # 模拟一些基本指标
+                metrics['automation_status'] = 1  # 1表示运行中，0表示停止
+                metrics['task_queue_size'] = 0  # 任务队列大小
+                metrics['active_tasks'] = 0  # 活跃任务数
+                
+                return metrics
+                
+            except Exception as e:
+                self._logger.error(f"Automation metrics collector failed: {e}")
+                return {}
+        
+        def template_metrics_collector() -> Dict[str, Any]:
+            """模板文件指标收集器."""
+            try:
+                import os
+                
+                metrics = {}
+                template_dir = "templates"
+                
+                if os.path.exists(template_dir):
+                    template_count = 0
+                    total_size = 0
+                    
+                    for root, dirs, files in os.walk(template_dir):
+                        for file in files:
+                            if file.endswith(('.png', '.jpg', '.jpeg')):
+                                template_count += 1
+                                file_path = os.path.join(root, file)
+                                try:
+                                    total_size += os.path.getsize(file_path)
+                                except OSError:
+                                    pass
+                    
+                    metrics['template_file_count'] = template_count
+                    metrics['template_total_size'] = total_size / (1024 * 1024)  # MB
+                else:
+                    metrics['template_file_count'] = 0
+                    metrics['template_total_size'] = 0
+                
+                return metrics
+                
+            except Exception as e:
+                self._logger.error(f"Template metrics collector failed: {e}")
+                return {}
+        
+        def system_health_collector() -> Dict[str, Any]:
+            """系统健康指标收集器."""
+            try:
+                import psutil
+                
+                metrics = {}
+                
+                # CPU使用率
+                cpu_percent = psutil.cpu_percent(interval=0.1)
+                metrics['system_cpu_usage'] = cpu_percent
+                
+                # 内存使用率
+                memory = psutil.virtual_memory()
+                metrics['system_memory_usage'] = memory.percent
+                metrics['system_memory_available'] = memory.available / (1024 * 1024 * 1024)  # GB
+                
+                # 磁盘使用率
+                try:
+                    disk = psutil.disk_usage('/')
+                    metrics['system_disk_usage'] = (disk.used / disk.total) * 100
+                    metrics['system_disk_free'] = disk.free / (1024 * 1024 * 1024)  # GB
+                except:
+                    # Windows系统使用C盘
+                    try:
+                        disk = psutil.disk_usage('C:\\')
+                        metrics['system_disk_usage'] = (disk.used / disk.total) * 100
+                        metrics['system_disk_free'] = disk.free / (1024 * 1024 * 1024)  # GB
+                    except:
+                        metrics['system_disk_usage'] = 0
+                        metrics['system_disk_free'] = 0
+                
+                # 网络IO
+                try:
+                    net_io = psutil.net_io_counters()
+                    metrics['network_bytes_sent'] = net_io.bytes_sent / (1024 * 1024)  # MB
+                    metrics['network_bytes_recv'] = net_io.bytes_recv / (1024 * 1024)  # MB
+                except:
+                    metrics['network_bytes_sent'] = 0
+                    metrics['network_bytes_recv'] = 0
+                
+                return metrics
+                
+            except Exception as e:
+                self._logger.error(f"System health collector failed: {e}")
+                return {}
+        
+        # 注册收集器
+        self.register_collector("game_performance", game_performance_collector)
+        self.register_collector("automation_metrics", automation_metrics_collector)
+        self.register_collector("template_metrics", template_metrics_collector)
+        self.register_collector("system_health", system_health_collector)
 
     def _calculate_stats(self, values: List[float]) -> Dict[str, float]:
         """计算统计信息.

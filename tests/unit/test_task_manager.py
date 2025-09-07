@@ -402,16 +402,16 @@ class TestTaskManager(unittest.TestCase):
 
     def test_submit_concurrent_task(self):
         """测试提交并发任务。"""
-        self.task_manager.submit_concurrent_task(
-            task_id="test_task", priority=TaskPriority.HIGH
-        )
+        task_data = {"name": "test_task", "priority": "high", "type": "user"}
+        self.task_manager.submit_concurrent_task(task_data)
 
         self.assertEqual(self.task_manager._stats["total_tasks"], 1)
         self.assertEqual(self.task_manager._concurrent_task_queue.size(), 1)
 
     def test_submit_concurrent_task_default_priority(self):
         """测试提交默认优先级的并发任务。"""
-        execution_id = self.task_manager.submit_concurrent_task(task_id="test_task")
+        task_data = {"name": "test_task", "type": "user"}
+        execution_id = self.task_manager.submit_concurrent_task(task_data)
 
         self.assertIsNotNone(execution_id)
         self.assertEqual(self.task_manager._stats["total_tasks"], 1)

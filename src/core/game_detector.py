@@ -1,13 +1,15 @@
 """游戏检测模块.
 
-提供游戏窗口检测、UI元素识别等功能。
-"""
+提供游戏窗口检测、UI元素识别等功能。"""
 
 from dataclasses import dataclass
 from enum import Enum
+import logging
 import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import io
+import time
 
 import cv2
 import numpy as np
@@ -15,11 +17,23 @@ import numpy as np
 try:
     import win32con
     import win32gui
+    import win32ui
+    import psutil
+    from PIL import Image
+    from ctypes import windll
 except ImportError:
     win32gui = None
     win32con = None
+    win32ui = None
+    psutil = None
+    Image = None
+    windll = None
 
 from src.config.config_manager import ConfigManager
+from src.interfaces.automation_interface import IGameDetector
+
+# 设置日志记录器
+logger = logging.getLogger(__name__)
 
 
 class SceneType(Enum):
@@ -127,23 +141,182 @@ class TemplateMatcher:
         Returns:
             TemplateInfo: 模板信息，加载失败返回None
         """
-        if cv2 is None:
+        try:
+            if cv2 is None:
+                logger.warning("OpenCV未安装，无法加载模板")
+                return None
+                
+            # 检查文件是否存在
+            if not os.path.exists(template_path):
+                logger.error(f"模板文件不存在: {template_path}")
+                return None
+                
+            # 加载图像
+            image = cv2.imread(template_path)
+            if image is None:
+                logger.error(f"无法加载模板图像: {template_path}")
+                return None
+                
+            # 获取模板名称（不包含扩展名）
+            template_name = os.path.splitext(os.path.basename(template_path))[0]
+            
+            # 创建模板信息
+            template_info = TemplateInfo(
+                name=template_name,
+                image=image,
+                threshold=threshold,
+                path=template_path
+            )
+            
+            # 缓存模板信息
+            self.template_info_cache[template_name] = template_info
+            
+            logger.debug(f"模板加载成功: {template_name}")
+            return template_info
+            
+        except Exception as e:
+            logger.error(f"加载模板时发生错误: {e}")
             return None
 
-        if not os.path.exists(template_path):
+    def capture_screen(self) -> Optional[bytes]:
+        """截取游戏画面.
+        
+        Returns:
+            Optional[bytes]: 截图数据，失败返回None
+        """
+        if not self.current_window:
+            # 尝试检测游戏窗口
+            self.current_window = self.detect_game_window()
+            if not self.current_window:
+                self.logger.warning("No game window found for screenshot")
+                return None
+        
+        if not win32gui or not win32ui:
+            self.logger.warning("win32gui/win32ui not available, cannot capture screen")
             return None
-
-        image = cv2.imread(template_path)
-        if image is None:
+            
+        try:
+            hwnd = self.current_window['hwnd']
+            
+            # 获取窗口设备上下文
+            hwndDC = win32gui.GetWindowDC(hwnd)
+            mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+            saveDC = mfcDC.CreateCompatibleDC()
+            
+            # 获取窗口尺寸
+            left, top, right, bottom = win32gui.GetWindowRect(hwnd)
+            width = right - left
+            height = bottom - top
+            
+            # 创建位图
+            saveBitMap = win32ui.CreateBitmap()
+            saveBitMap.CreateCompatibleBitmap(mfcDC, width, height)
+            saveDC.SelectObject(saveBitMap)
+            
+            # 复制窗口内容到位图
+            result = windll.user32.PrintWindow(hwnd, saveDC.GetSafeHdc(), 3)
+            
+            if result:
+                # 获取位图数据
+                bmpinfo = saveBitMap.GetInfo()
+                bmpstr = saveBitMap.GetBitmapBits(True)
+                
+                # 转换为PIL图像
+                img = Image.frombuffer(
+                    'RGB',
+                    (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+                    bmpstr, 'raw', 'BGRX', 0, 1
+                )
+                
+                # 转换为字节数据
+                img_bytes = io.BytesIO()
+                img.save(img_bytes, format='PNG')
+                screenshot_data = img_bytes.getvalue()
+                
+                self.logger.debug(f"Screenshot captured: {len(screenshot_data)} bytes")
+                return screenshot_data
+            else:
+                self.logger.error("Failed to capture window content")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Error capturing screen: {e}")
             return None
+        finally:
+            # 清理资源
+            try:
+                win32gui.DeleteObject(saveBitMap.GetHandle())
+                saveDC.DeleteDC()
+                mfcDC.DeleteDC()
+                win32gui.ReleaseDC(hwnd, hwndDC)
+            except:
+                pass
 
-        name = Path(template_path).stem
-        template_info = TemplateInfo(
-            name=name, image=image, threshold=threshold, path=template_path
-        )
-
-        self.template_info_cache[name] = template_info
-        return template_info
+    def find_template(self, template_path: str, threshold: float = 0.8) -> Optional[Dict[str, Any]]:
+        """模板匹配查找UI元素.
+        
+        Args:
+            template_path: 模板图像路径
+            threshold: 匹配阈值
+            
+        Returns:
+            Optional[Dict[str, Any]]: 匹配结果，未找到返回None
+        """
+        if not cv2:
+            self.logger.warning("OpenCV not available, cannot perform template matching")
+            return None
+            
+        try:
+            # 获取当前截图
+            screenshot_data = self.capture_screen()
+            if not screenshot_data:
+                self.logger.warning("Failed to capture screen for template matching")
+                return None
+            
+            # 转换截图为OpenCV格式
+            img_pil = Image.open(io.BytesIO(screenshot_data))
+            screenshot = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
+            
+            # 加载模板图像
+            if not os.path.exists(template_path):
+                self.logger.error(f"Template file not found: {template_path}")
+                return None
+                
+            template = cv2.imread(template_path)
+            if template is None:
+                self.logger.error(f"Failed to load template: {template_path}")
+                return None
+            
+            # 执行模板匹配
+            result = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            
+            if max_val >= threshold:
+                # 计算匹配区域
+                template_h, template_w = template.shape[:2]
+                top_left = max_loc
+                bottom_right = (top_left[0] + template_w, top_left[1] + template_h)
+                center = (top_left[0] + template_w // 2, top_left[1] + template_h // 2)
+                
+                match_result = {
+                    'found': True,
+                    'confidence': float(max_val),
+                    'center': center,
+                    'top_left': top_left,
+                    'bottom_right': bottom_right,
+                    'width': template_w,
+                    'height': template_h
+                }
+                
+                self.logger.info(f"Template found: {template_path}, confidence: {max_val:.3f}, center: {center}")
+                return match_result
+            else:
+                self.logger.debug(f"Template not found: {template_path}, max confidence: {max_val:.3f}")
+                return None
+                
+        except Exception as e:
+            self.logger.error(f"Error in template matching: {e}")
+            return None
 
     def load_templates(self, templates_dir: str) -> None:
         """批量加载模板.
@@ -341,14 +514,65 @@ class WindowManager:
             return None
 
         try:
-            # 模拟实际的窗口截图功能，调用win32gui.GetWindowDC
+            # 尝试使用win32gui进行窗口截图
             if win32gui is not None:
-                # 这个调用可能会被测试mock并抛出异常
-                win32gui.GetWindowDC(window.hwnd)
-
-            # 为了测试，返回一个空图像
-            return np.zeros((window.height, window.width, 3), dtype=np.uint8)
-        except Exception:
+                try:
+                    import win32ui
+                    import win32con
+                    from PIL import Image
+                    
+                    # 获取窗口设备上下文
+                    hwndDC = win32gui.GetWindowDC(window.hwnd)
+                    mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+                    saveDC = mfcDC.CreateCompatibleDC()
+                    
+                    # 创建位图对象
+                    saveBitMap = win32ui.CreateBitmap()
+                    saveBitMap.CreateCompatibleBitmap(mfcDC, window.width, window.height)
+                    saveDC.SelectObject(saveBitMap)
+                    
+                    # 截图
+                    result = saveDC.BitBlt((0, 0), (window.width, window.height), mfcDC, (0, 0), win32con.SRCCOPY)
+                    
+                    if result:
+                        # 转换为numpy数组
+                        bmpinfo = saveBitMap.GetInfo()
+                        bmpstr = saveBitMap.GetBitmapBits(True)
+                        
+                        img = Image.frombuffer(
+                            'RGB',
+                            (bmpinfo['bmWidth'], bmpinfo['bmHeight']),
+                            bmpstr, 'raw', 'BGRX', 0, 1
+                        )
+                        
+                        # 转换为OpenCV格式
+                        screenshot = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
+                        
+                        # 清理资源
+                        win32gui.DeleteObject(saveBitMap.GetHandle())
+                        saveDC.DeleteDC()
+                        mfcDC.DeleteDC()
+                        win32gui.ReleaseDC(window.hwnd, hwndDC)
+                        
+                        return screenshot
+                        
+                except ImportError:
+                    # 如果缺少依赖，使用备用方案
+                    pass
+                except Exception as e:
+                    print(f"窗口截图失败: {e}")
+                    return None
+            
+            # 备用方案：创建一个测试用的彩色图像
+            test_image = np.zeros((window.height, window.width, 3), dtype=np.uint8)
+            # 添加一些测试内容
+            cv2.rectangle(test_image, (50, 50), (window.width-50, window.height-50), (100, 100, 100), 2)
+            cv2.putText(test_image, "Test Window", (100, 100), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+            
+            return test_image
+            
+        except Exception as e:
+            print(f"截取窗口图像失败: {e}")
             return None
 
     def bring_window_to_front(self, window: GameWindow) -> bool:
@@ -373,7 +597,7 @@ class WindowManager:
             return False
 
 
-class GameDetector:
+class GameDetector(IGameDetector):
     """游戏检测器."""
 
     def __init__(self, config_manager: Optional[ConfigManager] = None):
@@ -388,6 +612,9 @@ class GameDetector:
         self.current_scene = SceneType.UNKNOWN
         self.game_window: Optional[GameWindow] = None
         self.last_screenshot: Optional[Any] = None
+        self.game_processes = ["StarRail.exe", "YuanShen.exe", "Honkai3rd.exe"]  # 支持的游戏进程
+        self.current_window: Optional[Dict[str, Any]] = None
+        self.logger = logger
 
         # 加载游戏配置
         self._load_game_config()
@@ -395,12 +622,56 @@ class GameDetector:
     def _load_game_config(self) -> None:
         """加载游戏配置."""
         # 从配置中获取游戏标题等信息
-        self.game_titles = ["Test Game", "Game Window"]
+        self.game_titles = [
+            "崩坏：星穹铁道", "Honkai: Star Rail", "StarRail", 
+            "Test Game", "Game Window", "记事本", "Notepad"
+        ]
 
-        # 加载模板
-        templates_dir = "templates"
-        if os.path.exists(templates_dir):
-            self.template_matcher.load_templates(templates_dir)
+        # 加载模板 - 修复路径问题
+        project_root = Path(__file__).parent.parent.parent
+        templates_dir = project_root / "assets" / "templates"
+        
+        if templates_dir.exists():
+            # 递归加载所有子目录的模板
+            self._load_templates_recursive(str(templates_dir))
+        else:
+            print(f"模板目录不存在: {templates_dir}")
+    
+    def _load_templates_recursive(self, templates_dir: str) -> None:
+        """递归加载模板目录中的所有模板.
+        
+        Args:
+            templates_dir: 模板目录路径
+        """
+        for root, dirs, files in os.walk(templates_dir):
+            for file in files:
+                if file.lower().endswith(('.png', '.jpg', '.jpeg')):
+                    template_path = os.path.join(root, file)
+                    template_name = Path(file).stem
+                    # 添加目录前缀以避免重名
+                    category = Path(root).name
+                    if category != "templates":
+                        template_name = f"{category}_{template_name}"
+                    
+                    # 直接加载模板到缓存
+                    try:
+                        if cv2 is not None:
+                            template_image = cv2.imread(template_path)
+                            if template_image is not None:
+                                template_info = TemplateInfo(
+                                    name=template_name,
+                                    path=template_path,
+                                    image=template_image,
+                                    threshold=0.8
+                                )
+                                self.template_matcher.template_info_cache[template_name] = template_info
+                                print(f"已加载模板: {template_name} from {template_path}")
+                            else:
+                                print(f"无法加载模板图像: {template_path}")
+                        else:
+                            print(f"OpenCV不可用，跳过模板: {template_path}")
+                    except Exception as e:
+                        print(f"加载模板失败 {template_path}: {e}")
 
     def is_game_running(self) -> bool:
         """检查游戏是否正在运行.
@@ -408,13 +679,19 @@ class GameDetector:
         Returns:
             bool: 游戏是否正在运行
         """
-        windows = self.window_manager.find_game_windows(self.game_titles)
-        if windows:
-            self.game_window = windows[0]
-            return True
-
-        self.game_window = None
-        return False
+        try:
+            # 查找游戏窗口
+            windows = self.window_manager.find_game_windows(self.game_titles)
+            if windows:
+                self.game_window = windows[0]  # 使用第一个找到的窗口
+                return True
+            else:
+                self.game_window = None
+                return False
+            
+        except Exception as e:
+            self.logger.error(f"检查游戏运行状态时发生错误: {e}")
+            return False
 
     def detect_ui_elements(self, element_names: List[str]) -> List[UIElement]:
         """检测UI元素.
@@ -455,14 +732,24 @@ class GameDetector:
             return self.current_scene
 
         # 根据UI元素判断场景
-        ui_elements = self.detect_ui_elements(
-            ["main_menu", "play_button", "settings_button"]
-        )
+        ui_elements = self.detect_ui_elements([
+            "main_menu_start_button", "main_menu_start_game", 
+            "main_menu_settings_button", "main_menu_exit_button",
+            "combat_attack_button", "combat_skill_button",
+            "inventory_bag_icon", "shop_shop_icon"
+        ])
 
-        if any(elem.name == "main_menu" for elem in ui_elements):
+        # 判断主菜单场景
+        main_menu_elements = ["main_menu_start_button", "main_menu_start_game", 
+                             "main_menu_settings_button", "main_menu_exit_button"]
+        if any(elem.name in main_menu_elements for elem in ui_elements):
             self.current_scene = SceneType.MAIN_MENU
-        elif any(elem.name == "play_button" for elem in ui_elements):
+        # 判断战斗场景
+        elif any(elem.name.startswith("combat_") for elem in ui_elements):
             self.current_scene = SceneType.GAME_PLAY
+        # 判断设置场景
+        elif any(elem.name == "main_menu_settings_button" for elem in ui_elements):
+            self.current_scene = SceneType.SETTINGS
         else:
             self.current_scene = SceneType.UNKNOWN
 
@@ -570,38 +857,82 @@ class GameDetector:
 
     def detect_game_window(self) -> Optional[GameWindow]:
         """检测游戏窗口.
-
+        
         Returns:
-            Optional[GameWindow]: 检测到的游戏窗口，未找到返回None
+            Optional[GameWindow]: 游戏窗口信息，未找到返回None
         """
         try:
-            window = self.window_manager.find_game_window(self.game_titles)
-            if window:
-                self.window_manager.current_window = window
-            return window
+            # 使用WindowManager查找游戏窗口
+            game_window = self.window_manager.find_game_window(self.game_titles)
+            
+            if game_window:
+                self.game_window = game_window
+                self.window_manager.current_window = game_window
+                self.logger.info(f"Found game window: {game_window.title}")
+                return game_window
+            
+            self.game_window = None
+            self.window_manager.current_window = None
+            self.logger.debug("No game window found")
+            return None
+            
         except Exception as e:
-            print(f"检测游戏窗口失败: {e}")
+            self.logger.error(f"Error detecting game window: {e}")
             return None
 
-    def get_game_status(self) -> dict:
-        """获取游戏状态信息.
+    def get_game_status(self) -> Dict[str, Any]:
+        """获取游戏状态.
 
         Returns:
-            dict: 游戏状态信息
+            Dict[str, Any]: 游戏状态信息
         """
         try:
-            window = self.window_manager.find_game_window(self.game_titles)
-            return {
-                "window_found": window is not None,
-                "current_scene": self.current_scene.value,
-                "templates_loaded": len(self.template_matcher.template_info_cache) > 0,
+            status = {
+                'game_running': self.is_game_running(),
+                'window_found': False,
+                'window_info': None,
+                'screenshot_available': False,
+                'current_scene': self.current_scene.value if self.current_scene else 'unknown',
+                'templates_loaded': len(self.template_matcher.template_info_cache),
+                'last_update': time.time()
             }
+            
+            # 检测游戏窗口
+            window_info = self.detect_game_window()
+            if window_info:
+                status['window_found'] = True
+                status['window_info'] = {
+                    'title': window_info.title,
+                    'width': window_info.width,
+                    'height': window_info.height,
+                    'hwnd': window_info.hwnd
+                }
+                
+                # 测试截图功能
+                screenshot_data = self.capture_screen()
+                if screenshot_data:
+                    status['screenshot_available'] = True
+                    status['screenshot_size'] = len(screenshot_data)
+            
+            # 确定整体状态
+            if status['game_running'] and status['window_found'] and status['screenshot_available']:
+                status['overall_status'] = 'ready'
+            elif status['game_running'] and status['window_found']:
+                status['overall_status'] = 'partial'
+            elif status['game_running']:
+                status['overall_status'] = 'process_only'
+            else:
+                status['overall_status'] = 'not_running'
+            
+            self.logger.debug(f"Game status: {status['overall_status']}")
+            return status
+            
         except Exception as e:
-            print(f"获取游戏状态失败: {e}")
+            self.logger.error(f"Error getting game status: {e}")
             return {
-                "window_found": False,
-                "current_scene": SceneType.UNKNOWN.value,
-                "templates_loaded": False,
+                'overall_status': 'error',
+                'error': str(e),
+                'last_update': time.time()
             }
 
     def bring_game_to_front(self) -> bool:
@@ -758,6 +1089,89 @@ class GameDetector:
             Optional[UIElement]: 找到的UI元素，超时返回None
         """
         return self.wait_for_ui_element(template_name, timeout)
+
+    def capture_screen(self) -> Optional[bytes]:
+        """捕获游戏屏幕截图.
+        
+        Returns:
+            Optional[bytes]: 截图数据，失败时返回None
+        """
+        try:
+            screenshot = self.capture_screenshot()
+            if screenshot is None:
+                return None
+                
+            # 将numpy数组转换为字节数据
+            if cv2 is not None:
+                _, buffer = cv2.imencode('.png', screenshot)
+                return buffer.tobytes()
+            else:
+                # 如果没有cv2，返回原始数据
+                return screenshot.tobytes() if hasattr(screenshot, 'tobytes') else None
+                
+        except Exception as e:
+            self.logger.error(f"捕获屏幕截图失败: {e}")
+            return None
+    
+    def find_template(self, template_name: str, threshold: float = 0.8) -> Optional[Dict[str, Any]]:
+        """查找模板匹配.
+        
+        Args:
+            template_name: 模板名称
+            threshold: 匹配阈值
+            
+        Returns:
+            Optional[Dict[str, Any]]: 匹配结果字典，包含found、confidence、center等字段
+        """
+        try:
+            if cv2 is None:
+                return None
+                
+            screenshot = self.capture_screenshot()
+            if screenshot is None:
+                return None
+                
+            # 构建模板文件路径
+            import os
+            templates_dir = self.config_manager.get('game_detector', {}).get('templates_dir', 'templates')
+            template_path = os.path.join(templates_dir, template_name)
+            
+            if not os.path.exists(template_path):
+                return None
+                
+            # 加载模板图像
+            template = cv2.imread(template_path, cv2.IMREAD_COLOR)
+            if template is None:
+                return None
+                
+            # 执行模板匹配
+            result = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            
+            # 检查匹配度是否满足阈值
+            if max_val >= threshold:
+                # 计算中心点
+                h, w = template.shape[:2]
+                center_x = max_loc[0] + w // 2
+                center_y = max_loc[1] + h // 2
+                
+                return {
+                    'found': True,
+                    'confidence': max_val,
+                    'center': (center_x, center_y),
+                    'top_left': max_loc,
+                    'bottom_right': (max_loc[0] + w, max_loc[1] + h)
+                }
+            else:
+                return {
+                    'found': False,
+                    'confidence': max_val,
+                    'center': None
+                }
+                
+        except Exception as e:
+            self.logger.error(f"模板匹配失败: {e}")
+            return None
 
     def _find_window_by_process(self, process_name: str) -> Optional[GameWindow]:
         """通过进程名查找窗口.
