@@ -639,6 +639,19 @@ class ErrorHandler:
         
         return error_info
     
+    async def try_recovery(self, error_info: ErrorInfo, context: Dict[str, Any] = None) -> bool:
+        """尝试错误恢复（公共接口）。
+        
+        Args:
+            error_info: 错误信息
+            context: 上下文信息
+            
+        Returns:
+            是否恢复成功
+        """
+        context = context or {}
+        return await self._attempt_recovery(error_info, context)
+    
     async def _attempt_recovery(self, error_info: ErrorInfo, context: Dict[str, Any]) -> bool:
         """尝试错误恢复。
         

@@ -224,7 +224,7 @@ class PriorityManager:
         
         # 资源配额
         self.resource_quotas: Dict[TaskPriority, ResourceQuota] = {
-            TaskPriority.CRITICAL: ResourceQuota(cpu_quota=2.0, memory_quota=2.0, concurrent_limit=5, priority_weight=4.0),
+            TaskPriority.URGENT: ResourceQuota(cpu_quota=2.0, memory_quota=2.0, concurrent_limit=5, priority_weight=4.0),
             TaskPriority.HIGH: ResourceQuota(cpu_quota=1.5, memory_quota=1.5, concurrent_limit=3, priority_weight=3.0),
             TaskPriority.MEDIUM: ResourceQuota(cpu_quota=1.0, memory_quota=1.0, concurrent_limit=2, priority_weight=2.0),
             TaskPriority.LOW: ResourceQuota(cpu_quota=0.5, memory_quota=0.5, concurrent_limit=1, priority_weight=1.0)
@@ -268,15 +268,16 @@ class PriorityManager:
             metrics = TaskMetrics(
                 task_id=execution_id,
                 task_type=task_config.task_type,
-                priority=task_config.priority,
-                estimated_duration=task_config.config.get('estimated_duration', 0.0),
-                deadline=task_config.config.get('deadline'),
-                dependencies=set(task_config.config.get('dependencies', []))
+                priority=TaskPriority(task_config.priority) if isinstance(task_config.priority, str) else task_config.priority,
+                estimated_duration=task_config.automation_config.get('estimated_duration', 0.0),
+                deadline=task_config.automation_config.get('deadline'),
+                dependencies=set(task_config.automation_config.get('dependencies', []))
             )
             
             with self.metrics_lock:
                 self.task_metrics[execution_id] = metrics
-                self.scheduling_stats['priority_distribution'][task_config.priority.value] += 1
+                priority_value = task_config.priority if isinstance(task_config.priority, str) else task_config.priority.value
+                self.scheduling_stats['priority_distribution'][priority_value] += 1
     
     async def _on_task_started(self, event_data: Dict[str, Any]):
         """处理任务开始事件。"""
@@ -362,11 +363,11 @@ class PriorityManager:
             # 检查截止时间
             if metrics.deadline:
                 time_to_deadline = (metrics.deadline - datetime.now()).total_seconds()
-                if time_to_deadline <= 3600 and metrics.priority != TaskPriority.CRITICAL:
-                    # 1小时内截止，提升为关键优先级
+                if time_to_deadline <= 3600 and metrics.priority != TaskPriority.URGENT:
+                    # 1小时内截止，提升为紧急优先级
                     await self.adjust_task_priority(
                         metrics.task_id,
-                        TaskPriority.CRITICAL,
+                        TaskPriority.URGENT,
                         PriorityAdjustmentReason.DEADLINE_APPROACHING
                     )
             
@@ -469,7 +470,7 @@ class PriorityManager:
                 self.scheduling_stats['priority_distribution'][new_priority.value] += 1
         
         # 发送优先级调整事件
-        await self.event_bus.emit("priority_adjusted", {
+        await self.event_bus.emit_async("priority_adjusted", {
             "task_id": task_id,
             "old_priority": old_priority,
             "new_priority": new_priority,
@@ -503,7 +504,7 @@ class PriorityManager:
         
         # 基础优先级分数
         base_scores = {
-            TaskPriority.CRITICAL: 1000.0,
+            TaskPriority.URGENT: 1000.0,
             TaskPriority.HIGH: 100.0,
             TaskPriority.MEDIUM: 10.0,
             TaskPriority.LOW: 1.0

@@ -1814,13 +1814,20 @@ class TestTemplateMatcherExceptions:
 
     def test_match_template_cv2_exception(self, template_matcher):
         """测试cv2.matchTemplate抛出异常."""
+        # 禁用多尺度匹配和金字塔匹配，使用单尺度匹配来测试异常处理
+        template_matcher.enable_multi_scale = False
+        template_matcher.enable_pyramid_matching = False
+        
         mock_screenshot = Mock()
+        mock_screenshot.shape = [200, 300, 3]  # 添加shape属性
         template_name = "test_template"
         
         # 模拟模板存在于缓存中
         mock_template_info = Mock()
         mock_template_info.image = Mock()
+        mock_template_info.image.shape = [50, 50, 3]  # 添加shape属性
         mock_template_info.threshold = 0.8
+        mock_template_info.path = "test.png"
         template_matcher.template_info_cache[template_name] = mock_template_info
         
         with patch('src.core.game_detector.cv2') as mock_cv2:
@@ -1830,16 +1837,26 @@ class TestTemplateMatcherExceptions:
             result = template_matcher.match_template(mock_screenshot, template_name)
             
             assert result is None
+            # 验证cv2.matchTemplate被调用
+            assert mock_cv2.matchTemplate.called
+            # cv2.matchTemplate抛出异常后不会执行到minMaxLoc，所以不检查minMaxLoc
 
     def test_match_template_numpy_exception(self, template_matcher):
         """测试numpy操作抛出异常."""
+        # 禁用多尺度匹配和金字塔匹配，使用单尺度匹配来测试异常处理
+        template_matcher.enable_multi_scale = False
+        template_matcher.enable_pyramid_matching = False
+        
         mock_screenshot = Mock()
+        mock_screenshot.shape = [200, 300, 3]  # 添加shape属性
         template_name = "test_template"
         
         # 模拟模板存在于缓存中
         mock_template_info = Mock()
         mock_template_info.image = Mock()
+        mock_template_info.image.shape = [50, 50, 3]  # 添加shape属性
         mock_template_info.threshold = 0.8
+        mock_template_info.path = "test.png"
         template_matcher.template_info_cache[template_name] = mock_template_info
         
         with patch('src.core.game_detector.cv2') as mock_cv2:
@@ -1847,8 +1864,8 @@ class TestTemplateMatcherExceptions:
             mock_result = Mock()
             mock_cv2.matchTemplate.return_value = mock_result
             
-            # 模拟cv2.minMaxLoc返回值解包失败
-            mock_cv2.minMaxLoc.return_value = ()  # 空元组导致解包失败
+            # 模拟cv2.minMaxLoc抛出异常
+            mock_cv2.minMaxLoc.side_effect = Exception("NumPy error")
             
             result = template_matcher.match_template(mock_screenshot, template_name)
             
@@ -1872,8 +1889,10 @@ class TestTemplateMatcherExceptions:
             # 应该不抛出异常
             template_matcher.load_templates(templates_dir)
             
-            # 验证load_template被调用
-            mock_load_template.assert_called_once_with("/test/templates/template1.png")
+            # 验证load_template被调用（使用Windows路径格式）
+            import os
+            expected_path = os.path.join("/test/templates", "template1.png")
+            mock_load_template.assert_called_once_with(expected_path)
 
     def test_load_templates_directory_traversal(self, template_matcher):
         """测试load_templates方法的目录遍历功能."""
@@ -1889,15 +1908,16 @@ class TestTemplateMatcherExceptions:
             
             template_matcher.load_templates(templates_dir)
             
-            # 验证只加载了图片文件
+            # 验证只加载了图片文件（使用Windows路径格式）
+            import os
             expected_calls = [
-                call("/test/templates/template1.png"),
-                call("/test/templates/template2.jpg")
+                call(os.path.join("/test/templates", "template1.png")),
+                call(os.path.join("/test/templates", "template2.jpg"))
             ]
             mock_load_template.assert_has_calls(expected_calls, any_order=True)
             
             # 验证没有加载非图片文件
-            assert call("/test/templates/invalid.txt") not in mock_load_template.call_args_list
+            assert call(os.path.join("/test/templates", "invalid.txt")) not in mock_load_template.call_args_list
 
     def test_load_templates_empty_directory(self, template_matcher):
         """测试加载空目录."""
@@ -1928,22 +1948,27 @@ class TestTemplateMatcherExceptions:
             
             template_matcher.load_templates(templates_dir)
             
-            # 只有有效的图片文件被加载
-            mock_load_template.assert_called_once_with("/test/templates/valid.png")
+            # 只有有效的图片文件被加载（使用Windows路径格式）
+            import os
+            expected_path = os.path.join("/test/templates", "valid.png")
+            mock_load_template.assert_called_once_with(expected_path)
             
             # 验证没有加载非图片文件
-            assert call("/test/templates/invalid.txt") not in mock_load_template.call_args_list
-            assert call("/test/templates/another.doc") not in mock_load_template.call_args_list
+            assert call(os.path.join("/test/templates", "invalid.txt")) not in mock_load_template.call_args_list
+            assert call(os.path.join("/test/templates", "another.doc")) not in mock_load_template.call_args_list
 
     def test_match_template_threshold_not_met(self, template_matcher):
         """测试匹配阈值不满足时返回None."""
         mock_screenshot = Mock()
+        mock_screenshot.shape = [200, 300, 3]  # 添加shape属性
         template_name = "test_template"
         
         # 模拟模板存在于缓存中
         mock_template_info = Mock()
         mock_template_info.image = Mock()
+        mock_template_info.image.shape = [50, 50, 3]  # 添加shape属性
         mock_template_info.threshold = 0.8
+        mock_template_info.path = "test.png"
         template_matcher.template_info_cache[template_name] = mock_template_info
         
         with patch('src.core.game_detector.cv2') as mock_cv2:
@@ -1957,19 +1982,23 @@ class TestTemplateMatcherExceptions:
             result = template_matcher.match_template(mock_screenshot, template_name)
             
             assert result is None
-            mock_cv2.matchTemplate.assert_called_once()
-            mock_cv2.minMaxLoc.assert_called_once()
+            # 多尺度匹配会调用多次，所以不检查具体调用次数
+            assert mock_cv2.matchTemplate.called
+            assert mock_cv2.minMaxLoc.called
 
     def test_match_template_custom_threshold_not_met(self, template_matcher):
         """测试自定义阈值不满足时返回None."""
         mock_screenshot = Mock()
+        mock_screenshot.shape = [200, 300, 3]  # 添加shape属性
         template_name = "test_template"
         custom_threshold = 0.9
         
         # 模拟模板存在于缓存中
         mock_template_info = Mock()
         mock_template_info.image = Mock()
+        mock_template_info.image.shape = [50, 50, 3]  # 添加shape属性
         mock_template_info.threshold = custom_threshold
+        mock_template_info.path = "test.png"
         template_matcher.template_info_cache[template_name] = mock_template_info
         
         with patch('src.core.game_detector.cv2') as mock_cv2:
@@ -1987,6 +2016,7 @@ class TestTemplateMatcherExceptions:
     def test_match_template_threshold_exactly_met(self, template_matcher):
         """测试匹配阈值刚好满足时返回结果."""
         mock_screenshot = Mock()
+        mock_screenshot.shape = [200, 300, 3]  # 添加shape属性
         template_name = "test_template"
         threshold = 0.8
         
@@ -1995,6 +2025,7 @@ class TestTemplateMatcherExceptions:
         mock_template_info.image = Mock()
         mock_template_info.image.shape = [50, 50, 3]
         mock_template_info.threshold = threshold
+        mock_template_info.path = "test.png"
         template_matcher.template_info_cache[template_name] = mock_template_info
         
         with patch('src.core.game_detector.cv2') as mock_cv2:

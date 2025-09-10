@@ -17,7 +17,7 @@ import logging
 
 from .events import EventBus
 from .logger import get_logger
-from .error_handler import ErrorHandler
+from .error_handler import ErrorHandler, ErrorSeverity
 from .game_operator import GameOperator, OperationResult
 from .task_executor import TaskExecutor as BaseTaskExecutor, ActionConfig, ExecutionResult
 
@@ -101,6 +101,19 @@ class TaskExecution:
     @property
     def is_running(self) -> bool:
         return self.status == TaskStatus.RUNNING
+    
+    def complete(self, result: Any = None):
+        """标记任务为完成状态。"""
+        self.status = TaskStatus.COMPLETED
+        self.result = result
+        self.end_time = datetime.now()
+    
+    def fail(self, error: Exception):
+        """标记任务为失败状态。"""
+        self.status = TaskStatus.FAILED
+        self.error = error
+        self.end_time = datetime.now()
+        self.error_message = str(error)  # 添加error_message属性
 
 
 class TaskQueue:
@@ -112,6 +125,7 @@ class TaskQueue:
         Args:
             max_size: 队列最大容量
         """
+        self.max_size = max_size
         self._queue = PriorityQueue(maxsize=max_size)
         self._lock = Lock()
         self._task_map: Dict[str, TaskConfig] = {}
@@ -130,10 +144,16 @@ class TaskQueue:
                 if task_config.task_id in self._task_map:
                     return False  # 任务已存在
                 
+                # 检查队列是否已满
+                if self._queue.qsize() >= self.max_size:
+                    raise Exception(f"队列已满，最大容量: {self.max_size}")
+                
                 self._queue.put_nowait((task_config.priority.value, time.time(), task_config))
                 self._task_map[task_config.task_id] = task_config
                 return True
-        except:
+        except Exception as e:
+            if "队列已满" in str(e):
+                raise e  # 重新抛出队列满异常
             return False
     
     def get(self, timeout: Optional[float] = None) -> Optional[TaskConfig]:
@@ -300,39 +320,88 @@ class EnhancedTaskExecutor:
         self.task_runners[task_runner.task_type] = task_runner
         self.logger.info(f"注册任务运行器: {task_runner.task_type.value}")
     
-    async def submit_task(self, task_config: TaskConfig) -> str:
-        """提交任务。
+    async def submit_task(self, task_config: TaskConfig) -> TaskExecution:
+        """提交任务到执行队列。
         
         Args:
             task_config: 任务配置
             
         Returns:
-            执行ID
+            任务执行对象
         """
-        execution_id = str(uuid.uuid4())
+        # 检查是否有对应的任务运行器
+        if task_config.task_type not in self.task_runners:
+            raise ValueError(f"未找到任务类型 {task_config.task_type.value} 的运行器")
         
         # 创建任务执行对象
-        task_execution = TaskExecution(
-            execution_id=execution_id,
+        execution = TaskExecution(
+            execution_id=str(uuid.uuid4()),
             task_config=task_config,
-            status=TaskStatus.QUEUED
+            status=TaskStatus.PENDING
         )
         
-        # 添加到队列
-        if self.task_queue.put(task_config):
-            self.active_executions[execution_id] = task_execution
+        # 添加到活跃执行列表
+        self.active_executions[execution.execution_id] = execution
+        
+        try:
+            # 添加到任务队列
+            success = self.task_queue.put(task_config)
+            if not success:
+                raise RuntimeError("无法添加任务到队列")
+            
             self.stats["total_tasks"] += 1
             
             # 发送任务提交事件
-            await self.event_bus.emit("task_submitted", {
-                "execution_id": execution_id,
+            self.event_bus.emit("task_submitted", {
+                "execution_id": execution.execution_id,
                 "task_config": task_config
             })
             
-            self.logger.info(f"任务已提交: {task_config.name} (ID: {execution_id})")
-            return execution_id
-        else:
-            raise RuntimeError(f"无法提交任务: {task_config.name}")
+            self.logger.info(f"任务已提交: {task_config.name}")
+            
+        except Exception as e:
+            # 如果队列满了，重新抛出异常
+            if "队列已满" in str(e):
+                raise
+            # 其他异常处理
+            del self.active_executions[execution.execution_id]
+            raise RuntimeError(f"提交任务失败: {e}")
+        
+        return execution
+    
+    async def submit_and_wait(self, task_config: TaskConfig) -> ExecutionResult:
+        """提交任务并等待执行完成。
+        
+        Args:
+            task_config: 任务配置
+            
+        Returns:
+            执行结果
+        """
+        execution = await self.submit_task(task_config)
+        
+        # 如果执行引擎没有启动，直接执行任务
+        if not self.is_running:
+            result = await self._execute_task(execution)
+            return result
+        
+        # 等待任务完成（最多等待30秒避免无限循环）
+        timeout = 30.0
+        start_wait_time = time.time()
+        while execution.status in [TaskStatus.PENDING, TaskStatus.RUNNING, TaskStatus.RETRYING]:
+            if time.time() - start_wait_time > timeout:
+                self.logger.error(f"任务等待超时: {task_config.name}")
+                execution.status = TaskStatus.FAILED
+                execution.error = TimeoutError("任务执行超时")
+                break
+            await asyncio.sleep(0.1)
+        
+        return ExecutionResult(
+            status=execution.status.value,
+            result=execution.result,
+            error=execution.error,
+            execution_time=execution.execution_time
+        )
     
     async def cancel_task(self, execution_id: str) -> bool:
         """取消任务。
@@ -357,7 +426,7 @@ class EnhancedTaskExecutor:
                 self.stats["cancelled_tasks"] += 1
                 
                 # 发送任务取消事件
-                await self.event_bus.emit("task_cancelled", {
+                self.event_bus.emit("task_cancelled", {
                     "execution_id": execution_id,
                     "task_execution": task_execution
                 })
@@ -507,7 +576,7 @@ class EnhancedTaskExecutor:
                 raise RuntimeError("前置条件验证失败")
             
             # 发送任务开始事件
-            await self.event_bus.emit("task_started", {
+            self.event_bus.emit("task_started", {
                 "execution_id": task_execution.execution_id,
                 "task_execution": task_execution
             })
@@ -528,7 +597,7 @@ class EnhancedTaskExecutor:
             self.stats["completed_tasks"] += 1
             
             # 发送任务完成事件
-            await self.event_bus.emit("task_completed", {
+            self.event_bus.emit("task_completed", {
                 "execution_id": task_execution.execution_id,
                 "task_execution": task_execution,
                 "result": result
@@ -560,23 +629,35 @@ class EnhancedTaskExecutor:
             
             # 检查是否需要重试
             if (task_execution.retry_count < task_execution.task_config.retry_count and 
-                (recovery_success or error_info.severity.value <= 2)):  # 只有轻微或中等错误才重试
+                (recovery_success or error_info.severity in [ErrorSeverity.LOW, ErrorSeverity.MEDIUM])):  # 只有轻微或中等错误才重试
                 task_execution.retry_count += 1
                 task_execution.status = TaskStatus.RETRYING
                 
                 self.stats["retry_tasks"] += 1
                 
-                # 延迟后重新提交任务
+                # 延迟后重试
                 await asyncio.sleep(task_execution.task_config.retry_delay)
-                self.task_queue.put(task_execution.task_config)
                 
                 self.logger.warning(f"任务重试 ({task_execution.retry_count}/{task_execution.task_config.retry_count}): {task_execution.task_config.name}")
+                
+                # 如果执行引擎正在运行，重新提交到队列；否则直接递归重试
+                if self.is_running:
+                    self.task_queue.put(task_execution.task_config)
+                    return ExecutionResult(
+                        status=task_execution.status.value,
+                        result=task_execution.result,
+                        error=task_execution.error,
+                        execution_time=task_execution.execution_time
+                    )
+                else:
+                    # 直接重试执行
+                    return await self._execute_task(task_execution)
             else:
                 task_execution.status = TaskStatus.FAILED
                 self.stats["failed_tasks"] += 1
                 
                 # 发送任务失败事件
-                await self.event_bus.emit("task_failed", {
+                self.event_bus.emit("task_failed", {
                     "execution_id": task_execution.execution_id,
                     "task_execution": task_execution,
                     "error": e,

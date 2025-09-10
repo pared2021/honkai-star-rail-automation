@@ -39,3 +39,211 @@
 2025-09-10 08:06:32 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
 2025-09-10 08:06:32 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
 2025-09-10 08:06:33 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:20:38 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:20:39 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:20:39 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:20:40 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:48:13 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:48:14 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:48:14 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:48:15 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:56:53 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:56:54 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:56:54 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:56:55 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:04:03 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:04:04 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:04:05 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:04:05 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:08:51 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:08:52 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:08:52 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:08:53 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:20:53 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:20:54 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:20:54 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:20:55 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:23:23 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:23:24 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:23:24 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:23:25 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:23:32 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757467412922 - Unrecoverable error
+2025-09-10 09:23:33 | ERROR    | src.core.daily_mission_runner:_claim_all_rewards:542 - 领取奖励失败: SmartWaiter.wait_for_ui_element() got an unexpected keyword argument 'template_path'
+2025-09-10 09:23:33 | ERROR    | src.core.daily_mission_runner:_execute_single_mission:368 - 执行任务 每日实训 时发生错误: object Mock can't be used in 'await' expression
+2025-09-10 09:28:11 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:28:12 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:28:12 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:28:13 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:31:19 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:31:19 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:31:20 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:31:20 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:33:22 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:33:22 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:33:23 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:33:23 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 09:35:14 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 09:35:14 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 09:35:54 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 09:35:54 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:06:13 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:06:14 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:06:46 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:06:46 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:06:46 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-10 10:10:46 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:10:46 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:11:18 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:11:18 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:11:18 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-10 10:12:35 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:12:36 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:12:37 | ERROR    | src.core.error_handler:recover:402 - 游戏状态恢复异常: 'NoneType' object has no attribute 'take_screenshot'
+2025-09-10 10:12:39 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757470359828 - Test error
+2025-09-10 10:12:39 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757470359833 - Unrecoverable error
+2025-09-10 10:12:39 | ERROR    | src.core.automation_engine:_monitor_loop:479 - 监控循环错误: Mock object has no attribute 'get_statistics'
+2025-09-10 10:12:39 | ERROR    | src.core.automation_engine:execute_task:408 - 执行任务时发生错误: Test error
+2025-09-10 10:12:39 | ERROR    | src.core.automation_engine:_stop_components:337 - 停止组件时发生错误: Mock object has no attribute 'stop'
+2025-09-10 10:16:37 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:16:38 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:17:10 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:17:10 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:17:10 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-10 10:21:17 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:21:17 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:21:49 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:21:49 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:21:49 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-10 10:26:00 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:26:01 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 10:26:33 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:26:33 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 10:26:33 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-10 22:34:30 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 22:34:31 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 22:35:03 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 22:35:03 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 22:35:03 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-10 23:05:32 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 23:05:33 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 23:06:05 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 23:06:05 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 23:06:05 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-10 23:36:08 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 23:36:08 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-10 23:36:41 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 23:36:41 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-10 23:36:41 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 02:07:09 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757527629540 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 02:07:09 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757527629582 - 任务执行失败
+2025-09-11 02:07:09 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757527629628 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 02:07:53 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757527673990 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 02:40:42 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 02:40:43 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 02:41:15 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 02:41:15 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 02:41:15 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 02:41:18 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757529678467 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 02:41:18 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757529678531 - 任务执行失败
+2025-09-11 02:41:18 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757529678593 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 02:42:03 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757529723030 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 03:11:47 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 03:11:48 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 03:12:20 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 03:12:20 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 03:12:20 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 03:12:27 | ERROR    | src.core.task_monitor:export_metrics:634 - 导出指标数据失败: 不支持的导出格式: invalid
+2025-09-11 03:12:50 | ERROR    | src.core.task_runners:run:87 - 日常任务执行失败: 测试日常任务, 错误: 无法导航到任务界面
+2025-09-11 03:13:10 | ERROR    | src.core.task_runners:run:351 - 资源采集失败: 资源采集, 错误: 无法导航到 credit 采集区域
+2025-09-11 03:13:33 | ERROR    | src.core.task_runners:run:480 - 邮件收集失败: 邮件收集, 错误: 无法导航到邮件界面
+2025-09-11 03:13:40 | ERROR    | src.core.task_runners:run:891 - 自定义任务失败: 空任务, 错误: 自定义任务缺少动作序列
+2025-09-11 03:14:11 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531651945 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:14:12 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531652069 - 任务执行失败
+2025-09-11 03:14:12 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531652131 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:15:00 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531700551 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:15:00 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531700643 - 任务执行失败
+2025-09-11 03:15:00 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531700704 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:15:08 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531708685 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:03 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531763613 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:08 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531768746 - 任务执行失败
+2025-09-11 03:16:13 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531773795 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:18 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531778826 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:23 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531783849 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:25 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531785530 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:30 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531790620 - 任务执行失败
+2025-09-11 03:16:35 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531795667 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:40 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531800690 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:16:45 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531805718 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:18:31 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531911729 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:18:36 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531916759 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:18:41 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531921781 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:18:46 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531926802 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:18:46 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务10, 错误: ExecutionResult.__init__() got an unexpected keyword argument 'action_config', 错误ID: error_1757531926802
+2025-09-11 03:18:46 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531926881 - 任务执行失败
+2025-09-11 03:18:51 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531931908 - 任务执行失败
+2025-09-11 03:18:51 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757531931908
+2025-09-11 03:18:51 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531931940 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:18:56 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531936968 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:01 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531941990 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:07 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531947011 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:07 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务13, 错误: ExecutionResult.__init__() got an unexpected keyword argument 'action_config', 错误ID: error_1757531947011
+2025-09-11 03:19:07 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531947027 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:12 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531952055 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:17 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531957077 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:22 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531962096 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:22 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务14, 错误: ExecutionResult.__init__() got an unexpected keyword argument 'action_config', 错误ID: error_1757531962096
+2025-09-11 03:19:22 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531962111 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:27 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531967130 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:32 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531972155 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:37 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757531977184 - ExecutionResult.__init__() got an unexpected keyword argument 'action_config'
+2025-09-11 03:19:37 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务15, 错误: ExecutionResult.__init__() got an unexpected keyword argument 'action_config', 错误ID: error_1757531977184
+2025-09-11 03:20:36 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757532036391 - 任务执行失败
+2025-09-11 03:20:41 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757532041416 - 任务执行失败
+2025-09-11 03:20:41 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757532041416
+2025-09-11 03:23:53 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 03:23:53 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 03:24:25 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 03:24:25 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 03:24:25 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 03:24:29 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757532269358 - 任务执行失败
+2025-09-11 03:24:34 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757532274384 - 任务执行失败
+2025-09-11 03:24:34 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757532274384
+2025-09-11 03:25:18 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757532318830 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 03:56:04 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 03:56:05 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 03:56:37 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 03:56:37 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 03:56:37 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 03:56:40 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757534200413 - 任务执行失败
+2025-09-11 03:56:45 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757534205432 - 任务执行失败
+2025-09-11 03:56:45 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757534205432
+2025-09-11 03:57:29 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757534249842 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 04:26:50 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 04:26:51 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 04:27:23 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 04:27:23 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 04:27:23 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 04:27:26 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757536046609 - 任务执行失败
+2025-09-11 04:27:31 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757536051637 - 任务执行失败
+2025-09-11 04:27:31 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757536051637
+2025-09-11 04:28:16 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757536096020 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 04:55:25 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757537725921 - 任务执行失败
+2025-09-11 04:55:30 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757537730944 - 任务执行失败
+2025-09-11 04:55:30 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757537730944
+2025-09-11 04:56:15 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757537775366 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 05:26:25 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757539585747 - 任务执行失败
+2025-09-11 05:26:30 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757539590777 - 任务执行失败
+2025-09-11 05:26:30 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757539590777
+2025-09-11 05:27:15 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757539635206 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 05:57:18 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757541438181 - 任务执行失败
+2025-09-11 05:57:23 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757541443198 - 任务执行失败
+2025-09-11 05:57:23 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757541443198
+2025-09-11 05:58:07 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757541487631 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 06:28:22 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757543302905 - 任务执行失败
+2025-09-11 06:28:27 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757543307934 - 任务执行失败
+2025-09-11 06:28:27 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757543307934
+2025-09-11 06:29:12 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757543352318 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 06:59:22 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757545162736 - 任务执行失败
+2025-09-11 06:59:27 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757545167761 - 任务执行失败
+2025-09-11 06:59:27 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757545167761
+2025-09-11 07:00:12 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757545212207 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'

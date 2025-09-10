@@ -116,6 +116,7 @@ class GameTaskRunner(BaseTaskRunner):
             game_detector: 游戏检测器
         """
         super().__init__(task_type)
+        self.task_type = task_type  # 确保task_type属性被设置
         self.game_operator = game_operator
         self.game_detector = game_detector
         self.action_history: List[GameActionResult] = []
@@ -494,15 +495,20 @@ class GameTaskIntegration:
             任务执行ID
         """
         task_config = TaskConfig(
+            task_id=f"game_task_{int(time.time() * 1000)}",
             task_type=task_type,
+            name=f"游戏任务_{task_type.value}",
             priority=priority,
-            config=config or {}
+            parameters=config or {}
         )
         
         # 将动作列表添加到配置中
-        task_config.config['game_actions'] = actions
+        task_config.parameters['game_actions'] = actions
         
-        return await self.task_executor.submit_task(task_config)
+        # 提交任务
+        execution = await self.task_executor.submit_task(task_config)
+        
+        return execution.execution_id
     
     async def execute_action_sequence(self, 
                                     actions: List[GameAction],

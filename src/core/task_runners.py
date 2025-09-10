@@ -918,7 +918,7 @@ class CustomTaskRunner(TaskRunner):
         elif action_type == "wait":
             duration = action.get("duration", 1.0)
             await asyncio.sleep(duration)
-            return OperationResult(success=True, data={"waited": duration})
+            return OperationResult(success=True, execution_time=duration, metadata={"waited": duration})
         
         elif action_type == "wait_for_condition":
             return await game_operator.wait_for_condition(
