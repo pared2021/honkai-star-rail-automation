@@ -139,3 +139,1845 @@
 2025-09-06 09:53:51 | INFO     | src.ui.main_window.main_window_mvp:__init__:62 - 监控系统已启动
 2025-09-06 09:53:51 | INFO     | src.ui.main_window.main_window_mvp:__init__:67 - 主窗口MVP初始化完成
 2025-09-06 09:53:52 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-07 23:30:11 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-07 23:30:11 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-07 23:30:11 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-07 23:30:11 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-07 23:30:12 | INFO     | src.ui.main_window.main_window_mvp:__init__:62 - 监控系统已启动
+2025-09-07 23:30:12 | INFO     | src.ui.main_window.main_window_mvp:__init__:67 - 主窗口MVP初始化完成
+2025-09-07 23:30:12 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-07 23:31:25 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:31:25 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:32:26 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:32:26 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:37:16 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-07 23:37:16 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-07 23:37:16 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-07 23:37:16 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-07 23:37:16 | INFO     | src.ui.main_window.main_window_mvp:__init__:62 - 监控系统已启动
+2025-09-07 23:37:16 | INFO     | src.ui.main_window.main_window_mvp:__init__:67 - 主窗口MVP初始化完成
+2025-09-07 23:37:17 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-07 23:37:51 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:37:51 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:39:13 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:39:13 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:40 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:40:41 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:41 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:40:41 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:42 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:40:42 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:42 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:40:42 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:42 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:40:42 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:42:46 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-07 23:42:46 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-07 23:42:46 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-07 23:42:46 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-07 23:42:46 | INFO     | src.ui.main_window.main_window_mvp:__init__:62 - 监控系统已启动
+2025-09-07 23:42:46 | INFO     | src.ui.main_window.main_window_mvp:__init__:67 - 主窗口MVP初始化完成
+2025-09-07 23:42:46 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-07 23:43:06 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:44:28 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-07 23:44:28 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-07 23:44:28 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-07 23:44:28 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-07 23:44:28 | INFO     | src.ui.main_window.main_window_mvp:__init__:62 - 监控系统已启动
+2025-09-07 23:44:28 | INFO     | src.ui.main_window.main_window_mvp:__init__:67 - 主窗口MVP初始化完成
+2025-09-07 23:44:28 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-07 23:45:14 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-07 23:45:14 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-07 23:45:14 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-07 23:45:14 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-07 23:45:15 | INFO     | src.ui.main_window.main_window_mvp:__init__:62 - 监控系统已启动
+2025-09-07 23:45:15 | INFO     | src.ui.main_window.main_window_mvp:__init__:67 - 主窗口MVP初始化完成
+2025-09-07 23:45:15 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-07 23:46:11 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:46:15 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-07 23:46:15 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-07 23:46:15 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-07 23:46:15 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-07 23:46:15 | INFO     | src.ui.main_window.main_window_mvp:__init__:62 - 监控系统已启动
+2025-09-07 23:46:15 | INFO     | src.ui.main_window.main_window_mvp:__init__:67 - 主窗口MVP初始化完成
+2025-09-07 23:46:15 | INFO     | __main__:main:93 - 主窗口已显示
+2025-09-07 23:46:19 | INFO     | src.ui.main_window.main_window_mvp:on_start_automation:87 - 用户点击开始自动化
+2025-09-07 23:50:48 | INFO     | src.ui.main_window.main_window_mvp:on_stop_automation:150 - 用户点击停止自动化
+2025-09-07 23:50:57 | INFO     | __main__:main:98 - 应用程序退出，退出码: 0
+2025-09-07 23:59:30 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:30 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 200)
+2025-09-07 23:59:30 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:31 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-07 23:59:31 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:31 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-07 23:59:31 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:32 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:32 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:33 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:33 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:33 | INFO     | core.game_operator:swipe:316 - 滑动操作成功: (100, 100) -> (200, 200)
+2025-09-07 23:59:33 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:33 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-07 23:59:33 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:33 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:34 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-07 23:59:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:34 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: ui_element_appear
+2025-09-07 23:59:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:35 | WARNING  | core.game_operator:wait_for_condition:448 - 等待条件超时: ui_element_appear
+2025-09-07 23:59:35 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:36 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:36 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:36 | ERROR    | core.game_operator:_perform_click:518 - 执行点击失败: Failed
+2025-09-07 23:59:36 | WARNING  | core.game_operator:click:251 - 点击操作失败: (100, 100)
+2025-09-07 23:59:36 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:36 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:36 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:36 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:36 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:36 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: custom
+2025-09-07 23:59:52 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:52 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 200)
+2025-09-07 23:59:52 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:53 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-07 23:59:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:53 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-07 23:59:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:54 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:54 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:55 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:55 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:55 | INFO     | core.game_operator:swipe:316 - 滑动操作成功: (100, 100) -> (200, 200)
+2025-09-07 23:59:55 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:55 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-07 23:59:55 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:55 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:56 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-07 23:59:56 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:56 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: ui_element_appear
+2025-09-07 23:59:56 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:57 | WARNING  | core.game_operator:wait_for_condition:448 - 等待条件超时: ui_element_appear
+2025-09-07 23:59:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:58 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-07 23:59:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:58 | ERROR    | core.game_operator:_perform_click:518 - 执行点击失败: Failed
+2025-09-07 23:59:58 | WARNING  | core.game_operator:click:251 - 点击操作失败: (100, 100)
+2025-09-07 23:59:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-07 23:59:58 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: custom
+2025-09-08 00:01:20 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:01:21 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (500, 300)
+2025-09-08 00:01:22 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (400, 300)
+2025-09-08 00:01:23 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (410, 300)
+2025-09-08 00:01:24 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (420, 300)
+2025-09-08 00:01:25 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (430, 300)
+2025-09-08 00:01:26 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (440, 300)
+2025-09-08 00:01:27 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (450, 300)
+2025-09-08 00:01:27 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (460, 300)
+2025-09-08 00:01:28 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (470, 300)
+2025-09-08 00:01:29 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (480, 300)
+2025-09-08 00:01:30 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (490, 300)
+2025-09-08 00:01:30 | ERROR    | src.core.game_operator:_perform_click:518 - 执行点击失败: PyAutoGUI fail-safe triggered from mouse moving to a corner of the screen. To disable this fail-safe, set pyautogui.FAILSAFE to False. DISABLING FAIL-SAFE IS NOT RECOMMENDED.
+2025-09-08 00:01:30 | WARNING  | src.core.game_operator:click:251 - 点击操作失败: (-100, -100)
+2025-09-08 00:01:53 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:01:53 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (500, 300)
+2025-09-08 00:01:54 | INFO     | src.core.game_operator:wait_for_condition:446 - 等待条件满足: custom
+2025-09-08 00:01:55 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (400, 300)
+2025-09-08 00:01:56 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (410, 300)
+2025-09-08 00:01:57 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (420, 300)
+2025-09-08 00:01:58 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (430, 300)
+2025-09-08 00:01:58 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (440, 300)
+2025-09-08 00:01:59 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (450, 300)
+2025-09-08 00:02:00 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (460, 300)
+2025-09-08 00:02:01 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (470, 300)
+2025-09-08 00:02:02 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (480, 300)
+2025-09-08 00:02:02 | INFO     | src.core.game_operator:click:249 - 点击操作成功: (490, 300)
+2025-09-08 00:02:03 | ERROR    | src.core.game_operator:_perform_click:518 - 执行点击失败: PyAutoGUI fail-safe triggered from mouse moving to a corner of the screen. To disable this fail-safe, set pyautogui.FAILSAFE to False. DISABLING FAIL-SAFE IS NOT RECOMMENDED.
+2025-09-08 00:02:03 | WARNING  | src.core.game_operator:click:251 - 点击操作失败: (-100, -100)
+2025-09-08 00:02:04 | WARNING  | src.core.game_operator:wait_for_condition:448 - 等待条件超时: custom
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:17:19 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:17:19 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:17:19 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:18:53 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:18:53 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:18:53 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:24:01 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:24:01 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:24:01 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:26:29 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:26:29 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:26:29 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:29:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:29:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:29:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:29:58 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:29:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:29:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:29:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:29:58 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:29:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:29:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:29:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:29:59 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:29:59 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:29:59 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:29:59 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:29:59 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:29:59 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:29:59 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:29:59 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:29:59 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:29:59 | INFO     | core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-08 00:30:01 | INFO     | core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-08 00:30:01 | INFO     | core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-08 00:30:41 | INFO     | core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.18秒
+2025-09-08 00:30:41 | INFO     | core.task_runners:run:629 - 开始执行自定义任务: 自定义任务
+2025-09-08 00:30:41 | ERROR    | core.task_runners:run:688 - 自定义任务失败: 自定义任务, 错误: 自定义任务缺少动作序列
+2025-09-08 00:30:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:30:41 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:30:41 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:30:41 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:30:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:30:41 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:30:41 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:30:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:30:41 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:30:41 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:30:41 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:30:41 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:30:41 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:30:41 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:13 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:13 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:13 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:13 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:13 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:13 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:13 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:32:13 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:13 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:32:13 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:13 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:32:13 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:13 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:13 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:32:13 | INFO     | core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-08 00:32:15 | INFO     | core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-08 00:32:15 | INFO     | core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-08 00:32:55 | INFO     | core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.18秒
+2025-09-08 00:32:55 | INFO     | core.task_runners:run:629 - 开始执行自定义任务: 自定义任务
+2025-09-08 00:32:55 | WARNING  | core.task_runners:run:658 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-08 00:32:56 | WARNING  | core.task_runners:run:658 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-08 00:32:57 | INFO     | core.task_runners:run:673 - 自定义任务完成: 自定义任务, 耗时: 2.14秒
+2025-09-08 00:32:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:57 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:57 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:57 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:57 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:57 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:57 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:57 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:57 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:32:57 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:32:57 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:32:57 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:33:49 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:33:49 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:33:49 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:33:49 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:33:49 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:33:49 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:33:49 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:33:49 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:33:49 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:33:49 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:33:49 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:33:49 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:33:49 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:33:49 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 00:33:49 | INFO     | core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-08 00:33:51 | INFO     | core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.00秒
+2025-09-08 00:33:51 | INFO     | core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-08 00:34:31 | INFO     | core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.16秒
+2025-09-08 00:34:31 | INFO     | core.task_runners:run:629 - 开始执行自定义任务: 自定义任务
+2025-09-08 00:34:31 | WARNING  | core.task_runners:run:658 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-08 00:34:33 | WARNING  | core.task_runners:run:658 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-08 00:34:34 | INFO     | core.task_runners:run:673 - 自定义任务完成: 自定义任务, 耗时: 2.13秒
+2025-09-08 00:34:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:34:34 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:34:34 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:34:34 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:34:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:34:34 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:34:34 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:34:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:34:34 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:34:34 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:34:34 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 00:34:34 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 00:34:34 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 00:34:34 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 08:16:31 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-08 08:16:31 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-08 08:16:31 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-08 08:16:31 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-08 08:16:58 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-08 08:16:58 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-08 08:16:58 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-08 08:16:58 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-08 08:17:43 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-08 08:17:43 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-08 08:17:43 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-08 08:17:43 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-08 08:18:27 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-08 08:18:27 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-08 08:18:27 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-08 08:18:27 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-08 08:18:48 | INFO     | __main__:main:71 - 应用程序启动
+2025-09-08 08:18:48 | INFO     | src.core.service_locator:initialize_services:115 - 开始初始化服务容器
+2025-09-08 08:18:48 | INFO     | src.core.service_locator:initialize_services:130 - 服务容器初始化完成
+2025-09-08 08:18:48 | INFO     | __main__:main:84 - 依赖注入容器初始化完成
+2025-09-08 09:53:37 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:37 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 200)
+2025-09-08 09:53:37 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:38 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-08 09:53:38 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:38 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-08 09:53:38 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:39 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 09:53:39 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 09:53:40 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 09:53:40 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:40 | INFO     | core.game_operator:swipe:316 - 滑动操作成功: (100, 100) -> (200, 200)
+2025-09-08 09:53:40 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:40 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-08 09:53:40 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:40 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 09:53:41 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-08 09:53:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:41 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: ui_element_appear
+2025-09-08 09:53:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:42 | WARNING  | core.game_operator:wait_for_condition:448 - 等待条件超时: ui_element_appear
+2025-09-08 09:53:42 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:43 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 09:53:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:43 | ERROR    | core.game_operator:_perform_click:518 - 执行点击失败: Failed
+2025-09-08 09:53:43 | WARNING  | core.game_operator:click:251 - 点击操作失败: (100, 100)
+2025-09-08 09:53:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:53:43 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: custom
+2025-09-08 09:54:14 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:14 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 09:54:14 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:14 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:14 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:14 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:14 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:14 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 09:54:14 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:14 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 09:54:14 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:14 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 09:54:14 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:14 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:14 | INFO     | core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-08 09:54:14 | INFO     | core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-08 09:54:16 | INFO     | core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-08 09:54:16 | INFO     | core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-08 09:54:56 | INFO     | core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.16秒
+2025-09-08 09:54:56 | INFO     | core.task_runners:run:629 - 开始执行自定义任务: 自定义任务
+2025-09-08 09:54:56 | WARNING  | core.task_runners:run:658 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-08 09:54:57 | WARNING  | core.task_runners:run:658 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-08 09:54:58 | INFO     | core.task_runners:run:673 - 自定义任务完成: 自定义任务, 耗时: 2.14秒
+2025-09-08 09:54:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:58 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:58 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:58 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:58 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 09:54:58 | INFO     | core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-08 09:54:58 | INFO     | core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-08 09:54:58 | INFO     | core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-08 10:31:41 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:41 | WARNING  | core.game_operator:_adjust_coordinates_to_screen:549 - 坐标调整失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:41 | WARNING  | core.game_operator:_smooth_move_to_position:597 - 鼠标移动失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:42 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 200)
+2025-09-08 10:31:42 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:42 | WARNING  | core.game_operator:_adjust_coordinates_to_screen:549 - 坐标调整失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:42 | WARNING  | core.game_operator:_smooth_move_to_position:597 - 鼠标移动失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:43 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-08 10:31:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:43 | WARNING  | core.game_operator:_adjust_coordinates_to_screen:549 - 坐标调整失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:43 | WARNING  | core.game_operator:_smooth_move_to_position:597 - 鼠标移动失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:43 | INFO     | core.game_operator:click:249 - 点击操作成功: (150, 125)
+2025-09-08 10:31:43 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:43 | WARNING  | core.game_operator:_adjust_coordinates_to_screen:549 - 坐标调整失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:43 | WARNING  | core.game_operator:_smooth_move_to_position:597 - 鼠标移动失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:44 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 10:31:44 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:44 | INFO     | core.game_operator:swipe:316 - 滑动操作成功: (100, 100) -> (200, 200)
+2025-09-08 10:31:44 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:44 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-08 10:31:44 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:44 | WARNING  | core.game_operator:_adjust_coordinates_to_screen:549 - 坐标调整失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:44 | WARNING  | core.game_operator:_smooth_move_to_position:597 - 鼠标移动失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:45 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 10:31:45 | INFO     | core.game_operator:input_text:383 - 文本输入成功: Hello World...
+2025-09-08 10:31:45 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:46 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: ui_element_appear
+2025-09-08 10:31:46 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:47 | WARNING  | core.game_operator:wait_for_condition:448 - 等待条件超时: ui_element_appear
+2025-09-08 10:31:47 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:47 | WARNING  | core.game_operator:_adjust_coordinates_to_screen:549 - 坐标调整失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:47 | WARNING  | core.game_operator:_smooth_move_to_position:597 - 鼠标移动失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:47 | INFO     | core.game_operator:click:249 - 点击操作成功: (100, 100)
+2025-09-08 10:31:47 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:47 | WARNING  | core.game_operator:_adjust_coordinates_to_screen:549 - 坐标调整失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:47 | WARNING  | core.game_operator:_smooth_move_to_position:597 - 鼠标移动失败: not enough values to unpack (expected 2, got 0)
+2025-09-08 10:31:47 | ERROR    | core.game_operator:_perform_pyautogui_click:641 - PyAutoGUI点击失败: Failed
+2025-09-08 10:31:47 | WARNING  | core.game_operator:click:251 - 点击操作失败: (100, 100)
+2025-09-08 10:31:47 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:47 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:47 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:47 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:47 | INFO     | core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 10:31:48 | INFO     | core.game_operator:wait_for_condition:446 - 等待条件满足: custom
+2025-09-08 18:20:15 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 18:21:31 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 18:22:50 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 18:23:40 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 18:24:02 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 18:24:29 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-08 18:24:49 | INFO     | src.core.game_operator:__init__:181 - GameOperator初始化完成
+2025-09-09 21:30:35 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:35 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:36 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 200)
+2025-09-09 21:30:36 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:36 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:37 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-09 21:30:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:38 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-09 21:30:38 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:38 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:39 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-09 21:30:39 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:39 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:39 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-09 21:30:39 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 1
+2025-09-09 21:30:39 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-09 21:30:39 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 2
+2025-09-09 21:30:40 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-09 21:30:40 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 3
+2025-09-09 21:30:40 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-09 21:30:40 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 4
+2025-09-09 21:30:40 | WARNING  | src.core.game_operator:swipe:347 - 滑动操作失败: (100, 100) -> (200, 200)
+2025-09-09 21:30:40 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:41 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-09 21:30:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:42 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-09 21:30:43 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-09 21:30:43 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:43 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:44 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: ui_element_appear
+2025-09-09 21:30:44 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:44 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:45 | WARNING  | src.core.game_operator:wait_for_condition:514 - 等待条件超时: ui_element_appear
+2025-09-09 21:30:45 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:45 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:45 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-09 21:30:45 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:45 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-09 21:30:46 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:30:46 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:30:47 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: custom
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:15 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:31:15 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-09 21:31:17 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-09 21:31:17 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-09 21:31:57 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.16秒
+2025-09-09 21:31:57 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-09 21:31:57 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-09 21:31:58 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-09 21:31:59 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.14秒
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:31:59 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:52 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:33:53 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:33:53 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:33:53 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-09 21:33:53 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-09 21:33:55 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-09 21:33:55 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-09 21:34:35 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.16秒
+2025-09-09 21:34:35 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-09 21:34:35 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-09 21:34:36 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-09 21:34:37 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.14秒
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-09 21:34:37 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:10 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:10 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-09 21:37:12 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.00秒
+2025-09-09 21:37:12 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:37:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:37:41 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-09 21:37:43 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.00秒
+2025-09-09 21:37:43 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-09 21:38:23 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.16秒
+2025-09-09 21:38:23 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-09 21:38:23 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-09 21:38:24 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-09 21:38:25 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.13秒
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.enhanced_task_executor:register_task_runner:302 - 注册任务运行器: daily_mission
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.enhanced_task_executor:__init__:287 - 增强任务执行引擎初始化完成
+2025-09-09 21:38:25 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:43:23 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:43:23 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-09 21:43:25 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-09 21:43:25 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-09 21:44:05 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.17秒
+2025-09-09 21:44:05 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-09 21:44:05 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-09 21:44:06 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-09 21:44:07 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.12秒
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.enhanced_task_executor:register_task_runner:335 - 注册任务运行器: daily_mission
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.error_handler:__init__:408 - 错误处理器初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.enhanced_task_executor:__init__:320 - 增强任务执行引擎初始化完成
+2025-09-09 21:44:07 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:48:11 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:11 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:12 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 200)
+2025-09-10 07:48:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:13 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 07:48:13 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:13 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:14 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 07:48:14 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:14 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:15 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:48:15 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:15 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:15 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 1
+2025-09-10 07:48:15 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:15 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 2
+2025-09-10 07:48:16 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:16 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 3
+2025-09-10 07:48:16 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:16 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 4
+2025-09-10 07:48:16 | WARNING  | src.core.game_operator:swipe:347 - 滑动操作失败: (100, 100) -> (200, 200)
+2025-09-10 07:48:16 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:16 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:17 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 07:48:17 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:17 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:18 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:48:19 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 07:48:19 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:19 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:20 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: ui_element_appear
+2025-09-10 07:48:20 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:20 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:21 | WARNING  | src.core.game_operator:wait_for_condition:514 - 等待条件超时: ui_element_appear
+2025-09-10 07:48:21 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:21 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:48:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:48:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:23 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: custom
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:55 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:48:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:48:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:48:56 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:48:56 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-10 07:48:58 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-10 07:48:58 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-10 07:49:38 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.15秒
+2025-09-10 07:49:38 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-10 07:49:38 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-10 07:49:39 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-10 07:49:40 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.13秒
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:42 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:43 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:49:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:49:49 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:14 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:14 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:15 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 200)
+2025-09-10 07:56:15 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:15 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:16 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 07:56:16 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:16 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:16 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 07:56:16 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:16 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:17 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:56:17 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:17 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:17 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:17 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 1
+2025-09-10 07:56:18 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:18 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 2
+2025-09-10 07:56:18 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:18 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 3
+2025-09-10 07:56:19 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:19 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 4
+2025-09-10 07:56:19 | WARNING  | src.core.game_operator:swipe:347 - 滑动操作失败: (100, 100) -> (200, 200)
+2025-09-10 07:56:19 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:19 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:20 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 07:56:20 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:20 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:20 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:56:22 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 07:56:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:22 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: ui_element_appear
+2025-09-10 07:56:22 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:22 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:23 | WARNING  | src.core.game_operator:wait_for_condition:514 - 等待条件超时: ui_element_appear
+2025-09-10 07:56:23 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:23 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:24 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:56:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 07:56:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:25 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: custom
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:56:57 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:56:57 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-10 07:56:59 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-10 07:56:59 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-10 07:57:39 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.19秒
+2025-09-10 07:57:39 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-10 07:57:39 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-10 07:57:40 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-10 07:57:41 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.12秒
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:41 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:42 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:43 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:44 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:44 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:44 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 07:57:44 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:44 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:44 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:44 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 07:57:50 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:00:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:00:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:00:58 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 200)
+2025-09-10 08:00:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:00:58 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:00:58 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 08:00:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:00:58 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:00:59 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 08:00:59 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:00:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:00 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:01:00 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:00 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:00 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:00 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 1
+2025-09-10 08:01:01 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:01 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 2
+2025-09-10 08:01:01 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:01 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 3
+2025-09-10 08:01:02 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:02 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 4
+2025-09-10 08:01:02 | WARNING  | src.core.game_operator:swipe:347 - 滑动操作失败: (100, 100) -> (200, 200)
+2025-09-10 08:01:02 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:02 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:02 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 08:01:02 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:02 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:03 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:01:04 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 08:01:04 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:04 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:05 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: ui_element_appear
+2025-09-10 08:01:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:05 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:06 | WARNING  | src.core.game_operator:wait_for_condition:514 - 等待条件超时: ui_element_appear
+2025-09-10 08:01:06 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:06 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:07 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:01:07 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:07 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:01:08 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:08 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: custom
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:01:40 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:01:40 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-10 08:01:42 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-10 08:01:42 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-10 08:02:22 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.20秒
+2025-09-10 08:02:22 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-10 08:02:22 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-10 08:02:23 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-10 08:02:24 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.12秒
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:24 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:25 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:26 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:27 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:27 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:27 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:02:27 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:27 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:27 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:27 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:02:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:28 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:28 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:29 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 200)
+2025-09-10 08:06:29 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:29 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:29 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 08:06:30 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:30 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:30 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (150, 125)
+2025-09-10 08:06:30 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:30 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:31 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:06:31 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:31 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:31 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:31 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 1
+2025-09-10 08:06:32 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:32 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 2
+2025-09-10 08:06:32 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:32 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 3
+2025-09-10 08:06:33 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:33 | WARNING  | src.core.game_operator:_execute_swipe_with_retry:931 - 滑动执行失败，尝试 4
+2025-09-10 08:06:33 | WARNING  | src.core.game_operator:swipe:347 - 滑动操作失败: (100, 100) -> (200, 200)
+2025-09-10 08:06:33 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:33 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:33 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 08:06:33 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:33 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:34 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:06:36 | INFO     | src.core.game_operator:input_text:431 - 文本输入成功: Hello World...
+2025-09-10 08:06:36 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:36 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:36 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: ui_element_appear
+2025-09-10 08:06:36 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:36 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:37 | WARNING  | src.core.game_operator:wait_for_condition:514 - 等待条件超时: ui_element_appear
+2025-09-10 08:06:37 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:37 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:38 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:06:38 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:38 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.game_operator:click:255 - 点击操作成功: (100, 100)
+2025-09-10 08:06:39 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:06:39 | INFO     | src.core.game_operator:wait_for_condition:512 - 等待条件满足: custom
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:12 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:12 | INFO     | src.core.task_runners:run:38 - 开始执行日常任务: 日常登录任务
+2025-09-10 08:07:14 | INFO     | src.core.task_runners:run:77 - 日常任务完成: 日常登录任务, 耗时: 2.01秒
+2025-09-10 08:07:14 | INFO     | src.core.task_runners:run:320 - 开始执行资源采集: 资源采集任务
+2025-09-10 08:07:54 | INFO     | src.core.task_runners:run:341 - 资源采集完成: 资源采集任务, 耗时: 40.17秒
+2025-09-10 08:07:54 | INFO     | src.core.task_runners:run:832 - 开始执行自定义任务: 自定义任务
+2025-09-10 08:07:54 | WARNING  | src.core.task_runners:run:861 - 自定义动作 1 执行失败: object Mock can't be used in 'await' expression
+2025-09-10 08:07:55 | WARNING  | src.core.task_runners:run:861 - 自定义动作 2 执行失败: OperationResult.__init__() got an unexpected keyword argument 'data'
+2025-09-10 08:07:56 | INFO     | src.core.task_runners:run:876 - 自定义任务完成: 自定义任务, 耗时: 2.13秒
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.enhanced_task_executor:register_task_runner:301 - 注册任务运行器: daily_mission
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.enhanced_task_executor:__init__:286 - 增强任务执行引擎初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.task_game_integration:__init__:404 - 游戏任务集成管理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:56 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:57 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:58 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:59 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:59 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:59 | INFO     | src.core.game_operator:__init__:186 - GameOperator初始化完成
+2025-09-10 08:07:59 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:59 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:59 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:07:59 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成
+2025-09-10 08:08:05 | INFO     | src.core.error_handler:__init__:544 - 错误处理器初始化完成

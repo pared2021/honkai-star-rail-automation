@@ -116,8 +116,8 @@ def initialize_services() -> None:
     
     try:
         # 导入并注册核心服务
-        from src.core.config_manager import ConfigManager
-        from src.database.db_manager import DatabaseManager
+        from .config_manager import ConfigManager
+from ..database.db_manager import DatabaseManager
         
         # 注册配置管理器
         config_manager = ConfigManager()

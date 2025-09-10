@@ -1,4 +1,1 @@
-"""核心功能模块..
-
-包含游戏检测、同步适配和任务管理等核心功能组件。
-"""
+# core package initialization

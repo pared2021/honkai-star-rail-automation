@@ -1,1 +1,1 @@
-"""接口定义模块."""
+# interfaces package initialization

@@ -18,6 +18,7 @@ try:
     import win32con
     import win32gui
     import win32ui
+    import win32process
     import psutil
     from PIL import Image
     from ctypes import windll
@@ -25,9 +26,17 @@ except ImportError:
     win32gui = None
     win32con = None
     win32ui = None
+    win32process = None
     psutil = None
     Image = None
     windll = None
+
+try:
+    import pytesseract
+    from PIL import Image as PILImage
+except ImportError:
+    pytesseract = None
+    PILImage = None
 
 from src.config.config_manager import ConfigManager
 from src.interfaces.automation_interface import IGameDetector
@@ -56,6 +65,35 @@ class GameWindow:
     width: int
     height: int
     is_foreground: bool
+    process_info: Optional[Dict] = None
+    class_name: Optional[str] = None
+    last_updated: float = 0.0
+    
+    def __post_init__(self):
+        """初始化后处理."""
+        if self.last_updated == 0.0:
+            self.last_updated = time.time()
+    
+    @property
+    def center(self) -> Tuple[int, int]:
+        """获取窗口中心点坐标."""
+        x, y, right, bottom = self.rect
+        return ((x + right) // 2, (y + bottom) // 2)
+    
+    @property
+    def client_rect(self) -> Tuple[int, int, int, int]:
+        """获取客户区矩形."""
+        # 这里可以根据需要计算客户区域（去除标题栏等）
+        return self.rect
+    
+    def is_valid(self) -> bool:
+        """检查窗口是否有效."""
+        try:
+            if win32gui:
+                return win32gui.IsWindow(self.hwnd) and win32gui.IsWindowVisible(self.hwnd)
+            return False
+        except Exception:
+            return False
 
 
 @dataclass
@@ -128,6 +166,32 @@ class TemplateMatcher:
     def __init__(self):
         """初始化模板匹配器."""
         self.template_info_cache: Dict[str, TemplateInfo] = {}
+        self.scale_factors: List[float] = [0.8, 0.9, 1.0, 1.1, 1.2]  # 多尺度匹配
+        # 匹配方法 - 处理cv2为None的情况
+        if cv2 is not None:
+            self.match_methods: List[int] = [cv2.TM_CCOEFF_NORMED, cv2.TM_CCORR_NORMED]
+        else:
+            self.match_methods: List[int] = []
+        self.logger = logging.getLogger(__name__)
+        self.enable_multi_scale: bool = True
+        self.enable_pyramid_matching: bool = True  # 启用金字塔匹配
+        self.enable_rotation_matching: bool = False
+        self.rotation_angles: List[float] = [-5, 0, 5]  # 旋转角度
+        self.pyramid_levels: int = 3  # 金字塔层数
+        self.enable_ocr: bool = True
+        self.ocr_config: str = '--psm 8 -c tessedit_char_whitelist=0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+        # 性能优化配置
+        self.max_scale_factors: int = 12  # 最大缩放因子数量
+        self.early_exit_threshold: float = 0.95  # 早期退出阈值
+        self.high_confidence_threshold: float = 0.98  # 高置信度阈值
+        # 初始化OCR检测器
+        try:
+            from .ocr_detector import OCRDetector
+            self.ocr_detector = OCRDetector()
+        except ImportError:
+            self.ocr_detector = None
+            self.enable_ocr = False
+            self.logger.warning("OCR检测器导入失败，OCR功能已禁用")
 
     def load_template(
         self, template_path: str, threshold: float = 0.8
@@ -287,31 +351,34 @@ class TemplateMatcher:
                 self.logger.error(f"Failed to load template: {template_path}")
                 return None
             
-            # 执行模板匹配
-            result = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            # 多尺度和多方法匹配
+            best_result = None
+            best_confidence = 0
             
-            if max_val >= threshold:
-                # 计算匹配区域
-                template_h, template_w = template.shape[:2]
-                top_left = max_loc
-                bottom_right = (top_left[0] + template_w, top_left[1] + template_h)
-                center = (top_left[0] + template_w // 2, top_left[1] + template_h // 2)
-                
-                match_result = {
-                    'found': True,
-                    'confidence': float(max_val),
-                    'center': center,
-                    'top_left': top_left,
-                    'bottom_right': bottom_right,
-                    'width': template_w,
-                    'height': template_h
-                }
-                
-                self.logger.info(f"Template found: {template_path}, confidence: {max_val:.3f}, center: {center}")
-                return match_result
+            if self.enable_multi_scale:
+                for scale in self.scale_factors:
+                    scaled_template = self._scale_template(template, scale)
+                    if scaled_template is None:
+                        continue
+                    
+                    for method in self.match_methods:
+                        result = self._match_with_method(screenshot, scaled_template, method, threshold, scale)
+                        if result and result['confidence'] > best_confidence:
+                            best_confidence = result['confidence']
+                            best_result = result
             else:
-                self.logger.debug(f"Template not found: {template_path}, max confidence: {max_val:.3f}")
+                # 单尺度匹配
+                for method in self.match_methods:
+                    result = self._match_with_method(screenshot, template, method, threshold, 1.0)
+                    if result and result['confidence'] > best_confidence:
+                        best_confidence = result['confidence']
+                        best_result = result
+            
+            if best_result:
+                self.logger.info(f"Template found: {template_path}, confidence: {best_confidence:.3f}, center: {best_result['center']}")
+                return best_result
+            else:
+                self.logger.debug(f"Template not found: {template_path}, max confidence: {best_confidence:.3f}")
                 return None
                 
         except Exception as e:
@@ -354,44 +421,169 @@ class TemplateMatcher:
         template = template_info.image
         threshold = template_info.threshold
 
-        # 执行模板匹配
-        result = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
-        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+        best_element = None
+        best_confidence = 0
 
-        if max_val >= threshold:
-            h, w = template.shape[:2]
-            element = UIElement(
-                name=template_name,
-                position=(max_loc[0], max_loc[1]),
-                size=(w, h),
-                confidence=max_val,
-                template_path=template_info.path,
-            )
-            return element
+        # 优先尝试金字塔匹配（更高效）
+        if self.enable_pyramid_matching and cv2 is not None:
+            pyramid_result = self._pyramid_match_template(screenshot, template, threshold)
+            if pyramid_result and pyramid_result.confidence >= threshold:
+                pyramid_result.name = template_name
+                pyramid_result.template_path = template_info.path
+                return pyramid_result
 
-        return None
+        # 智能多尺度匹配
+        if self.enable_multi_scale:
+            # 计算智能缩放因子
+            screenshot_size = screenshot.shape[:2]  # (height, width)
+            template_size = template.shape[:2]  # (height, width)
+            scale_factors = self._calculate_scale_factors(screenshot_size, template_size)
+            
+            # 按接近1.0的顺序排序，优先尝试原始尺寸附近的缩放
+            scale_factors.sort(key=lambda x: abs(x - 1.0))
+            
+            for scale in scale_factors:
+                scaled_template = self._scale_template(template, scale)
+                if scaled_template is None:
+                    continue
+                
+                # 早期退出优化：如果已经找到高置信度匹配，跳过后续尺度
+                if best_confidence > self.early_exit_threshold:
+                    break
+                
+                for method in self.match_methods:
+                    result = cv2.matchTemplate(screenshot, scaled_template, method)
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                    
+                    # 根据匹配方法调整置信度
+                    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+                        confidence = 1.0 - min_val if method == cv2.TM_SQDIFF_NORMED else 1.0 / (1.0 + min_val)
+                        best_loc = min_loc
+                    else:
+                        confidence = max_val
+                        best_loc = max_loc
+                    
+                    # 添加尺度权重：接近1.0的尺度获得轻微加成
+                    scale_weight = 1.0 + (0.05 * (1.0 - abs(scale - 1.0)))
+                    weighted_confidence = confidence * scale_weight
+                    
+                    if confidence >= threshold and weighted_confidence > best_confidence:
+                        if len(scaled_template.shape) >= 2:
+                            h, w = scaled_template.shape[:2]
+                        else:
+                            continue
+                        # 调整坐标以适应缩放
+                        adjusted_x = int(best_loc[0] / scale) if scale != 1.0 else best_loc[0]
+                        adjusted_y = int(best_loc[1] / scale) if scale != 1.0 else best_loc[1]
+                        adjusted_w = int(w / scale) if scale != 1.0 else w
+                        adjusted_h = int(h / scale) if scale != 1.0 else h
+                        
+                        best_element = UIElement(
+                            name=template_name,
+                            position=(adjusted_x, adjusted_y),
+                            size=(adjusted_w, adjusted_h),
+                            confidence=confidence,  # 使用原始置信度
+                            template_path=template_info.path,
+                        )
+                        best_confidence = weighted_confidence
+                        
+                        # 早期退出：如果找到非常高的置信度匹配
+                        if confidence > 0.98:
+                            break
+        else:
+            # 单尺度匹配
+            for method in self.match_methods:
+                result = cv2.matchTemplate(screenshot, template, method)
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                
+                # 根据匹配方法调整置信度
+                if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+                    confidence = 1.0 - min_val if method == cv2.TM_SQDIFF_NORMED else 1.0 / (1.0 + min_val)
+                    best_loc = min_loc
+                else:
+                    confidence = max_val
+                    best_loc = max_loc
+                
+                if confidence >= threshold and confidence > best_confidence:
+                    if len(template.shape) >= 2:
+                        h, w = template.shape[:2]
+                    else:
+                        continue
+                    best_element = UIElement(
+                        name=template_name,
+                        position=(best_loc[0], best_loc[1]),
+                        size=(w, h),
+                        confidence=confidence,
+                        template_path=template_info.path,
+                    )
+                    best_confidence = confidence
+
+        return best_element
 
     def _calculate_scale_factors(
         self, screenshot_size: tuple, template_size: tuple
     ) -> List[float]:
-        """计算缩放因子.
+        """智能计算缩放因子.
 
         Args:
             screenshot_size: 截图尺寸 (height, width)
             template_size: 模板尺寸 (height, width)
 
         Returns:
-            List[float]: 缩放因子列表
+            List[float]: 优化的缩放因子列表
         """
         # 基础缩放因子
         factors = [1.0]  # 原始尺寸
-
-        # 添加一些常用的缩放因子
-        for scale in [0.5, 0.75, 1.25, 1.5, 2.0]:
-            if 0.1 <= scale <= 5.0:  # 合理的缩放范围
+        
+        # 计算屏幕与模板的尺寸比例
+        screen_h, screen_w = screenshot_size
+        template_h, template_w = template_size
+        
+        # 计算宽高比例
+        width_ratio = screen_w / template_w
+        height_ratio = screen_h / template_h
+        
+        # 基于屏幕分辨率智能选择缩放因子
+        if screen_w >= 1920:  # 高分辨率屏幕
+            base_scales = [0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.5]
+        elif screen_w >= 1280:  # 中等分辨率
+            base_scales = [0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.4]
+        else:  # 低分辨率
+            base_scales = [0.7, 0.8, 0.9, 1.0, 1.1, 1.2]
+        
+        # 添加基于比例的智能缩放因子
+        for scale in base_scales:
+            # 确保缩放后的模板不会太大或太小
+            scaled_w = template_w * scale
+            scaled_h = template_h * scale
+            
+            if (10 <= scaled_w <= screen_w * 0.8 and 
+                10 <= scaled_h <= screen_h * 0.8):
                 factors.append(scale)
-
-        return sorted(set(factors))  # 去重并排序
+        
+        # 添加基于屏幕比例的特殊缩放因子
+        adaptive_scales = [
+            min(width_ratio, height_ratio) * 0.8,
+            min(width_ratio, height_ratio) * 0.9,
+            min(width_ratio, height_ratio) * 1.1,
+            min(width_ratio, height_ratio) * 1.2
+        ]
+        
+        for scale in adaptive_scales:
+            if 0.3 <= scale <= 3.0:
+                factors.append(scale)
+        
+        # 去重、排序并限制数量以提高性能
+        factors = sorted(set(factors))
+        
+        # 限制最大缩放因子数量，优先保留接近1.0的值
+        if len(factors) > self.max_scale_factors:
+            # 按与1.0的距离排序，保留最接近的值
+            factors.sort(key=lambda x: abs(x - 1.0))
+            factors = factors[:self.max_scale_factors]
+            factors.sort()
+        
+        return factors
 
     def _scale_template(self, template: Any, scale_factor: float) -> Optional[Any]:
         """缩放模板图像.
@@ -418,6 +610,160 @@ class TemplateMatcher:
             return scaled_template
         except Exception:
             return None
+    
+    def _pyramid_match_template(self, screenshot: Any, template: Any, threshold: float) -> Optional[UIElement]:
+        """使用图像金字塔进行高效多尺度模板匹配.
+        
+        Args:
+            screenshot: 截图图像
+            template: 模板图像
+            threshold: 匹配阈值
+            
+        Returns:
+            匹配到的UI元素或None
+        """
+        if cv2 is None:
+            return None
+            
+        try:
+            # 构建图像金字塔
+            screenshot_pyramid = self._build_pyramid(screenshot, levels=self.pyramid_levels)
+            template_pyramid = self._build_pyramid(template, levels=self.pyramid_levels)
+            
+            best_element = None
+            best_confidence = 0
+            
+            # 从最小尺度开始匹配
+            max_levels = min(len(screenshot_pyramid), len(template_pyramid))
+            for level in range(max_levels):
+                scale_factor = 2 ** level
+                
+                for method in self.match_methods:
+                    result = cv2.matchTemplate(screenshot_pyramid[level], template_pyramid[level], method)
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+                    
+                    # 根据匹配方法调整置信度
+                    if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+                        confidence = 1.0 - min_val if method == cv2.TM_SQDIFF_NORMED else 1.0 / (1.0 + min_val)
+                        best_loc = min_loc
+                    else:
+                        confidence = max_val
+                        best_loc = max_loc
+                    
+                    if confidence >= threshold and confidence > best_confidence:
+                        # 将坐标转换回原始尺度
+                        original_x = best_loc[0] * scale_factor
+                        original_y = best_loc[1] * scale_factor
+                        if len(template.shape) >= 2:
+                            template_h, template_w = template.shape[:2]
+                        else:
+                            continue
+                        
+                        best_element = UIElement(
+                            name="pyramid_match",
+                            position=(original_x, original_y),
+                            size=(template_w, template_h),
+                            confidence=confidence,
+                            template_path="",
+                        )
+                        best_confidence = confidence
+                        
+                        # 如果在较小尺度找到高置信度匹配，可以提前退出
+                        if confidence > self.high_confidence_threshold and level > 0:
+                            return best_element
+            
+            return best_element
+            
+        except Exception as e:
+            self.logger.error(f"金字塔匹配错误: {e}")
+            return None
+    
+    def _build_pyramid(self, image: Any, levels: int = 3) -> List[Any]:
+        """构建图像金字塔.
+        
+        Args:
+            image: 输入图像
+            levels: 金字塔层数
+            
+        Returns:
+            图像金字塔列表
+        """
+        pyramid = [image]
+        current = image
+        
+        for i in range(levels - 1):
+            # 每层缩小一半
+            if len(current.shape) >= 2:
+                height, width = current.shape[:2]
+                if height < 32 or width < 32:  # 避免图像过小
+                    break
+                current = cv2.pyrDown(current)
+                pyramid.append(current)
+            else:
+                break
+        
+        return pyramid
+    
+    def _match_with_method(self, screenshot: Any, template: Any, method: int, threshold: float, scale: float = 1.0) -> Optional[Dict[str, Any]]:
+        """使用指定方法进行模板匹配.
+        
+        Args:
+            screenshot: 截图图像
+            template: 模板图像
+            method: 匹配方法
+            threshold: 匹配阈值
+            scale: 缩放因子
+            
+        Returns:
+            匹配结果字典或None
+        """
+        try:
+            # 执行模板匹配
+            result = cv2.matchTemplate(screenshot, template, method)
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+            
+            # 根据匹配方法调整阈值判断
+            if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+                # 对于SQDIFF方法，值越小越好
+                confidence = 1.0 - min_val if method == cv2.TM_SQDIFF_NORMED else 1.0 / (1.0 + min_val)
+                best_loc = min_loc
+            else:
+                # 对于其他方法，值越大越好
+                confidence = max_val
+                best_loc = max_loc
+            
+            if confidence >= threshold:
+                # 计算匹配区域
+                template_h, template_w = template.shape[:2]
+                top_left = best_loc
+                bottom_right = (top_left[0] + template_w, top_left[1] + template_h)
+                center = (top_left[0] + template_w // 2, top_left[1] + template_h // 2)
+                
+                # 如果使用了缩放，需要调整坐标
+                if scale != 1.0:
+                    center = (int(center[0] / scale), int(center[1] / scale))
+                    top_left = (int(top_left[0] / scale), int(top_left[1] / scale))
+                    bottom_right = (int(bottom_right[0] / scale), int(bottom_right[1] / scale))
+                    template_w = int(template_w / scale)
+                    template_h = int(template_h / scale)
+                
+                return {
+                    'found': True,
+                    'confidence': float(confidence),
+                    'center': center,
+                    'top_left': top_left,
+                    'bottom_right': bottom_right,
+                    'width': template_w,
+                    'height': template_h,
+                    'scale': scale,
+                    'method': method
+                }
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error in template matching with method {method}: {e}")
+            return None
 
     def match_multiple_templates(
         self, screenshot: Any, template_names: List[str]
@@ -437,6 +783,57 @@ class TemplateMatcher:
             if element is not None:
                 all_elements.append(element)
         return all_elements
+    
+    def recognize_text(self, screenshot_data: bytes, region: Optional[Tuple[int, int, int, int]] = None) -> Optional[str]:
+        """使用OCR识别文本.
+        
+        Args:
+            screenshot_data: 截图数据
+            region: 识别区域 (x, y, width, height)
+            
+        Returns:
+            Optional[str]: 识别到的文本
+        """
+        if not self.enable_ocr or not self.ocr_detector:
+            self.logger.warning("OCR功能未启用")
+            return None
+        
+        return self.ocr_detector.recognize_text(screenshot_data=screenshot_data, region=region)
+    
+    def find_text(self, target_text: str, screenshot_data: bytes, 
+                 region: Optional[Tuple[int, int, int, int]] = None) -> Optional[Dict[str, Any]]:
+        """在屏幕中查找指定文本.
+        
+        Args:
+            target_text: 要查找的文本
+            screenshot_data: 截图数据
+            region: 搜索区域 (x, y, width, height)
+            
+        Returns:
+            Optional[Dict[str, Any]]: 找到的文本位置信息
+        """
+        if not self.enable_ocr or not self.ocr_detector:
+            self.logger.warning("OCR功能未启用")
+            return None
+        
+        return self.ocr_detector.find_text(target_text, screenshot_data, region)
+    
+    def extract_all_text(self, screenshot_data: bytes, 
+                        region: Optional[Tuple[int, int, int, int]] = None) -> List[Dict[str, Any]]:
+        """提取图像中的所有文本.
+        
+        Args:
+            screenshot_data: 截图数据
+            region: 搜索区域 (x, y, width, height)
+            
+        Returns:
+            List[Dict[str, Any]]: 所有文本信息列表
+        """
+        if not self.enable_ocr or not self.ocr_detector:
+            self.logger.warning("OCR功能未启用")
+            return []
+        
+        return self.ocr_detector.extract_all_text(screenshot_data, region)
 
 
 class WindowManager:
@@ -445,6 +842,13 @@ class WindowManager:
     def __init__(self):
         """初始化窗口管理器."""
         self.current_window: Optional[GameWindow] = None
+        self.window_cache: Dict[int, GameWindow] = {}
+        self.last_detection_time: float = 0
+        self.detection_interval: float = 1.0  # 检测间隔（秒）
+        self.logger = logging.getLogger(__name__)
+        self.window_change_callbacks: List[callable] = []
+        self.monitoring_enabled: bool = False
+        self.last_window_state: Optional[Dict] = None
 
     def find_game_window(self, game_titles: List[str]) -> Optional[GameWindow]:
         """查找游戏窗口.
@@ -455,14 +859,93 @@ class WindowManager:
         Returns:
             GameWindow: 游戏窗口信息，未找到返回None
         """
+        # 使用缓存优化性能
+        current_time = time.time()
+        if (current_time - self.last_detection_time) < self.detection_interval and self.current_window:
+            # 验证缓存的窗口是否仍然有效
+            if self._is_window_valid(self.current_window):
+                return self.current_window
+        
+        # 重新检测窗口
         windows = self.find_game_windows(game_titles)
-        return windows[0] if windows else None
+        if windows:
+            self.current_window = windows[0]
+            self.last_detection_time = current_time
+            return self.current_window
+        
+        self.current_window = None
+        return None
 
-    def find_game_windows(self, game_titles: List[str]) -> List[GameWindow]:
+    def _is_window_valid(self, window: GameWindow) -> bool:
+        """验证窗口是否仍然有效.
+        
+        Args:
+            window: 要验证的窗口
+            
+        Returns:
+            bool: 窗口是否有效
+        """
+        try:
+            # 检查窗口句柄是否仍然有效
+            if not win32gui.IsWindow(window.hwnd):
+                return False
+            
+            # 检查窗口是否可见
+            if not win32gui.IsWindowVisible(window.hwnd):
+                return False
+            
+            # 检查窗口标题是否仍然匹配
+            current_title = win32gui.GetWindowText(window.hwnd)
+            if current_title != window.title:
+                return False
+            
+            # 检查进程是否仍在运行
+            try:
+                if win32process:
+                    _, pid = win32process.GetWindowThreadProcessId(window.hwnd)
+                    if psutil and not psutil.pid_exists(pid):
+                        return False
+            except Exception:
+                return False
+            
+            return True
+        except Exception as e:
+            self.logger.warning(f"窗口验证失败: {e}")
+            return False
+
+    def get_window_process_info(self, hwnd: int) -> Optional[Dict]:
+        """获取窗口进程信息.
+        
+        Args:
+            hwnd: 窗口句柄
+            
+        Returns:
+            Dict: 进程信息字典
+        """
+        try:
+            if not win32process or not psutil:
+                return None
+                
+            _, pid = win32process.GetWindowThreadProcessId(hwnd)
+            process = psutil.Process(pid)
+            return {
+                'pid': pid,
+                'name': process.name(),
+                'exe': process.exe(),
+                'status': process.status(),
+                'memory_info': process.memory_info(),
+                'cpu_percent': process.cpu_percent()
+            }
+        except Exception as e:
+            self.logger.warning(f"获取进程信息失败: {e}")
+            return None
+
+    def find_game_windows(self, game_titles: List[str], process_names: Optional[List[str]] = None) -> List[GameWindow]:
         """查找游戏窗口列表.
 
         Args:
             game_titles: 游戏标题列表
+            process_names: 进程名列表（可选）
 
         Returns:
             List[GameWindow]: 游戏窗口列表
@@ -471,35 +954,193 @@ class WindowManager:
             return []
 
         windows = []
+        process_names = process_names or []
 
         def enum_windows_callback(hwnd, lparam):
-            if win32gui.IsWindowVisible(hwnd):
+            try:
+                # 基本窗口检查
+                if not win32gui.IsWindowVisible(hwnd):
+                    return True
+                
+                # 检查窗口大小（过滤太小的窗口）
+                rect = win32gui.GetWindowRect(hwnd)
+                width = rect[2] - rect[0]
+                height = rect[3] - rect[1]
+                if width < 100 or height < 100:
+                    return True
+                
                 window_title = win32gui.GetWindowText(hwnd)
+                
+                # 标题匹配检查
+                title_match = False
                 for game_title in game_titles:
                     if game_title.lower() in window_title.lower():
-                        rect = win32gui.GetWindowRect(hwnd)
-                        width = rect[2] - rect[0]
-                        height = rect[3] - rect[1]
-                        is_foreground = win32gui.GetForegroundWindow() == hwnd
-
-                        window = GameWindow(
-                            hwnd=hwnd,
-                            title=window_title,
-                            rect=rect,
-                            width=width,
-                            height=height,
-                            is_foreground=is_foreground,
-                        )
-                        windows.append(window)
+                        title_match = True
                         break
+                
+                # 进程名匹配检查
+                process_match = False
+                if process_names and win32process and psutil:
+                    try:
+                        _, pid = win32process.GetWindowThreadProcessId(hwnd)
+                        process = psutil.Process(pid)
+                        process_name = process.name().lower()
+                        for target_name in process_names:
+                            if target_name.lower() in process_name:
+                                process_match = True
+                                break
+                    except Exception:
+                        pass
+                
+                # 如果标题或进程名匹配，则添加窗口
+                if title_match or process_match:
+                    is_foreground = win32gui.GetForegroundWindow() == hwnd
+                    
+                    # 获取窗口类名（用于更精确的识别）
+                    class_name = win32gui.GetClassName(hwnd)
+                    
+                    window = GameWindow(
+                        hwnd=hwnd,
+                        title=window_title,
+                        rect=rect,
+                        width=width,
+                        height=height,
+                        is_foreground=is_foreground,
+                    )
+                    
+                    # 添加进程信息到窗口对象（如果可用）
+                    process_info = self.get_window_process_info(hwnd)
+                    if process_info:
+                        window.process_info = process_info
+                    
+                    windows.append(window)
+                    
+            except Exception as e:
+                self.logger.debug(f"枚举窗口时出错: {e}")
+            
             return True
 
         try:
             win32gui.EnumWindows(enum_windows_callback, None)
-        except Exception:
-            pass
+        except Exception as e:
+            self.logger.error(f"枚举窗口失败: {e}")
 
+        # 按优先级排序：前台窗口优先，然后按窗口大小排序
+        windows.sort(key=lambda w: (not w.is_foreground, -(w.width * w.height)))
+        
+        # 更新窗口缓存
+        for window in windows:
+            self.window_cache[window.hwnd] = window
+        
         return windows
+    
+    def add_window_change_callback(self, callback: callable):
+        """添加窗口变化回调函数.
+        
+        Args:
+            callback: 回调函数，接收(old_window, new_window)参数
+        """
+        if callback not in self.window_change_callbacks:
+            self.window_change_callbacks.append(callback)
+    
+    def remove_window_change_callback(self, callback: callable):
+        """移除窗口变化回调函数.
+        
+        Args:
+            callback: 要移除的回调函数
+        """
+        if callback in self.window_change_callbacks:
+            self.window_change_callbacks.remove(callback)
+    
+    def start_monitoring(self):
+        """开始窗口状态监控."""
+        self.monitoring_enabled = True
+        self.logger.info("窗口状态监控已启动")
+    
+    def stop_monitoring(self):
+        """停止窗口状态监控."""
+        self.monitoring_enabled = False
+        self.logger.info("窗口状态监控已停止")
+    
+    def update_window_state(self, window: GameWindow) -> bool:
+        """更新窗口状态.
+        
+        Args:
+            window: 要更新的窗口
+            
+        Returns:
+            bool: 窗口状态是否发生变化
+        """
+        if not window or not window.is_valid():
+            return False
+        
+        try:
+            # 获取当前窗口信息
+            current_rect = win32gui.GetWindowRect(window.hwnd) if win32gui else window.rect
+            current_title = win32gui.GetWindowText(window.hwnd) if win32gui else window.title
+            current_foreground = win32gui.GetForegroundWindow() == window.hwnd if win32gui else window.is_foreground
+            
+            # 检查是否有变化
+            changed = False
+            if current_rect != window.rect:
+                window.rect = current_rect
+                window.width = current_rect[2] - current_rect[0]
+                window.height = current_rect[3] - current_rect[1]
+                changed = True
+            
+            if current_title != window.title:
+                window.title = current_title
+                changed = True
+            
+            if current_foreground != window.is_foreground:
+                window.is_foreground = current_foreground
+                changed = True
+            
+            if changed:
+                window.last_updated = time.time()
+                self.logger.debug(f"窗口状态已更新: {window.title}")
+            
+            return changed
+            
+        except Exception as e:
+            self.logger.warning(f"更新窗口状态失败: {e}")
+            return False
+    
+    def get_window_status(self, hwnd: int) -> Optional[Dict]:
+        """获取窗口详细状态信息.
+        
+        Args:
+            hwnd: 窗口句柄
+            
+        Returns:
+            Dict: 窗口状态信息
+        """
+        try:
+            if not win32gui or not win32gui.IsWindow(hwnd):
+                return None
+            
+            status = {
+                'hwnd': hwnd,
+                'title': win32gui.GetWindowText(hwnd),
+                'class_name': win32gui.GetClassName(hwnd),
+                'rect': win32gui.GetWindowRect(hwnd),
+                'is_visible': win32gui.IsWindowVisible(hwnd),
+                'is_foreground': win32gui.GetForegroundWindow() == hwnd,
+                'is_minimized': win32gui.IsIconic(hwnd),
+                'is_maximized': win32gui.IsZoomed(hwnd),
+                'timestamp': time.time()
+            }
+            
+            # 添加进程信息
+            process_info = self.get_window_process_info(hwnd)
+            if process_info:
+                status['process'] = process_info
+            
+            return status
+            
+        except Exception as e:
+            self.logger.warning(f"获取窗口状态失败: {e}")
+            return None
 
     def capture_window(self, window: GameWindow) -> Optional[Any]:
         """截取窗口图像.
@@ -1112,6 +1753,104 @@ class GameDetector(IGameDetector):
         except Exception as e:
             self.logger.error(f"捕获屏幕截图失败: {e}")
             return None
+    
+    def recognize_text_in_region(self, region: Tuple[int, int, int, int]) -> Optional[str]:
+        """识别指定区域的文本.
+        
+        Args:
+            region: 区域坐标 (x, y, width, height)
+            
+        Returns:
+            Optional[str]: 识别到的文本，失败时返回None
+        """
+        try:
+            screenshot_data = self.capture_screen()
+            if not screenshot_data:
+                return None
+                
+            return self.template_matcher.recognize_text(screenshot_data, region)
+        except Exception as e:
+            self.logger.error(f"识别区域文本失败: {e}")
+            return None
+    
+    def find_text_in_screen(self, target_text: str, region: Optional[Tuple[int, int, int, int]] = None) -> Optional[Dict[str, Any]]:
+        """在屏幕中查找指定文本.
+        
+        Args:
+            target_text: 要查找的文本
+            region: 搜索区域 (x, y, width, height)，None表示全屏搜索
+            
+        Returns:
+            Optional[Dict[str, Any]]: 找到的文本位置信息
+        """
+        try:
+            screenshot_data = self.capture_screen()
+            if not screenshot_data:
+                return None
+                
+            return self.template_matcher.find_text(target_text, screenshot_data, region)
+        except Exception as e:
+            self.logger.error(f"查找文本失败: {e}")
+            return None
+    
+    def extract_all_text_from_screen(self, region: Optional[Tuple[int, int, int, int]] = None) -> List[Dict[str, Any]]:
+        """提取屏幕中的所有文本.
+        
+        Args:
+            region: 搜索区域 (x, y, width, height)，None表示全屏搜索
+            
+        Returns:
+            List[Dict[str, Any]]: 所有文本信息列表
+        """
+        try:
+            screenshot_data = self.capture_screen()
+            if not screenshot_data:
+                return []
+                
+            return self.template_matcher.extract_all_text(screenshot_data, region)
+        except Exception as e:
+            self.logger.error(f"提取所有文本失败: {e}")
+            return []
+    
+    def wait_for_text(self, target_text: str, timeout: float = 10.0, 
+                     region: Optional[Tuple[int, int, int, int]] = None) -> Optional[Dict[str, Any]]:
+        """等待指定文本出现.
+        
+        Args:
+            target_text: 要等待的文本
+            timeout: 超时时间（秒）
+            region: 搜索区域 (x, y, width, height)
+            
+        Returns:
+            Optional[Dict[str, Any]]: 找到的文本位置信息，超时返回None
+        """
+        import time
+        
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            result = self.find_text_in_screen(target_text, region)
+            if result and result.get('found', False):
+                return result
+            time.sleep(0.1)
+        
+        return None
+    
+    def is_text_present(self, target_text: str, region: Optional[Tuple[int, int, int, int]] = None) -> bool:
+        """检查指定文本是否存在.
+        
+        Args:
+            target_text: 要检查的文本
+            region: 搜索区域 (x, y, width, height)
+            
+        Returns:
+            bool: 文本是否存在
+        """
+        try:
+            result = self.find_text_in_screen(target_text, region)
+            return result is not None and result.get('found', False)
+        except Exception as e:
+            self.logger.error(f"检查文本存在性失败: {e}")
+            return False
     
     def find_template(self, template_name: str, threshold: float = 0.8) -> Optional[Dict[str, Any]]:
         """查找模板匹配.

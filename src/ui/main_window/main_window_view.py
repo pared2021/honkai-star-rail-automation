@@ -3,8 +3,8 @@
 实现主窗口界面的视图组件。
 """
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtWidgets import (
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import (
     QMainWindow,
     QWidget,
     QVBoxLayout,
@@ -15,12 +15,13 @@ from PyQt6.QtWidgets import (
     QTextEdit,
     QStatusBar,
     QMenuBar,
-    QToolBar
+    QToolBar,
+    QAction
 )
-from PyQt6.QtGui import QAction, QIcon
+from PyQt5.QtGui import QIcon
 
 
-class MainWindowView(QMainWindow):
+class MainWindowView:
     """主窗口视图类.
     
     提供应用程序的主界面布局和基本组件。
@@ -28,24 +29,37 @@ class MainWindowView(QMainWindow):
     
     def __init__(self):
         """初始化主窗口视图."""
-        super().__init__()
-        self.setup_ui()
+        # 延迟所有UI创建，等待QApplication创建
+        self._window = None
+        self._ui_setup_done = False
+        
+    def ensure_ui_setup(self):
+        """确保UI已设置."""
+        if not self._ui_setup_done:
+            self._window = QMainWindow()
+            self.setup_ui()
+            self._ui_setup_done = True
+            
+    def get_window(self):
+        """获取主窗口实例."""
+        self.ensure_ui_setup()
+        return self._window
         
     def setup_ui(self):
         """设置用户界面."""
-        self.setWindowTitle("崩坏星穹铁道自动化助手")
-        self.setGeometry(100, 100, 1200, 800)
+        self._window.setWindowTitle("崩坏星穹铁道自动化助手")
+        self._window.setGeometry(100, 100, 1200, 800)
         
         # 创建中央部件
         central_widget = QWidget()
-        self.setCentralWidget(central_widget)
+        self._window.setCentralWidget(central_widget)
         
         # 创建主布局
         main_layout = QVBoxLayout(central_widget)
         
         # 创建标题标签
         title_label = QLabel("崩坏星穹铁道自动化助手")
-        title_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        title_label.setAlignment(Qt.AlignCenter)
         title_label.setStyleSheet("""
             QLabel {
                 font-size: 24px;
@@ -65,7 +79,7 @@ class MainWindowView(QMainWindow):
         
         # 创建状态栏
         self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
+        self._window.setStatusBar(self.status_bar)
         self.status_bar.showMessage("就绪")
         
         # 创建菜单栏
@@ -77,6 +91,110 @@ class MainWindowView(QMainWindow):
     def setup_tabs(self):
         """设置选项卡."""
         # 主控制面板
+        control_tab = self._create_control_tab()
+        self.tab_widget.addTab(control_tab, "主控制")
+        
+        # 任务管理选项卡
+        try:
+            from ..task_list.task_list_view import TaskListView
+            self.task_list_widget = TaskListView(self._window)
+            self.tab_widget.addTab(self.task_list_widget, "任务管理")
+        except Exception as e:
+            # 如果导入失败，创建占位符
+            self.tab_widget.addTab(self._create_placeholder_widget(f"任务管理界面加载失败: {str(e)}"), "任务管理")
+        
+        # 任务创建选项卡
+        try:
+            from ..task_creation.task_creation_view import TaskCreationView
+            self.task_creation_widget = TaskCreationView(self._window)
+            self.tab_widget.addTab(self.task_creation_widget, "创建任务")
+        except Exception as e:
+            # 如果导入失败，创建占位符
+            self.tab_widget.addTab(self._create_placeholder_widget(f"任务创建界面加载失败: {str(e)}"), "创建任务")
+        
+        # 进度监控选项卡
+        try:
+            from ..task_progress.task_progress_view import TaskProgressView
+            self.task_progress_widget = TaskProgressView(self._window)
+            self.tab_widget.addTab(self.task_progress_widget, "进度监控")
+        except Exception as e:
+            # 如果导入失败，创建占位符
+            self.tab_widget.addTab(self._create_placeholder_widget(f"进度监控界面加载失败: {str(e)}"), "进度监控")
+        
+        # 日志查看器选项卡
+        try:
+            from ..log_viewer.log_viewer_view import LogViewerView
+            self.log_viewer_widget = LogViewerView(self._window)
+            self.tab_widget.addTab(self.log_viewer_widget, "日志查看")
+        except Exception as e:
+            # 如果导入失败，创建占位符
+            self.tab_widget.addTab(self._create_placeholder_widget(f"日志查看界面加载失败: {str(e)}"), "日志查看")
+        
+    def setup_menu_bar(self):
+        """设置菜单栏."""
+        menubar = self._window.menuBar()
+        
+        # 文件菜单
+        file_menu = menubar.addMenu("文件")
+        
+        exit_action = QAction("退出", self._window)
+        exit_action.triggered.connect(self._window.close)
+        file_menu.addAction(exit_action)
+        
+        # 帮助菜单
+        help_menu = menubar.addMenu("帮助")
+        
+        about_action = QAction("关于", self._window)
+        help_menu.addAction(about_action)
+        
+    def setup_toolbar(self):
+        """设置工具栏."""
+        toolbar = QToolBar()
+        self._window.addToolBar(toolbar)
+        
+        # 添加工具栏按钮
+        start_action = QAction("开始", self._window)
+        toolbar.addAction(start_action)
+        
+        stop_action = QAction("停止", self._window)
+        toolbar.addAction(stop_action)
+        
+    def update_status(self, message: str):
+        """更新状态栏消息.
+        
+        Args:
+            message: 要显示的状态消息
+        """
+        self.status_bar.showMessage(message)
+        
+    def append_log(self, message: str):
+        """添加日志消息.
+        
+        Args:
+            message: 要添加的日志消息
+        """
+        self.log_display.append(message)
+    
+    def _create_placeholder_widget(self, message: str) -> QWidget:
+        """创建占位符组件.
+        
+        Args:
+            message: 要显示的错误消息
+            
+        Returns:
+            QWidget: 占位符组件
+        """
+        placeholder = QWidget()
+        layout = QVBoxLayout(placeholder)
+        layout.addWidget(QLabel(message))
+        return placeholder
+    
+    def _create_control_tab(self) -> QWidget:
+        """创建主控制面板.
+        
+        Returns:
+            QWidget: 控制面板组件
+        """
         control_tab = QWidget()
         control_layout = QVBoxLayout(control_tab)
         
@@ -123,73 +241,4 @@ class MainWindowView(QMainWindow):
         self.log_display.setPlaceholderText("日志信息将在这里显示...")
         control_layout.addWidget(self.log_display)
         
-        self.tab_widget.addTab(control_tab, "主控制")
-        
-        # 设置选项卡
-        try:
-            from .settings_widget import SettingsWidget
-            self.settings_widget = SettingsWidget()
-            self.tab_widget.addTab(self.settings_widget, "设置")
-        except Exception as e:
-            # 如果导入失败，创建占位符
-            settings_placeholder = QWidget()
-            settings_layout = QVBoxLayout(settings_placeholder)
-            settings_layout.addWidget(QLabel(f"设置界面加载失败: {str(e)}"))
-            self.tab_widget.addTab(settings_placeholder, "设置")
-        
-        # 状态监控选项卡
-        try:
-            from .monitoring_widget import MonitoringWidget
-            self.monitoring_widget = MonitoringWidget()
-            self.tab_widget.addTab(self.monitoring_widget, "状态监控")
-        except Exception as e:
-            # 如果导入失败，创建占位符
-            monitoring_placeholder = QWidget()
-            monitoring_layout = QVBoxLayout(monitoring_placeholder)
-            monitoring_layout.addWidget(QLabel(f"监控界面加载失败: {str(e)}"))
-            self.tab_widget.addTab(monitoring_placeholder, "状态监控")
-        
-    def setup_menu_bar(self):
-        """设置菜单栏."""
-        menubar = self.menuBar()
-        
-        # 文件菜单
-        file_menu = menubar.addMenu("文件")
-        
-        exit_action = QAction("退出", self)
-        exit_action.triggered.connect(self.close)
-        file_menu.addAction(exit_action)
-        
-        # 帮助菜单
-        help_menu = menubar.addMenu("帮助")
-        
-        about_action = QAction("关于", self)
-        help_menu.addAction(about_action)
-        
-    def setup_toolbar(self):
-        """设置工具栏."""
-        toolbar = QToolBar()
-        self.addToolBar(toolbar)
-        
-        # 添加工具栏按钮
-        start_action = QAction("开始", self)
-        toolbar.addAction(start_action)
-        
-        stop_action = QAction("停止", self)
-        toolbar.addAction(stop_action)
-        
-    def update_status(self, message: str):
-        """更新状态栏消息.
-        
-        Args:
-            message: 要显示的状态消息
-        """
-        self.status_bar.showMessage(message)
-        
-    def append_log(self, message: str):
-        """添加日志消息.
-        
-        Args:
-            message: 要添加的日志消息
-        """
-        self.log_display.append(message)
+        return control_tab

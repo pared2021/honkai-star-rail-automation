@@ -9,8 +9,8 @@ from PyQt6.QtWidgets import (
     QPushButton, QScrollArea, QGroupBox, QComboBox
 )
 from PyQt6.QtCore import pyqtSignal
-from src.core.service_locator import get_service
-from src.core.config_manager import ConfigManager
+from ...core.service_locator import get_service
+from ...core.config_manager import ConfigManager
 
 
 class SettingsWidget(QWidget):

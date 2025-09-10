@@ -10,12 +10,11 @@ from typing import Any, Dict, List, Optional, Callable
 from dataclasses import dataclass
 from datetime import datetime
 import asyncio
-from ..interfaces.automation_interface import IAutomationController
-
+from src.interfaces.automation_interface import IAutomationController
 try:
-    from ..core.game_detector import GameDetector, SceneType
-    from ..task_management.task_manager import TaskManager, TaskPriority
-    from ..exceptions import AutomationError, GameDetectionError
+    from src.core.game_detector import GameDetector, SceneType
+    from src.task_management.task_manager import TaskManager, TaskPriority
+    from src.exceptions import AutomationError, GameDetectionError
 except ImportError:
     # 处理导入失败的情况
     GameDetector = None

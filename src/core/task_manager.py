@@ -14,6 +14,9 @@ from enum import Enum
 from queue import Empty, PriorityQueue
 from typing import Any, Callable, Dict, List, Optional
 
+from .error_handler import ErrorHandler
+from .smart_waiter import SmartWaiter
+
 
 class TaskType(Enum):
     """任务类型枚举。"""
@@ -186,6 +189,10 @@ class TaskManager:
         self.default_user_id = default_user_id
         self._logger = logging.getLogger(__name__)
 
+        # 错误处理器
+        self.error_handler = ErrorHandler()
+        self.smart_waiter = SmartWaiter()
+
         # 并发任务管理
         self._concurrent_task_queue = ConcurrentTaskQueue()
         self._active_executions: Dict[str, TaskExecution] = {}
@@ -315,6 +322,88 @@ class TaskManager:
                 )
 
         return tasks
+    
+    def _should_throttle_execution(self) -> bool:
+        """检查是否应该限制任务执行。
+        
+        Returns:
+            是否应该限制执行
+        """
+        # 检查活动任务数量
+        if len(self._active_executions) >= self._resource_limits.max_concurrent_tasks:
+            return True
+        
+        # 检查系统资源（CPU、内存等）
+        try:
+            import psutil
+            cpu_percent = psutil.cpu_percent(interval=0.1)
+            memory_percent = psutil.virtual_memory().percent
+            
+            # 如果CPU或内存使用率过高，限制执行
+            if cpu_percent > self._resource_limits.max_cpu_usage or memory_percent > self._resource_limits.max_memory_usage:
+                return True
+        except ImportError:
+            # 如果没有psutil，只检查任务数量
+            pass
+        
+        return False
+    
+    def _check_task_dependencies(self, task_execution: TaskExecution) -> bool:
+        """检查任务依赖是否满足。
+        
+        Args:
+            task_execution: 任务执行对象
+            
+        Returns:
+            依赖是否满足
+        """
+        dependencies = task_execution.metadata.get('dependencies', [])
+        
+        if not dependencies:
+            return True
+        
+        # 检查依赖任务是否已完成
+        for dep_task_id in dependencies:
+            dep_completed = False
+            
+            # 在已完成任务中查找
+            for completed_exec in self._completed_executions.values():
+                if (completed_exec.task_id == dep_task_id and 
+                    completed_exec.state == TaskState.COMPLETED):
+                    dep_completed = True
+                    break
+            
+            if not dep_completed:
+                self._logger.debug(f"任务 {task_execution.task_id} 依赖 {dep_task_id} 未完成")
+                return False
+        
+        return True
+    
+    def set_task_priority(self, task_id: str, new_priority: TaskPriority) -> bool:
+        """设置任务优先级。
+        
+        Args:
+            task_id: 任务ID
+            new_priority: 新优先级
+            
+        Returns:
+            是否设置成功
+        """
+        try:
+            # 在活动任务中查找并更新优先级
+            for execution in self._active_executions.values():
+                if execution.task_id == task_id:
+                    old_priority = execution.priority
+                    execution.priority = new_priority
+                    
+                    self._logger.info(f"任务 {task_id} 优先级已更新: {old_priority.value} -> {new_priority.value}")
+                    return True
+            
+            return False
+            
+        except Exception as e:
+            self._logger.error(f"设置任务优先级失败 {task_id}: {str(e)}")
+            return False
 
     async def get_task_statistics(self) -> Dict[str, int]:
         """获取任务统计信息。
@@ -493,17 +582,31 @@ class TaskManager:
         """并发管理器主循环。"""
         while self._concurrent_manager_running and not self._shutdown_event.is_set():
             try:
+                # 检查系统负载和资源状态
+                if self._should_throttle_execution():
+                    self.smart_waiter.wait_for_condition(
+                        condition=lambda: not self._should_throttle_execution(),
+                        timeout=30.0,
+                        description="等待系统负载降低"
+                    )
+                
                 # 从队列获取任务
                 task_execution = self._concurrent_task_queue.get(timeout=1.0)
                 if task_execution:
-                    # 提交任务到线程池
-                    future = self._executor.submit(self._execute_task, task_execution)
-                    self._active_executions[task_execution.execution_id] = task_execution
-                    
-                    # 设置完成回调
-                    future.add_done_callback(
-                        lambda f, exec_id=task_execution.execution_id: self._on_task_completed(exec_id, f)
-                    )
+                    # 检查任务依赖和前置条件
+                    if self._check_task_dependencies(task_execution):
+                        # 提交任务到线程池
+                        future = self._executor.submit(self._execute_task, task_execution)
+                        self._active_executions[task_execution.execution_id] = task_execution
+                        
+                        # 设置完成回调
+                        future.add_done_callback(
+                            lambda f, exec_id=task_execution.execution_id: self._on_task_completed(exec_id, f)
+                        )
+                    else:
+                        # 依赖未满足，重新放回队列
+                        self._concurrent_task_queue.put(task_execution)
+                        time.sleep(1.0)  # 等待依赖满足
                 
                 # 检查是否需要关闭
                 if self._shutdown_event.wait(0.1):
@@ -519,18 +622,13 @@ class TaskManager:
         task_execution.start_time = datetime.now()
         
         task_name = task_execution.metadata.get('name', 'Unknown Task')
-        self._logger.info(f"开始执行任务: {task_name} (ID: {task_execution.task_id})")
+        task_type = task_execution.metadata.get('type', 'user')
+        self._logger.info(f"开始执行任务: {task_name} (ID: {task_execution.task_id}, 类型: {task_type})")
         
         try:
-            # 这里可以根据任务类型执行不同的逻辑
-            task_type = task_execution.metadata.get('type', 'user')
-            self._logger.debug(f"任务类型: {task_type}")
+            # 根据任务类型执行不同的逻辑
+            result = self._execute_task_by_type(task_execution, task_type)
             
-            # 模拟任务执行时间
-            execution_time = 1.0
-            time.sleep(execution_time)
-            
-            result = f"任务 {task_name} 执行完成"
             task_execution.result = result
             task_execution.state = TaskState.COMPLETED
             task_execution.progress = 1.0
@@ -541,15 +639,104 @@ class TaskManager:
             return result
             
         except Exception as e:
+            # 使用错误处理器处理错误
+            error_info = self.error_handler.handle_error(
+                error=e,
+                task_id=task_execution.task_id,
+                task_type=task_execution.metadata.get('type', 'user'),
+                context={
+                    "execution_id": task_execution.execution_id,
+                    "task_name": task_name,
+                    "execution_time": (datetime.now() - task_execution.start_time).total_seconds()
+                }
+            )
+            
+            # 尝试错误恢复
+            recovery_success = self.error_handler.try_recovery(error_info)
+            
             task_execution.state = TaskState.FAILED
             task_execution.error = e
             task_execution.result = f"任务执行失败: {str(e)}"
             
             execution_duration = (datetime.now() - task_execution.start_time).total_seconds()
-            self._logger.error(f"任务执行失败: {task_name} (耗时: {execution_duration:.2f}s) - {str(e)}")
+            self._logger.error(f"任务执行失败: {task_name} (耗时: {execution_duration:.2f}s) - {str(e)}, 错误ID: {error_info.error_id}, 恢复成功: {recovery_success}")
             raise
         finally:
             task_execution.end_time = datetime.now()
+    
+    def _execute_task_by_type(self, task_execution: TaskExecution, task_type: str) -> str:
+        """根据任务类型执行具体逻辑。
+        
+        Args:
+            task_execution: 任务执行对象
+            task_type: 任务类型
+            
+        Returns:
+            执行结果
+        """
+        from .task_runners import DailyMissionRunner, ResourceFarmingRunner
+        from .game_operator import GameOperator
+        
+        # 获取或创建游戏操作器实例
+        if not hasattr(self, '_game_operator'):
+            self._game_operator = GameOperator()
+        
+        task_params = task_execution.metadata.get('parameters', {})
+        
+        try:
+            if task_type == 'daily_mission':
+                runner = DailyMissionRunner()
+                return runner.run(task_execution, self._game_operator, task_params)
+            
+            elif task_type == 'resource_farming':
+                runner = ResourceFarmingRunner()
+                return runner.run(task_execution, self._game_operator, task_params)
+            
+            elif task_type == 'screenshot':
+                # 截图任务
+                screenshot_path = self._game_operator.take_screenshot()
+                return f"截图已保存: {screenshot_path}"
+            
+            elif task_type == 'game_detection':
+                # 游戏检测任务
+                from .game_detector import GameDetector
+                detector = GameDetector()
+                game_info = detector.detect_game_state()
+                return f"游戏状态检测完成: {game_info}"
+            
+            elif task_type == 'automation':
+                # 自动化任务
+                actions = task_params.get('actions', [])
+                results = []
+                
+                for action in actions:
+                    action_type = action.get('type')
+                    if action_type == 'click':
+                        target = action.get('target')
+                        result = self._game_operator.click(target)
+                        results.append(f"点击操作: {result.success}")
+                    elif action_type == 'swipe':
+                        start = action.get('start')
+                        end = action.get('end')
+                        result = self._game_operator.swipe(start, end)
+                        results.append(f"滑动操作: {result.success}")
+                    elif action_type == 'wait':
+                        duration = action.get('duration', 1.0)
+                        time.sleep(duration)
+                        results.append(f"等待: {duration}秒")
+                
+                return f"自动化任务完成: {'; '.join(results)}"
+            
+            else:
+                # 默认任务处理
+                task_name = task_execution.metadata.get('name', 'Unknown Task')
+                execution_time = task_params.get('execution_time', 1.0)
+                time.sleep(execution_time)
+                return f"任务 {task_name} 执行完成"
+                
+        except Exception as e:
+            self._logger.error(f"任务类型 {task_type} 执行失败: {str(e)}")
+            raise
     
     def _on_task_completed(self, execution_id: str, future: Future):
         """任务完成回调。"""
@@ -589,9 +776,25 @@ class TaskManager:
             return result
             
         except Exception as e:
+            # 使用错误处理器处理错误
+            error_info = self.error_handler.handle_error(
+                error=e,
+                task_id=task_execution.task_id,
+                task_type="test",
+                context={
+                    "execution_id": task_execution.execution_id,
+                    "execution_time": (datetime.now() - task_execution.start_time).total_seconds()
+                }
+            )
+            
+            # 尝试错误恢复
+            recovery_success = self.error_handler.try_recovery(error_info)
+            
             task_execution.state = TaskState.FAILED
             task_execution.error = e
             task_execution.end_time = datetime.now()
+            
+            self._logger.error(f"测试任务执行失败: {task_execution.task_id}, 错误ID: {error_info.error_id}, 恢复成功: {recovery_success}")
             raise
     
     def _task_completed(self, task_execution: TaskExecution, future: Future) -> None:
@@ -604,10 +807,28 @@ class TaskManager:
         try:
             # 处理Future的结果或异常
             if future.exception():
+                exception = future.exception()
+                
+                # 使用错误处理器处理异常
+                error_info = self.error_handler.handle_error(
+                    error=exception,
+                    task_id=task_execution.task_id,
+                    task_type=task_execution.metadata.get('type', 'user'),
+                    context={
+                        "execution_id": task_execution.execution_id,
+                        "future_exception": True
+                    }
+                )
+                
+                # 尝试错误恢复
+                recovery_success = self.error_handler.try_recovery(error_info)
+                
                 task_execution.state = TaskState.FAILED
-                task_execution.error = future.exception()
+                task_execution.error = exception
                 task_execution.end_time = datetime.now()
                 self._stats["failed_tasks"] += 1
+                
+                self._logger.error(f"Future任务执行失败: {task_execution.task_id}, 错误ID: {error_info.error_id}, 恢复成功: {recovery_success}")
             else:
                 task_execution.state = TaskState.COMPLETED
                 task_execution.result = future.result()
@@ -725,6 +946,48 @@ class TaskManager:
         except Exception as e:
             self._logger.error(f"停止任务失败 {task_id}: {str(e)}")
             return False
+    
+    def get_all_tasks(self) -> List[Dict[str, Any]]:
+        """获取所有任务列表。
+        
+        Returns:
+            List[Dict[str, Any]]: 所有任务的信息列表
+        """
+        tasks = []
+        
+        # 收集活动任务
+        for execution in self._active_executions.values():
+            tasks.append({
+                "id": execution.task_id,
+                "execution_id": execution.execution_id,
+                "name": execution.metadata.get('name', f'Task {execution.task_id}'),
+                "state": execution.state.value,
+                "priority": execution.priority.value,
+                "progress": execution.progress,
+                "start_time": execution.start_time.isoformat() if execution.start_time else None,
+                "end_time": execution.end_time.isoformat() if execution.end_time else None,
+                "result": execution.result,
+                "error": str(execution.error) if execution.error else None,
+                "metadata": execution.metadata
+            })
+        
+        # 收集已完成任务
+        for execution in self._completed_executions.values():
+            tasks.append({
+                "id": execution.task_id,
+                "execution_id": execution.execution_id,
+                "name": execution.metadata.get('name', f'Task {execution.task_id}'),
+                "state": execution.state.value,
+                "priority": execution.priority.value,
+                "progress": execution.progress,
+                "start_time": execution.start_time.isoformat() if execution.start_time else None,
+                "end_time": execution.end_time.isoformat() if execution.end_time else None,
+                "result": execution.result,
+                "error": str(execution.error) if execution.error else None,
+                "metadata": execution.metadata
+            })
+        
+        return tasks
 
 
 class TaskExecutor:
@@ -764,16 +1027,40 @@ class TaskExecutor:
         if not self._running:
             raise RuntimeError("TaskExecutor is not running")
 
-        # 模拟任务执行
         task_execution.state = TaskState.RUNNING
         task_execution.start_time = datetime.now()
-
+        
         try:
-            # 这里应该是实际的任务执行逻辑
-            result = f"Task {task_execution.task_id} completed"
+            # 获取任务信息
+            task_type = task_execution.metadata.get('type', 'user')
+            task_name = task_execution.metadata.get('name', f'Task {task_execution.task_id}')
+            
+            # 根据任务类型执行不同逻辑
+            if task_type == 'daily_mission':
+                from .task_runners import DailyMissionRunner
+                from .game_operator import GameOperator
+                
+                game_operator = GameOperator()
+                runner = DailyMissionRunner()
+                result = runner.run(task_execution, game_operator, task_execution.metadata.get('parameters', {}))
+            
+            elif task_type == 'resource_farming':
+                from .task_runners import ResourceFarmingRunner
+                from .game_operator import GameOperator
+                
+                game_operator = GameOperator()
+                runner = ResourceFarmingRunner()
+                result = runner.run(task_execution, game_operator, task_execution.metadata.get('parameters', {}))
+            
+            else:
+                # 默认任务处理
+                time.sleep(0.1)  # 短暂延迟模拟执行时间
+                result = f"Task {task_name} completed"
+            
             task_execution.state = TaskState.COMPLETED
             task_execution.result = result
             return result
+            
         except Exception as e:
             task_execution.state = TaskState.FAILED
             task_execution.result = str(e)

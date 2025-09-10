@@ -12,7 +12,7 @@ from datetime import datetime
 
 from .events import EventBus
 from .logger import get_logger
-from .error_handling import ErrorHandler
+from .error_handler import ErrorHandler
 
 
 class ActionType(Enum):

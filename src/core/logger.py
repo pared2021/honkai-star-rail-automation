@@ -53,3 +53,17 @@ def setup_logger(log_level: str = "INFO") -> logging.Logger:
     )
     
     return logger
+
+
+def get_logger(name: str = None):
+    """获取logger实例。
+    
+    Args:
+        name: logger名称
+        
+    Returns:
+        logger实例
+    """
+    if name:
+        return logger.bind(name=name)
+    return logger

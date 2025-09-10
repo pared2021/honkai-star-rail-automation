@@ -11,8 +11,8 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import QTimer, pyqtSignal
 from PyQt6.QtGui import QFont
-from src.core.service_locator import get_service
-from src.monitoring import get_monitoring_system
+from ...core.service_locator import get_service
+from ...monitoring import get_monitoring_system
 import psutil
 
 

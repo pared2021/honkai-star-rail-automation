@@ -3,3 +3,39 @@
 2025-09-06 09:37:05 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'MetricsCollector' object has no attribute 'record_gauge'
 2025-09-06 09:37:17 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'AutomationController' object has no attribute 'get_available_tasks'
 2025-09-06 09:38:02 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:125 - 启动自动化处理失败: 'AutomationController' object has no attribute 'get_available_tasks'
+2025-09-07 23:31:25 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:32:26 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:37:51 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:39:13 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:41 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:41 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:42 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:42 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:40:42 | ERROR    | src.ui.main_window.main_window_mvp:on_start_automation:141 - 启动自动化处理失败: 'str' object has no attribute 'name'
+2025-09-07 23:59:36 | ERROR    | core.game_operator:_perform_click:518 - 执行点击失败: Failed
+2025-09-07 23:59:58 | ERROR    | core.game_operator:_perform_click:518 - 执行点击失败: Failed
+2025-09-08 00:01:30 | ERROR    | src.core.game_operator:_perform_click:518 - 执行点击失败: PyAutoGUI fail-safe triggered from mouse moving to a corner of the screen. To disable this fail-safe, set pyautogui.FAILSAFE to False. DISABLING FAIL-SAFE IS NOT RECOMMENDED.
+2025-09-08 00:02:03 | ERROR    | src.core.game_operator:_perform_click:518 - 执行点击失败: PyAutoGUI fail-safe triggered from mouse moving to a corner of the screen. To disable this fail-safe, set pyautogui.FAILSAFE to False. DISABLING FAIL-SAFE IS NOT RECOMMENDED.
+2025-09-08 00:30:41 | ERROR    | core.task_runners:run:688 - 自定义任务失败: 自定义任务, 错误: 自定义任务缺少动作序列
+2025-09-08 09:53:43 | ERROR    | core.game_operator:_perform_click:518 - 执行点击失败: Failed
+2025-09-08 10:31:47 | ERROR    | core.game_operator:_perform_pyautogui_click:641 - PyAutoGUI点击失败: Failed
+2025-09-09 21:30:39 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-09 21:30:39 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-09 21:30:40 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-09 21:30:40 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:15 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:15 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:16 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:48:16 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:17 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:18 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:18 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 07:56:19 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:00 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:01 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:01 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:01:02 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:31 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:32 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:32 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'
+2025-09-10 08:06:33 | ERROR    | src.core.game_operator:_perform_swipe:776 - 执行滑动失败: dragRel() got multiple values for argument 'duration'

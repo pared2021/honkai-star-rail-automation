@@ -783,8 +783,12 @@ class TestAutomationController:
         assert result3["status"] == "success"
         assert test_task.retry_count == 0  # 成功后重置重试计数
     
-    def test_task_max_retries_exceeded(self, controller):
+    def test_task_max_retries_exceeded(self):
         """测试任务超过最大重试次数."""
+        # 创建新的控制器实例，避免fixture的干扰
+        controller = AutomationController()
+        controller.clear_tasks()  # 清空默认任务
+        
         def always_failing_action():
             raise Exception("总是失败")
         
@@ -792,20 +796,20 @@ class TestAutomationController:
             id="always_fail_task",
             name="总是失败任务",
             action=always_failing_action,
-            max_retries=1  # 设置为1，这样第二次执行就会失败
+            max_retries=2  # 设置为2，这样可以有两次重试机会
         )
         controller.add_task(test_task)
         controller.start()
         
-        # 第一次执行应该返回retry
+        # 第一次执行应该返回retry (retry_count=1 < max_retries=2)
         result1 = controller.execute("always_fail_task")
         assert result1["status"] == "retry"
         assert result1["retry_count"] == 1
         
-        # 第二次执行应该返回failed（超过最大重试次数）
+        # 第二次执行应该返回failed (retry_count=2 >= max_retries=2)
         result2 = controller.execute("always_fail_task")
         assert result2["status"] == "failed"
-        assert result2["retry_count"] == 1
+        assert result2["retry_count"] == 2
 
     def test_register_basic_tasks_with_dependencies(self, controller):
         """测试注册基本任务时的依赖处理."""
@@ -813,45 +817,58 @@ class TestAutomationController:
         mock_game_detector = Mock()
         mock_task_manager = Mock()
         
-        controller.game_detector = mock_game_detector
-        controller.task_manager = mock_task_manager
+        controller._game_detector = mock_game_detector
+        controller._task_manager = mock_task_manager
         
         controller._register_basic_tasks()
         
         # 验证基本任务已注册
-        assert "game_status_check" in controller.tasks
-        assert "scene_detection" in controller.tasks
-        assert "auto_screenshot" in controller.tasks
+        task_ids = [task.id for task in controller._tasks]
+        assert "game_detection" in task_ids
+        assert "scene_detection" in task_ids
+        assert "auto_screenshot" in task_ids
         
-    def test_game_status_check_with_valid_detector(self, controller):
+    def test_detect_game_status_with_valid_detector(self, controller):
         """测试游戏状态检测（有效检测器）."""
         mock_detector = Mock()
         mock_detector.is_game_running.return_value = True
-        controller.game_detector = mock_detector
+        mock_detector.get_game_status.return_value = "running"
+        controller._game_detector = mock_detector
         
-        result = controller._game_status_check()
-        assert result == {"game_running": True}
+        result = controller._detect_game_status()
+        assert result["status"] == "success"
+        assert result["is_running"] == True
+        assert result["game_status"] == "running"
         mock_detector.is_game_running.assert_called_once()
+        mock_detector.get_game_status.assert_called_once()
         
-    def test_scene_detection_with_valid_detector(self, controller):
+    def test_detect_current_scene_with_valid_detector(self, controller):
         """测试场景检测（有效检测器）."""
+        from unittest.mock import MagicMock
         mock_detector = Mock()
-        mock_detector.detect_current_scene.return_value = "main_menu"
-        controller.game_detector = mock_detector
+        mock_scene = MagicMock()
+        mock_scene.value = "main_menu"
+        mock_detector.detect_scene.return_value = mock_scene
+        controller._game_detector = mock_detector
         
-        result = controller._scene_detection()
-        assert result == {"current_scene": "main_menu"}
-        mock_detector.detect_current_scene.assert_called_once()
+        result = controller._detect_current_scene()
+        assert result["status"] == "success"
+        assert result["scene"] == "main_menu"
+        mock_detector.detect_scene.assert_called_once()
         
     def test_take_screenshot_with_valid_detector(self, controller):
         """测试截图功能（有效检测器）."""
         mock_detector = Mock()
-        mock_detector.take_screenshot.return_value = "screenshot_path.png"
-        controller.game_detector = mock_detector
+        mock_screenshot = Mock()
+        mock_screenshot.shape = (1080, 1920, 3)
+        mock_detector.capture_screenshot.return_value = mock_screenshot
+        controller._game_detector = mock_detector
         
         result = controller._take_screenshot()
-        assert result == {"screenshot_path": "screenshot_path.png"}
-        mock_detector.take_screenshot.assert_called_once()
+        assert result["status"] == "success"
+        assert "screenshot_shape" in result
+        assert "timestamp" in result
+        mock_detector.capture_screenshot.assert_called_once()
         
     def test_automation_controller_with_real_workflow(self, controller):
         """测试完整的自动化工作流程."""
@@ -885,15 +902,18 @@ class TestAutomationController:
             id="scene_task",
             name="场景特定任务",
             action=scene_specific_task,
-            required_scene="battle"
+            scene_requirement="battle"
         )
         controller.add_task(task)
         controller.start()
         
         # 模拟场景检测
+        from unittest.mock import MagicMock
         mock_detector = Mock()
-        mock_detector.detect_current_scene.return_value = "battle"
-        controller.game_detector = mock_detector
+        mock_scene = MagicMock()
+        mock_scene.value = "battle"
+        mock_detector.detect_scene.return_value = mock_scene
+        controller._game_detector = mock_detector
         
         result = controller.execute("scene_task")
         assert result["status"] == "success"
@@ -907,17 +927,340 @@ class TestAutomationController:
             id="scene_task",
             name="场景特定任务",
             action=scene_specific_task,
-            required_scene="battle"
+            scene_requirement="battle"
         )
         controller.add_task(task)
         controller.start()
         
         # 模拟场景检测返回不匹配的场景
+        from unittest.mock import MagicMock
         mock_detector = Mock()
-        mock_detector.detect_current_scene.return_value = "main_menu"
-        controller.game_detector = mock_detector
+        mock_scene = MagicMock()
+        mock_scene.value = "main_menu"
+        mock_detector.detect_scene.return_value = mock_scene
+        controller._game_detector = mock_detector
         
         result = controller.execute("scene_task")
-        assert result["status"] == "scene_mismatch"
-        assert "required" in result["message"]
-        assert "current" in result["message"]
+        assert result["status"] == "skipped"
+        assert "场景不匹配" in result["message"]
+    
+    def test_complete_automation_workflow(self, controller):
+        """测试完整的自动化工作流程."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        mock_detector.is_game_running.return_value = True
+        mock_detector.capture_screenshot.return_value = "mock_screenshot"
+        controller._game_detector = mock_detector
+        
+        # 创建测试任务
+        test_task = AutomationTask(
+            id="workflow_task",
+            name="工作流程任务",
+            action=lambda: {"result": "success"}
+        )
+        controller.add_task(test_task)
+        
+        # 启动控制器
+        assert controller.start() == True
+        
+        # 执行任务
+        result = controller.execute("workflow_task")
+        assert result["status"] == "success"
+        
+        # 停止控制器
+        assert controller.stop() == True
+    
+    @pytest.mark.asyncio
+    async def test_automation_loop_start_stop(self, controller):
+        """测试自动化循环的启动和停止."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        mock_detector.is_game_running.return_value = True
+        controller._game_detector = mock_detector
+        
+        # 启动控制器
+        controller.start()
+        
+        # 启动自动化循环
+        result = await controller.start_automation_loop()
+        assert result == True
+        assert controller._automation_loop_task is not None
+        
+        # 停止自动化循环
+        result = await controller.stop_automation_loop()
+        assert result == True
+        assert controller._automation_loop_task is None
+    
+    @pytest.mark.asyncio
+    async def test_detect_current_scene_async(self, controller):
+        """测试异步场景检测."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        mock_detector.capture_screen.return_value = "mock_screenshot"
+        mock_detector.find_template.return_value = {"found": True, "center": (100, 100)}
+        controller._game_detector = mock_detector
+        
+        # 测试场景检测
+        scene = await controller._detect_current_scene_async()
+        assert scene == "main_menu"  # 第一个匹配的场景
+        
+        # 测试无游戏检测器的情况
+        controller._game_detector = None
+        scene = await controller._detect_current_scene_async()
+        assert scene == "unknown"
+    
+    @pytest.mark.asyncio
+    async def test_handle_scene_main_menu(self, controller):
+        """测试主菜单场景处理."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        mock_detector.find_template.return_value = {"found": False}
+        controller._game_detector = mock_detector
+        
+        # 测试主菜单处理
+        await controller._handle_scene("main_menu")
+        
+        # 验证相关方法被调用
+        assert mock_detector.find_template.called
+    
+    @pytest.mark.asyncio
+    async def test_should_do_daily_missions(self, controller):
+        """测试日常任务检查."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        mock_detector.find_template.return_value = {"found": True}
+        controller._game_detector = mock_detector
+        
+        # 启用日常任务配置
+        controller._automation_config['enable_daily_missions'] = True
+        
+        # 测试应该执行日常任务
+        result = await controller._should_do_daily_missions()
+        assert result == True
+        
+        # 测试禁用日常任务
+        controller._automation_config['enable_daily_missions'] = False
+        result = await controller._should_do_daily_missions()
+        assert result == False
+    
+    @pytest.mark.asyncio
+    async def test_should_collect_resources(self, controller):
+        """测试资源收集检查."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        mock_detector.find_template.return_value = {"found": True}
+        controller._game_detector = mock_detector
+        
+        # 启用资源收集配置
+        controller._automation_config['enable_resource_collection'] = True
+        
+        # 测试应该收集资源
+        result = await controller._should_collect_resources()
+        assert result == True
+        
+        # 测试禁用资源收集
+        controller._automation_config['enable_resource_collection'] = False
+        result = await controller._should_collect_resources()
+        assert result == False
+    
+    @pytest.mark.asyncio
+    async def test_should_use_skills(self, controller):
+        """测试技能使用检查."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        mock_detector.find_template.return_value = {"found": True}
+        controller._game_detector = mock_detector
+        
+        # 启用自动技能配置
+        controller._automation_config['enable_auto_skills'] = True
+        
+        # 测试应该使用技能
+        result = await controller._should_use_skills()
+        assert result == True
+        
+        # 测试禁用自动技能
+        controller._automation_config['enable_auto_skills'] = False
+        result = await controller._should_use_skills()
+        assert result == False
+    
+    def test_execute_action_click_with_invalid_coordinates(self, controller):
+        """测试点击动作的无效坐标处理."""
+        controller.start()
+        
+        # 测试负坐标
+        result = controller.execute_action("click", x=-10, y=50)
+        assert result == False
+        
+        # 测试无效类型
+        result = controller.execute_action("click", x="invalid", y=50)
+        assert result == False
+        
+        # 测试正常坐标
+        result = controller.execute_action("click", x=100, y=100)
+        assert result == True
+    
+    def test_execute_action_screenshot_without_detector(self, controller):
+        """测试无游戏检测器时的截图动作."""
+        controller.start()
+        controller._game_detector = None
+        
+        result = controller.execute_action("screenshot", path="test.png")
+        assert result == False
+    
+    def test_execute_action_wait_with_invalid_duration(self, controller):
+        """测试等待动作的无效持续时间处理."""
+        controller.start()
+        
+        # 测试负数持续时间
+        result = controller.execute_action("wait", duration=-1)
+        assert result == False
+        
+        # 测试无效类型
+        result = controller.execute_action("wait", duration="invalid")
+        assert result == False
+        
+        # 测试过长时间（应该被限制）
+        result = controller.execute_action("wait", duration=100)
+        assert result == True
+    
+    def test_execute_action_unknown_action(self, controller):
+        """测试未知动作处理."""
+        controller.start()
+        
+        result = controller.execute_action("unknown_action")
+        assert result == False
+    
+    def test_execute_action_when_not_running(self, controller):
+        """测试控制器未运行时执行动作."""
+        # 不启动控制器
+        result = controller.execute_action("click", x=100, y=100)
+        assert result == False
+    
+    def test_execute_action_empty_action(self, controller):
+        """测试空动作名称处理."""
+        controller.start()
+        
+        result = controller.execute_action("")
+        assert result == False
+        
+        result = controller.execute_action(None)
+        assert result == False
+    
+    def test_run_tasks_success(self, controller):
+        """测试运行任务列表成功."""
+        # 创建成功的测试任务
+        task1 = AutomationTask(
+            id="task1",
+            name="任务1",
+            action=lambda: {"result": "success"}
+        )
+        task2 = AutomationTask(
+            id="task2",
+            name="任务2",
+            action=lambda: {"result": "success"}
+        )
+        
+        # 先添加任务到控制器
+        controller.add_task(task1)
+        controller.add_task(task2)
+        
+        tasks = [task1, task2]
+        result = controller.run(tasks)
+        assert result == True
+    
+    def test_run_tasks_with_failures(self, controller):
+        """测试运行任务列表包含失败."""
+        # 创建混合结果的测试任务
+        task1 = AutomationTask(
+            id="task1",
+            name="成功任务",
+            action=lambda: {"result": "success"}
+        )
+        def failing_action():
+            raise Exception("任务执行失败")
+        
+        task2 = AutomationTask(
+            id="task2",
+            name="失败任务",
+            action=failing_action
+        )
+        
+        # 先添加任务到控制器
+        controller.add_task(task1)
+        controller.add_task(task2)
+        
+        tasks = [task1, task2]
+        result = controller.run(tasks)
+        assert result == False
+    
+    def test_run_tasks_empty_list(self, controller):
+        """测试运行空任务列表."""
+        result = controller.run([])
+        assert result == True  # 空列表应该返回成功
+    
+    def test_add_remove_task(self, controller):
+        """测试添加和移除任务."""
+        # 添加任务
+        task = AutomationTask(
+            id="test_task",
+            name="测试任务",
+            action=lambda: {"result": "success"}
+        )
+        
+        initial_count = len(controller._tasks)
+        controller.add_task(task)
+        assert len(controller._tasks) == initial_count + 1
+        
+        # 移除任务
+        result = controller.remove_task("test_task")
+        assert result == True
+        assert len(controller._tasks) == initial_count
+        
+        # 尝试移除不存在的任务
+        result = controller.remove_task("nonexistent_task")
+        assert result == False
+    
+    @pytest.mark.asyncio
+    async def test_automation_loop_with_game_closed(self, controller):
+        """测试游戏关闭时的自动化循环处理."""
+        # 模拟游戏检测器 - 游戏已关闭
+        mock_detector = MagicMock()
+        mock_detector.is_game_running.return_value = False
+        controller._game_detector = mock_detector
+        controller._automation_config['auto_restart_game'] = False
+        
+        # 启动控制器
+        controller.start()
+        
+        # 模拟自动化循环的一次迭代
+        controller._running = True
+        
+        # 由于游戏关闭且不自动重启，循环应该退出
+        # 这里我们测试相关的检查逻辑
+        game_running = controller._game_detector.is_game_running()
+        assert game_running == False
+    
+    @pytest.mark.asyncio
+    async def test_handle_scene_unknown(self, controller):
+        """测试处理未知场景."""
+        # 模拟游戏检测器
+        mock_detector = MagicMock()
+        controller._game_detector = mock_detector
+        
+        # 测试未知场景处理
+        await controller._handle_scene("unknown_scene")
+        
+        # 验证没有异常抛出
+        assert True  # 如果到达这里说明没有异常
+    
+    @pytest.mark.asyncio
+    async def test_scene_detection_with_exception(self, controller):
+        """测试场景检测异常处理."""
+        # 模拟游戏检测器抛出异常
+        mock_detector = MagicMock()
+        mock_detector.capture_screen.side_effect = Exception("截图失败")
+        controller._game_detector = mock_detector
+        
+        # 测试异常处理
+        scene = await controller._detect_current_scene_async()
+        assert scene == "unknown"

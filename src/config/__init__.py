@@ -1,4 +1,1 @@
-"""配置管理模块..
-
-提供应用程序配置管理和设置功能。
-"""
+# config package initialization
