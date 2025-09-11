@@ -256,3 +256,26 @@
 2025-09-11 07:37:46 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757547466041 - 任务执行失败
 2025-09-11 07:37:46 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757547466041
 2025-09-11 07:38:30 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757547510408 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 21:44:12 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 21:44:12 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 21:44:44 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 21:44:44 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 21:44:44 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 21:44:48 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757598288063 - 任务执行失败
+2025-09-11 21:44:53 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757598293086 - 任务执行失败
+2025-09-11 21:44:53 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757598293086
+2025-09-11 21:45:37 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757598337498 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 22:35:03 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 22:35:04 | ERROR    | src.core.game_operator:_perform_pyautogui_click:726 - PyAutoGUI点击失败: Failed
+2025-09-11 22:35:36 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 22:35:36 | ERROR    | src.core.resource_farming_runner:_execute_dungeon_farming:572 - 副本刷取执行失败: SmartWaiter.wait_for_condition() got an unexpected keyword argument 'condition'
+2025-09-11 22:35:36 | ERROR    | src.core.resource_farming_runner:execute_farming_session:362 - 刷取会话执行失败: 无法导航到生存指南界面
+2025-09-11 22:35:39 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757601339816 - 任务执行失败
+2025-09-11 22:35:44 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757601344842 - 任务执行失败
+2025-09-11 22:35:44 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757601344842
+2025-09-11 22:36:29 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757601389265 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 23:02:26 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757602946211 - 任务执行失败
+2025-09-11 23:02:31 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757602951240 - 任务执行失败
+2025-09-11 23:02:31 | ERROR    | src.core.enhanced_task_executor:_execute_task:667 - 任务执行失败: 测试任务11, 错误: 任务执行失败, 错误ID: error_1757602951240
+2025-09-11 23:03:15 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757602995627 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
+2025-09-11 23:07:40 | ERROR    | src.core.error_handler:handle_error:624 - 错误处理: error_1757603260631 - 'CompleteGameRunner' object has no attribute 'validate_preconditions'
